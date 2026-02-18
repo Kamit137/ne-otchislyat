@@ -80,9 +80,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// ВОЗВРАЩАЕМ JSON С URL
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Login successful",
-		"email":   req.Email,
+		"success":  "true",
+		"message":  "Login successful",
+		"redirect": "/a", // ← фронтенд сам перейдет
+		"email":    req.Email,
 	})
 }

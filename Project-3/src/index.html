@@ -120,6 +120,7 @@ formPostRegister.addEventListener('submit', (event) => {
 });
 
 // Кнопка входа
+// Кнопка входа
 const formPostLogin = document.querySelector('.open');
 formPostLogin.addEventListener('submit', (event) => {
     event.preventDefault();
@@ -141,13 +142,20 @@ formPostLogin.addEventListener('submit', (event) => {
     })
     .then(response => {
         if (!response.ok) {
-            return response.text().then(text => { throw new Error(text) });
+            return response.text().then(text => { throw new Errorrror(text) });
         }
         return response.json();
     })
     .then(data => {
         console.log('Успех:', data);
-        alert('Вход выполнен!');
+
+        // ПЕРЕХОД ПО РЕДИРЕКТУ
+        if (data.redirect) {
+            console.log('Переходим на:', data.redirect);
+            window.location.href = data.redirect; // ← ВОТ ЭТО ВАЖНО!
+        } else {
+            alert('Вход выполнен!');
+        }
     })
     .catch(error => {
         console.error('Ошибка:', error);
