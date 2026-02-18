@@ -8,8 +8,11 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Строка подключения к твоей базе neotchislyat
+const connStr = "host=localhost port=5432 user=postgres password=postgres dbname=neotchislyat sslmode=disable"
+
 func RegDb(email, password string) error {
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=neotchislyat sslmode=disable")
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
@@ -58,7 +61,7 @@ func RegDb(email, password string) error {
 }
 
 func LoginDb(email, password string) error {
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+	db, err := sql.Open("postgres", connStr) // ← dbname=neotchislyat
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
@@ -89,7 +92,7 @@ type task struct {
 func GetTasks(email string) ([]task, error) {
 	var tasks []task
 
-	db, err := sql.Open("postgres", "host=localhost port=5432 user=postgres password=postgres dbname=postgres sslmode=disable")
+	db, err := sql.Open("postgres", connStr) // ← dbname=neotchislyat
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return tasks, err

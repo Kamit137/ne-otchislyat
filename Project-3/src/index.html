@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="site">
+        <div class="container">
+            <form class="register">РЕГИСТРАЦИЯ
+                <div class="text1">
+                    <label class="color" for="login1">Почта:</label>
+                    <input class="colorbox" id="login1" name="login" type="email">
+                </div>
+                <div class="text2">
+                    <label class="color" for="password1">Пороль:</label>
+                    <input class="colorbox" id="password1" name="password" type="password">
+                </div>
+                <button class="register-button" type="submit">ОТПРАВИТЬ</button>
+            </form>
+            <form class="open"> ВХОД
+                <div class="text1">
+                    <label class="color" for="login-true">Почта:</label>
+                    <input class="colorbox" id="login-true" type="email">
+                </div>
+                <div class="text2">
+                    <label class="color" for="password-true">Пороль:</label>
+                    <input class="colorbox" id="password-true" type="password">
+                </div>
+                <button class="open-button" type="submit">ОТПРАВИТЬ</button>
+            </form>
+            <div class="test">
+
+            </div>
+        </div>
+        <div class="container2">
+            <div class="block2">
+                <div class="column-take">
+                    <form class="block2-task">
+                        <h1 class="h1-2">Зaдачник</h1>
+                        <div>
+                            <label class="color" for="task">Добавить задачу:</label>
+                            <input class="colorbox" id="task" type="text" autocomplete="off">
+                        </div>
+                        <div>
+                            <button class="btn-post" type="submit">Oтправить задачу</button>
+                        </div>
+                    </form>
+                    <div class="lvl">
+                    </div>
+
+                </div>
+                <div class="button-cast">
+                    <button class="btn-site">добавить задачу</button>
+                </div>
+
+            </div>
+            <div class="column">
+                <form class="block3">
+                    <h1>Поиск поста</h1>
+                    <button type="submit" id="rest" class="button-server">Загрузить информацию с сервера</button>
+                </form>
+                <div class="server-completed">
+
+                </div>
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+    <script>
+
+const formPostRegister = document.querySelector('.register');
+formPostRegister.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const login = document.querySelector('#login1');
+    const password = document.querySelector('#password1');
+
+    if (login.value.trim() === '') {
+        alert('Введите email');
+        return;
+    }
+
+    const registerData = {
+        email: login.value,
+        password: password.value
+    };
+
+    fetch('http://localhost:8080/reg', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registerData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Успех:', data);
+        alert('Регистрация успешна!');
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка регистрации: ' + error.message);
+    });
+});
+
+// Кнопка входа
+const formPostLogin = document.querySelector('.open');
+formPostLogin.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const login = document.querySelector('#login-true');
+    const password = document.querySelector('#password-true');
+
+    const loginData = {
+        email: login.value,
+        password: password.value
+    };
+
+    fetch('http://localhost:8080/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text) });
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Успех:', data);
+        alert('Вход выполнен!');
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка входа: ' + error.message);
+    });
+});
+    </script>
+</body>
+
+</html>

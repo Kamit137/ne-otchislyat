@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"ne-otchislyat/sql"
 	"net/http"
+	"text/template"
 )
 
 type registr struct {
@@ -11,7 +12,16 @@ type registr struct {
 	Password string `json:"password"`
 }
 
+func IndexPage(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles("Project-3/src/index.html")
+	if err != nil {
+		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
+		return
+	}
+	tmpl.Execute(w, nil)
+}
 func Reg(w http.ResponseWriter, r *http.Request) {
+
 	var req registr
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -35,6 +45,7 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "User registered successfully",
@@ -69,6 +80,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Login successful",
 		"email":   req.Email,
