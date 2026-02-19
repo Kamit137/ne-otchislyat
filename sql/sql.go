@@ -22,25 +22,40 @@ func RegDb(email, password string) error {
                 id SERIAL PRIMARY KEY,
                 email TEXT UNIQUE NOT NULL,
                 password TEXT NOT NULL,
+                name TEXT NOT NULL,
+				is_company BOOLEAN DEFAULT FALSE,
+				rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+				tg_us TEXT,
+				recvizits BIGINT,
                 date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`)
 	if err != nil {
 		log.Fatal("ER create db", err)
 		return err
 	}
 
-	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS tasks(
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS case(
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
-                task TEXT NOT NULL,
-                status INTEGER DEFAULT 0,
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE);`)
+                title TEXT,
+				discription TEXT,
+				price INTEGER NOT NUL,
+				date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP;)
+				;`)
 	if err != nil {
 		log.Fatal("ER create db", err)
 		return err
 	}
-
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS comments(
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title TEXT,
+				rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+				date_create TIMESTAMP DEFAULT CURRENT_TIMESTAMP;)
+				;`)
+	if err != nil {
+		log.Fatal("ER create db", err)
+		return err
+	}
 	var exists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
 	if err != nil {

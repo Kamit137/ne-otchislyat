@@ -17,8 +17,6 @@ func main() {
 	http.HandleFunc("/login", reglog.Login)
 	http.HandleFunc("/a", A)
 
-	// Статические файлы (CSS, JS)
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("Project-3/src/css"))))
-
 	http.ListenAndServe(":8080", nil)
 }
