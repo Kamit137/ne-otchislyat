@@ -3,6 +3,7 @@ package reglog
 import (
 	"encoding/json"
 	"ne-otchislyat/sql"
+	"ne-otchislyat/token"
 	"net/http"
 	"text/template"
 )
@@ -44,7 +45,18 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
+	token, err := token.GenerateToken(req.Email)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   864000,
+	})
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
@@ -79,7 +91,18 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
+	token, err := token.GenerateToken(req.Email)
+	if err != nil {
+		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   864000,
+	})
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"success":  "true",

@@ -1,10 +1,10 @@
-package auth
+package token
 
 import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
+
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -42,23 +42,19 @@ func ValidateToken(tokenString string) (*Claims, error) {
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		authHeader := r.Header.Get("Authorization")
-		if authHeader == "" {
-			http.Error(w, "No token provided", http.StatusUnauthorized)
+		cookie, err := r.Cookie("token")
+		if err != nil {
+			http.Error(w, "No token", http.StatusUnauthorized)
 			return
 		}
-		parts := strings.Split(authHeader, " ")
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			http.Error(w, "Invalid token format", http.StatusUnauthorized)
-			return
-		}
-		claims, err := ValidateToken(parts[1])
+
+		claims, err := ValidateToken(cookie.Value)
 		if err != nil {
 			http.Error(w, "Invalid token", http.StatusUnauthorized)
 			return
 		}
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, "email", claims.Email)
+
+		ctx := context.WithValue(r.Context(), "email", claims.Email)
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
