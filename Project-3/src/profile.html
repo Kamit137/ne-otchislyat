@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/css/style.css">
+    <title>Профиль</title>
+</head>
+<body>
+    <div class="profile-container">
+        <h1>Профиль пользователя</h1>
+        
+        <div class="profile-info">
+            <h2>Основная информация</h2>
+            <p><strong>Имя:</strong> <span id="profile-name"></span></p>
+            <p><strong>Email:</strong> <span id="profile-email"></span></p>
+            <p><strong>Рейтинг:</strong> <span id="profile-rating"></span></p>
+            <p><strong>Компания:</strong> <span id="profile-company"></span></p>
+            <p><strong>Telegram:</strong> <span id="profile-tg"></span></p>
+            <p><strong>Реквизиты:</strong> <span id="profile-recvizits"></span></p>
+            <p><strong>Дата регистрации:</strong> <span id="profile-date"></span></p>
+        </div>
+
+        <div class="profile-cases">
+            <h2>Мои кейсы</h2>
+            <div id="cases-list"></div>
+        </div>
+
+        <div class="profile-comments">
+            <h2>Мои комментарии</h2>
+            <div id="comments-list"></div>
+        </div>
+
+        <button onclick="logout()">Выйти</button>
+    </div>
+
+    <script>
+        function logout() {
+            fetch('/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/';
+                });
+        }
+
+        // Загружаем данные профиля
+        fetch('/api/profile', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                if (response.status === 401) {
+                    window.location.href = '/';
+                    throw new Error('Unauthorized');
+                }
+                return response.text().then(text => { throw new Error(text) });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Profile data:', data);
+
+            // Заполняем основную информацию
+            document.getElementById('profile-name').textContent = data.name || 'Не указано';
+            document.getElementById('profile-email').textContent = data.email;
+            document.getElementById('profile-rating').textContent = data.rating || '0';
+            document.getElementById('profile-company').textContent = data.isCompany ? 'Да' : 'Нет';
+            document.getElementById('profile-tg').textContent = data.tgUs || 'Не указан';
+            document.getElementById('profile-recvizits').textContent = data.recvivits || 'Не указаны';
+            document.getElementById('profile-date').textContent = data.dateCreateProfile || 'Не указана';
+
+            // Заполняем кейсы
+            const casesList = document.getElementById('cases-list');
+            if (data.cases && data.cases.length > 0) {
+                casesList.innerHTML = data.cases.map(c => `
+                    <div class="case-item">
+                        <h3>${c.title}</h3>
+                        <p>${c.discription}</p>
+                        <p><strong>Цена:</strong> ${c.price}₽</p>
+                        <p><strong>Дата:</strong> ${c.dateCreateCreat}</p>
+                    </div>
+                `).join('');
+            } else {
+                casesList.innerHTML = '<p>Нет кейсов</p>';
+            }
+
+            // Заполняем комментарии
+            const commentsList = document.getElementById('comments-list');
+            if (data.comments && data.comments.length > 0) {
+                commentsList.innerHTML = data.comments.map(c => `
+                    <div class="comment-item">
+                        <p><strong>${c.avtor}</strong> (${c.stars}★)</p>
+                        <p>${c.title}</p>
+                        <p><small>${c.dateCreateComments}</small></p>
+                    </div>
+                `).join('');
+            } else {
+                commentsList.innerHTML = '<p>Нет комментариев</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ошибка загрузки профиля: ' + error.message);
+        });
+    </script>
+</body>
+</html>

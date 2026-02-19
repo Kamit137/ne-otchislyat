@@ -142,7 +142,7 @@ formPostLogin.addEventListener('submit', (event) => {
     })
     .then(response => {
         if (!response.ok) {
-            return response.text().then(text => { throw new Errorrror(text) });
+            return response.text().then(text => { throw new Error(text) });
         }
         return response.json();
     })
@@ -157,6 +157,15 @@ formPostLogin.addEventListener('submit', (event) => {
             alert('Вход выполнен!');
         }
     })
+    .then(data => {
+    console.log('Успех:', data);
+    if (data.redirect) {
+        console.log('Переходим на:', data.redirect);
+        window.location.href = data.redirect; // ← /a или /profile
+    } else {
+        alert('Вход выполнен!');
+    }
+})
     .catch(error => {
         console.error('Ошибка:', error);
         alert('Ошибка входа: ' + error.message);

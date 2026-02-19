@@ -19,15 +19,16 @@ func RegDb(email, password string) error {
 	defer db.Close()
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
-                id SERIAL PRIMARY KEY,
-                email TEXT UNIQUE NOT NULL,
-                password TEXT NOT NULL,
-                name TEXT NOT NULL,
-				isCompany BOOLEAN DEFAULT FALSE,
-				rating INTEGER CHECK (rating >= 1 AND rating <= 5),
-				tgUs TEXT,
-				recvizits BIGINT,
-                dateCreateProfile TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`)
+    id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    name TEXT DEFAULT 'User',
+    isCompany BOOLEAN DEFAULT FALSE,
+    rating INTEGER DEFAULT 0,
+    tgUs TEXT DEFAULT '',        -- ← добавил
+    recvizits BIGINT DEFAULT 0,  -- ← добавил
+    dateCreateProfile TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);`)
 	if err != nil {
 		log.Fatal("ER create db", err)
 		return err
@@ -163,7 +164,7 @@ type profile struct {
 	IsCompany         bool      `json:"isCompany"`
 	Rating            int       `json:"rating"`
 	TgUs              string    `json:"tgUs"`
-	Recvizits         string    `json:"recvivits"`
+	Recvizits         int64     `json:"recvivits"`
 	Cases             []cases   `json:"cases"`
 	Comments          []comment `json:"comments"`
 	DateCreateProfile string    `json:"dateCreateProfile"`
