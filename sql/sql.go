@@ -10,7 +10,10 @@ import (
 
 const connStr = "host=localhost port=5432 user=postgres password=postgres dbname=neotchislyat sslmode=disable"
 
-func RegDb(email, password string) error {
+func RegDb(email, password, name string) error {
+	if len(name) < 1 {
+		name = "User"
+	}
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
@@ -68,7 +71,7 @@ func RegDb(email, password string) error {
 		return errors.New("email exist")
 	}
 
-	_, err = db.Exec("INSERT INTO users(email, password) VALUES ($1, $2)", email, password)
+	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES ($1, $2, $3)", email, password, name)
 	if err != nil {
 		return err
 	}

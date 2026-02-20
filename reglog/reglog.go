@@ -11,6 +11,7 @@ import (
 type registr struct {
 	Email    string `json:"email"`
 	Password string `json:"password"`
+	Name     string `json:"name"`
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
@@ -36,7 +37,7 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := sql.RegDb(req.Email, req.Password)
+	err := sql.RegDb(req.Email, req.Password, req.Name)
 	if err != nil {
 		if err.Error() == "email exist" {
 			http.Error(w, "Email already exists", http.StatusConflict)
