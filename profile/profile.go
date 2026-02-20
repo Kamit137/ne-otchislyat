@@ -19,22 +19,28 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func ProfilePrint(w http.ResponseWriter, r *http.Request) {
-	// Получаем email из контекста (установлен middleware)
+
 	email, ok := r.Context().Value("email").(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Получаем данные профиля
 	prof, err := sql.GetInfProfile(email)
 	if err != nil {
 		log.Println("GetInfProfile error:", err)
 		http.Error(w, "Failed to get profile", http.StatusInternalServerError)
 		return
 	}
-
-	// Отправляем JSON
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(prof)
+}
+
+func WriteInProfile(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 }

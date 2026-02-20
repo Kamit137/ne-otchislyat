@@ -20,9 +20,9 @@ func main() {
 	http.HandleFunc("/reg", reglog.Reg)
 	http.HandleFunc("/login", reglog.Login)
 	http.HandleFunc("/a", A)
-	// Защищенные страницы (требуют авторизации)
-	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))        // HTML страница
-	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint)) // API для данных
+
+	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
+	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
 	http.HandleFunc("/logout", reglog.Logout)
 
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("Project-3/src"))))
