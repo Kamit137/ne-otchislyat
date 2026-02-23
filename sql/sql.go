@@ -30,7 +30,7 @@ func RegDb(email, password, name string) error {
     rating INTEGER DEFAULT 0,
     tgUs TEXT DEFAULT '',        -- ← добавил
     recvizits BIGINT DEFAULT 0,  -- ← добавил
-    dateCreateProfile TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    dateCreateprofileStruct TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`)
 	if err != nil {
 		log.Fatal("ER create db", err)
@@ -161,45 +161,45 @@ type comment struct {
 	DateCreateComments string `json:"dateCreateComments"`
 }
 
-type profile struct {
-	Name              string    `json:"name"`
-	Email             string    `json:"email"`
-	IsCompany         bool      `json:"isCompany"`
-	Rating            int       `json:"rating"`
-	TgUs              string    `json:"tgUs"`
-	Recvizits         int64     `json:"recvivits"`
-	Cases             []cases   `json:"cases"`
-	Comments          []comment `json:"comments"`
-	DateCreateProfile string    `json:"dateCreateProfile"`
+type profileStruct struct {
+	Name                    string    `json:"name"`
+	Email                   string    `json:"email"`
+	IsCompany               bool      `json:"isCompany"`
+	Rating                  int       `json:"rating"`
+	TgUs                    string    `json:"tgUs"`
+	Recvizits               int64     `json:"recvivits"`
+	Cases                   []cases   `json:"cases"`
+	Comments                []comment `json:"comments"`
+	DateCreateprofileStruct string    `json:"dateCreateprofileStruct"`
 }
 
-func GetInfProfile(email string) (profile, error) {
-	var InfProfile profile
+func GetInfProfile(email string) (profileStruct, error) {
+	var InfprofileStruct profileStruct
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
-		return profile{}, err
+		return profileStruct{}, err
 	}
 	defer db.Close()
 
-	rowsUser, err := db.Query("SELECT id, name, isCompany, rating, tgUs, recvizits, dateCreateProfile FROM users WHERE email=$1", email)
+	rowsUser, err := db.Query("SELECT id, name, isCompany, rating, tgUs, recvizits, dateCreateprofileStruct FROM users WHERE email=$1", email)
 	if err != nil {
-		return profile{}, err
+		return profileStruct{}, err
 	}
 	defer rowsUser.Close()
 
-	InfProfile.Email = email
+	InfprofileStruct.Email = email
 	var userId int
 	for rowsUser.Next() {
-		err := rowsUser.Scan(&userId, &InfProfile.Name, &InfProfile.IsCompany, &InfProfile.Rating, &InfProfile.TgUs, &InfProfile.Recvizits, &InfProfile.DateCreateProfile)
+		err := rowsUser.Scan(&userId, &InfprofileStruct.Name, &InfprofileStruct.IsCompany, &InfprofileStruct.Rating, &InfprofileStruct.TgUs, &InfprofileStruct.Recvizits, &InfprofileStruct.DateCreateprofileStruct)
 		if err != nil {
-			return profile{}, err
+			return profileStruct{}, err
 		}
 	}
 
 	rowsCases, err := db.Query("SELECT title, discription, price, dateCreateCase FROM cases WHERE user_id=$1", userId)
 	if err != nil {
-		return profile{}, err
+		return profileStruct{}, err
 	}
 	defer rowsCases.Close()
 
@@ -208,15 +208,15 @@ func GetInfProfile(email string) (profile, error) {
 		var c cases
 		err := rowsCases.Scan(&c.Title, &c.Discription, &c.Price, &c.DateCreateCase)
 		if err != nil {
-			return profile{}, err
+			return profileStruct{}, err
 		}
 		casesList = append(casesList, c)
 	}
-	InfProfile.Cases = casesList
+	InfprofileStruct.Cases = casesList
 
 	rowsComments, err := db.Query("SELECT title, rating, avtor, dateCreateComment FROM comments WHERE user_id=$1", userId)
 	if err != nil {
-		return profile{}, err
+		return profileStruct{}, err
 	}
 	defer rowsComments.Close()
 
@@ -225,11 +225,36 @@ func GetInfProfile(email string) (profile, error) {
 		var com comment
 		err := rowsComments.Scan(&com.Title, &com.Stars, &com.Avtor, &com.DateCreateComments)
 		if err != nil {
-			return profile{}, err
+			return profileStruct{}, err
 		}
 		commentsList = append(commentsList, com)
 	}
-	InfProfile.Comments = commentsList
+	InfprofileStruct.Comments = commentsList
 
-	return InfProfile, nil
+	return InfprofileStruct, nil
+}
+
+func UpdateProf(name string, password string, isCompany bool, Rating int, TgUs string, Recvizits int64, email string) error {
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("Fail open Db", err)
+		return err
+	}
+	defer db.Close()
+	_, err = db.Exec(`
+        UPDATE users SET 
+            name = $1, 
+			password = $2,
+            isCompany = $3, 
+            rating = $4, 
+            tgUs = $5, 
+            recvizits = $6 
+        WHERE email = $7`, name, password, isCompany, Rating, TgUs, Recvizits)
+	if err != nil {
+		log.Println("Update error:", err)
+		log.Fatal("Fail write inf of profile in Db", err)
+		return err
+	}
+
+	return nil
 }
