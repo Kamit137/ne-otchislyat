@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"ne-otchislyat/lenta"
 	"ne-otchislyat/profile"
 	"ne-otchislyat/reglog"
 	"ne-otchislyat/token"
@@ -21,10 +22,13 @@ func main() {
 	http.HandleFunc("/login", reglog.Login)
 	http.HandleFunc("/a", A)
 
+	http.HandleFunc("/lenta", token.AuthMiddleware(lenta.IndexPage))
+	http.HandleFunc("/api/lenta", token.AuthMiddleware(profile.ProfilePrint))
+
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
 	http.HandleFunc("/logout", reglog.Logout)
 
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("Project-3/src"))))
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(":8081", nil)
 }
