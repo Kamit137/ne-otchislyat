@@ -5,16 +5,16 @@ import (
 	"errors"
 	"log"
 
-	_ "github.com/lib/pq"
+	_ "github.com/go-sql-driver/mysql"
 )
 
-const connStr = "host=localhost port=5432 user=postgres password=postgres dbname=neotchislyat sslmode=disable"
+const connStr = "root:Password123!@tcp(127.0.0.1:3306)/neotchislyat?parseTime=true"
 
 func RegDb(email, password, name string) error {
 	if len(name) < 1 {
 		name = "User"
 	}
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
@@ -22,14 +22,14 @@ func RegDb(email, password, name string) error {
 	defer db.Close()
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS users(
-    id SERIAL PRIMARY KEY,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    name TEXT DEFAULT 'User',
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    name VARCHAR(255) DEFAULT 'User',
     isCompany BOOLEAN DEFAULT FALSE,
-    rating INTEGER DEFAULT 0,
-    tgUs TEXT DEFAULT '',        -- ← добавил
-    recvizits BIGINT DEFAULT 0,  -- ← добавил
+    rating INT DEFAULT 0,
+    tgUs VARCHAR(255) DEFAULT '',
+    recvizits BIGINT DEFAULT 0,
     dateCreateprofileStruct TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`)
 	if err != nil {
@@ -38,11 +38,11 @@ func RegDb(email, password, name string) error {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS cases(
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
                 title TEXT,
 				discription TEXT,
-				price INTEGER NOT NULL,
+				price INT NOT NULL,
 				dateCreateCase TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`)
 	if err != nil {
 		log.Fatal("ER create db", err)
@@ -50,11 +50,11 @@ func RegDb(email, password, name string) error {
 	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS comments(
-                id SERIAL PRIMARY KEY,
-                user_id INTEGER NOT NULL,
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                user_id INT NOT NULL,
                 title TEXT,
 				avtor TEXT,
-				rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+				rating INT CHECK (rating >= 1 AND rating <= 5),
 				dateCreateComment TIMESTAMP DEFAULT CURRENT_TIMESTAMP);`)
 	if err != nil {
 		log.Fatal("ER create db", err)
@@ -62,7 +62,7 @@ func RegDb(email, password, name string) error {
 	}
 
 	var exists bool
-	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)", email).Scan(&exists)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func RegDb(email, password, name string) error {
 		return errors.New("email exist")
 	}
 
-	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES ($1, $2, $3)", email, password, name)
+	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES (?, ?, ?)", email, password, name)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func RegDb(email, password, name string) error {
 }
 
 func LoginDb(email, password string) error {
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
@@ -88,7 +88,7 @@ func LoginDb(email, password string) error {
 	defer db.Close()
 
 	var storedPassword string
-	err = db.QueryRow("SELECT password FROM users WHERE email = $1", email).Scan(&storedPassword)
+	err = db.QueryRow("SELECT password FROM users WHERE email = ?", email).Scan(&storedPassword)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return errors.New("user not found")
@@ -111,7 +111,7 @@ type task struct {
 func GetTasks(email string) ([]task, error) {
 	var tasks []task
 
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return tasks, err
@@ -119,7 +119,7 @@ func GetTasks(email string) ([]task, error) {
 	defer db.Close()
 
 	var userID int
-	err = db.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	err = db.QueryRow("SELECT id FROM users WHERE email = ?", email).Scan(&userID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return tasks, errors.New("user not found")
@@ -128,7 +128,7 @@ func GetTasks(email string) ([]task, error) {
 		return tasks, err
 	}
 
-	rows, err := db.Query("SELECT task, status FROM tasks WHERE user_id = $1", userID)
+	rows, err := db.Query("SELECT task, status FROM tasks WHERE user_id = ?", userID)
 	if err != nil {
 		log.Fatal("Fail find tasks", err)
 		return tasks, err
@@ -175,14 +175,14 @@ type profileStruct struct {
 
 func GetInfProfile(email string) (profileStruct, error) {
 	var InfprofileStruct profileStruct
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return profileStruct{}, err
 	}
 	defer db.Close()
 
-	rowsUser, err := db.Query("SELECT id, name, isCompany, rating, tgUs, recvizits, dateCreateprofileStruct FROM users WHERE email=$1", email)
+	rowsUser, err := db.Query("SELECT id, name, isCompany, rating, tgUs, recvizits, dateCreateprofileStruct FROM users WHERE email=?", email)
 	if err != nil {
 		return profileStruct{}, err
 	}
@@ -197,7 +197,7 @@ func GetInfProfile(email string) (profileStruct, error) {
 		}
 	}
 
-	rowsCases, err := db.Query("SELECT title, discription, price, dateCreateCase FROM cases WHERE user_id=$1", userId)
+	rowsCases, err := db.Query("SELECT title, discription, price, dateCreateCase FROM cases WHERE user_id=?", userId)
 	if err != nil {
 		return profileStruct{}, err
 	}
@@ -214,7 +214,7 @@ func GetInfProfile(email string) (profileStruct, error) {
 	}
 	InfprofileStruct.Cases = casesList
 
-	rowsComments, err := db.Query("SELECT title, rating, avtor, dateCreateComment FROM comments WHERE user_id=$1", userId)
+	rowsComments, err := db.Query("SELECT title, rating, avtor, dateCreateComment FROM comments WHERE user_id=?", userId)
 	if err != nil {
 		return profileStruct{}, err
 	}
@@ -235,7 +235,7 @@ func GetInfProfile(email string) (profileStruct, error) {
 }
 
 func UpdateProf(name string, password string, isCompany bool, Rating int, TgUs string, Recvizits int64, email string) error {
-	db, err := sql.Open("postgres", connStr)
+	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
@@ -243,13 +243,13 @@ func UpdateProf(name string, password string, isCompany bool, Rating int, TgUs s
 	defer db.Close()
 	_, err = db.Exec(`
         UPDATE users SET 
-            name = $1, 
-			password = $2,
-            isCompany = $3, 
-            rating = $4, 
-            tgUs = $5, 
-            recvizits = $6 
-        WHERE email = $7`, name, password, isCompany, Rating, TgUs, Recvizits)
+            name = ?, 
+			password = ?,
+            isCompany = ?, 
+            rating = ?, 
+            tgUs = ?, 
+            recvizits = ? 
+        WHERE email = ?`, name, password, isCompany, Rating, TgUs, Recvizits, email)
 	if err != nil {
 		log.Println("Update error:", err)
 		log.Fatal("Fail write inf of profile in Db", err)
