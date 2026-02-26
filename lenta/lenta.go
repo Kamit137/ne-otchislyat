@@ -5,7 +5,7 @@ import (
 	"log"
 	"ne-otchislyat/sql"
 	"net/http"
-	"strconv"
+
 	"text/template"
 )
 
@@ -19,24 +19,21 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	tmpl.Execute(w, nil)
 }
 
-func GiveLentaZakaz(w http.ResponseWriter, r *http.Request) {
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
+func GiveLenta(w http.ResponseWriter, r *http.Request) {
+	var Zapros struct {
+		page            int
+		tagFilters      []string
+		itemType        string
+		priceUpDownFals string
 	}
 
-	cards, err := sql.GetCards(page, "zakaz")
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(cards)
-}
-
-func GiveLentaVakans(w http.ResponseWriter, r *http.Request) {
-	page, err := strconv.Atoi(r.URL.Query().Get("page"))
-	if err != nil || page < 1 {
-		page = 1
+	err := json.NewDecoder(r.Body).Decode(&Zapros)
+	if err != nil || Zapros.page < 1 {
+		Zapros.page = 1
 	}
 
-	cards, err := sql.GetCards(page, "vakans")
+	cards, err := sql.GetCards(Zapros.page, Zapros.tagFilters, Zapros.itemType, Zapros.priceUpDownFals)
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cards)
 }

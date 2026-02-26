@@ -5,12 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"strings"
+	"sort"
 
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
-const connStr = "host=localhost port=5432 user=root password=Password123! dbname=neotchislyat sslmode=disable"
+const connStr = "host=localhost port=5432 user=postgres password=postgres dbname=neotchislyat sslmode=disable"
 
 func InitDB() error {
 	db, err := sql.Open("postgres", connStr)
@@ -74,8 +75,8 @@ func InitDB() error {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS tags(
 		id SERIAL PRIMARY KEY,
-		name VARCHAR(100) UNIQUE NOT NULL,
-		category VARCHAR(50) DEFAULT 'other'
+		name VARCHAR(255) UNIQUE NOT NULL,
+		category VARCHAR(255) DEFAULT 'other'
 	);`)
 	if err != nil {
 		return err
@@ -89,7 +90,14 @@ func InitDB() error {
 	if err != nil {
 		return err
 	}
-
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS vakans_tags(
+    vakans_id INT REFERENCES vakans(id) ON DELETE CASCADE,
+    tag_id INT REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (vakans_id, tag_id)
+	);`)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -97,17 +105,19 @@ func RegDb(email, password, name string) error {
 	if len(name) < 1 {
 		name = "User"
 	}
-	db, err := sql.Open("postgres", connStr)
-	if err != nil {
-		InitDB()
-	}
 
-	db, err = sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
 		return err
 	}
 	defer db.Close()
+
+	err = InitDB()
+	if err != nil {
+		log.Fatal("Fail init Db", err)
+		return err
+	}
 
 	var exists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
@@ -117,8 +127,12 @@ func RegDb(email, password, name string) error {
 	if exists {
 		return errors.New("email exist")
 	}
-
-	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES ($1, $2, $3)", email, password, name)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES ($1, $2, $3)",
+		email, string(hashedPassword), name)
 	if err != nil {
 		return err
 	}
@@ -134,19 +148,16 @@ func LoginDb(email, password string) error {
 	}
 	defer db.Close()
 
-	var storedPassword string
-	err = db.QueryRow("SELECT password FROM users WHERE email = $1", email).Scan(&storedPassword)
+	var storedHash string
+	err = db.QueryRow("SELECT password FROM users WHERE email = $1", email).Scan(&storedHash)
 	if err != nil {
-		if err == sql.ErrNoRows {
-			return errors.New("user not found")
-		}
 		return err
 	}
 
-	if storedPassword != password {
+	err = bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(password))
+	if err != nil {
 		return errors.New("wrong password")
 	}
-
 	return nil
 }
 
@@ -244,6 +255,7 @@ func UpdateProf(name string, password string, isCompany bool, Rating int, TgUs s
 		return err
 	}
 	defer db.Close()
+
 	_, err = db.Exec(`
 		UPDATE users SET 
 			name = $1,
@@ -256,13 +268,12 @@ func UpdateProf(name string, password string, isCompany bool, Rating int, TgUs s
 		name, password, isCompany, Rating, TgUs, Recvizits, email)
 	if err != nil {
 		log.Println("Update error:", err)
-		log.Fatal("Fail write inf of profile in Db", err)
 		return err
 	}
 	return nil
 }
 
-type Zakaz struct {
+type Cards struct {
 	Label       string   `json:"label"`
 	Discription string   `json:"discription"`
 	Avtor       string   `json:"avtor"`
@@ -270,7 +281,20 @@ type Zakaz struct {
 	Tags        []string `json:"tags"`
 }
 
-func AddZakaz(userID int, name, title, discription string, price int, tags []string) error {
+// добавляет новый заказ или вакансию с указанными тегами
+func AddItem(userID int, tableName, name, title, discription string, price int, tags []string) error {
+	tagsTable := ""
+	tagsColumn := ""
+	if tableName == "zakazs" {
+		tagsTable = "zakaz_tags"
+		tagsColumn = "zakaz_id"
+	} else if tableName == "vakans" {
+		tagsTable = "vakans_tags"
+		tagsColumn = "vakans_id"
+	} else {
+		return errors.New("Неверное поле tableName")
+	}
+
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		return err
@@ -283,18 +307,17 @@ func AddZakaz(userID int, name, title, discription string, price int, tags []str
 	}
 	defer tx.Rollback()
 
-	var zakazID int
-	err = tx.QueryRow(`
-		INSERT INTO zakazs (user_id, name, title, discription, price)
-		VALUES ($1, $2, $3, $4, $5)
-		RETURNING id
-	`, userID, name, title, discription, price).Scan(&zakazID)
+	// Вставляем элемент (заказ или вакансию)
+	var itemID int
+	err = tx.QueryRow(fmt.Sprintf(`INSERT INTO %s (user_id, name, title, discription, price)
+	VALUES ($1, $2, $3, $4, $5) RETURNING id`, tableName), userID, name, title, discription, price).Scan(&itemID)
+
 	if err != nil {
 		return err
 	}
 
 	for _, tagName := range tags {
-
+		// Вставляем тег, если его нет
 		var tagID int
 		err = tx.QueryRow(`
 			INSERT INTO tags (name) VALUES ($1)
@@ -305,11 +328,8 @@ func AddZakaz(userID int, name, title, discription string, price int, tags []str
 			return err
 		}
 
-		// Связываем заказ с тегом
-		_, err = tx.Exec(`
-			INSERT INTO zakaz_tags (zakaz_id, tag_id) VALUES ($1, $2)
-			ON CONFLICT DO NOTHING
-		`, zakazID, tagID)
+		// Связываем элемент с тегом
+		_, err = tx.Exec(fmt.Sprintf(`INSERT INTO %s (%s, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, tagsTable, tagsColumn), itemID, tagID)
 		if err != nil {
 			return err
 		}
@@ -318,9 +338,8 @@ func AddZakaz(userID int, name, title, discription string, price int, tags []str
 	return tx.Commit()
 }
 
-// GetCards возвращает заказы с пагинацией и фильтрацией по тегам
-func GetCards(page int, tagFilters []string) ([]Zakaz, error) {
-	var cards []Zakaz
+// возвращает слайс карточек пагинацией и фильтрацией по тегам
+func GetCards(page int, tagFilters []string, itemType string, priceUpDownFalse string) ([]Cards, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -333,58 +352,124 @@ func GetCards(page int, tagFilters []string) ([]Zakaz, error) {
 	}
 	defer db.Close()
 
-	query := `
-		SELECT z.id, z.name, z.title, z.discription, z.price,
-		       COALESCE(array_agg(t.name) FILTER (WHERE t.name IS NOT NULL), '{}') as tags
-		FROM zakazs z
-		LEFT JOIN zakaz_tags zt ON z.id = zt.zakaz_id
-		LEFT JOIN tags t ON zt.tag_id = t.id
-		WHERE 1=1
-	`
-	args := []interface{}{}
-	argCounter := 1
-
-	// Фильтрация по тегам
+	// получаем ID элементов по тегам
+	var itemIDs []int
 	if len(tagFilters) > 0 {
-		placeholders := make([]string, len(tagFilters))
-		for i := range tagFilters {
-			placeholders[i] = fmt.Sprintf("$%d", argCounter)
-			args = append(args, tagFilters[i])
-			argCounter++
+		itemIDs, err = filterByTags(db, tagFilters, itemType)
+		if err != nil {
+			return nil, err
 		}
-		query += fmt.Sprintf(`
-			AND z.id IN (
-				SELECT zakaz_id FROM zakaz_tags
-				WHERE tag_id IN (
-					SELECT id FROM tags WHERE name IN (%s)
-				)
-				GROUP BY zakaz_id
-				HAVING COUNT(DISTINCT tag_id) = %d
-			)
-		`, strings.Join(placeholders, ","), len(tagFilters))
+		if len(itemIDs) == 0 {
+			return []Cards{}, nil
+		}
 	}
 
-	query += ` GROUP BY z.id ORDER BY z.id LIMIT 20 OFFSET $` + fmt.Sprint(argCounter)
-	args = append(args, offset)
+	return getItemsByIDs(db, itemIDs, offset, itemType, priceUpDownFalse)
+}
 
-	rows, err := db.Query(query, args...)
+func filterByTags(db *sql.DB, tags []string, itemType string) ([]int, error) {
+	var tagsTable string
+	var idColumn string
+
+	if itemType == "zakazs" {
+		tagsTable = "zakaz_tags"
+		idColumn = "zakaz_id"
+	} else if itemType == "vakans" {
+		tagsTable = "vakans_tags"
+		idColumn = "vakans_id"
+	} else {
+		return nil, errors.New("неверный тип элемента")
+	}
+
+	rows, err := db.Query(fmt.Sprintf(`SELECT %s FROM %s WHERE tag_id IN (SELECT id FROM tags WHERE name = ANY($1))	GROUP BY %s`, idColumn, tagsTable, idColumn), pq.Array(tags))
 	if err != nil {
-		log.Println("Fail query zakazs:", err)
 		return nil, err
 	}
 	defer rows.Close()
 
+	var ids []int
 	for rows.Next() {
-		var z Zakaz
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			return nil, err
+		}
+		ids = append(ids, id)
+	}
+	return ids, nil
+}
+
+func getItemsByIDs(db *sql.DB, ids []int, offset int, itemType string, priceUpDownFalse string) ([]Cards, error) {
+	var tableName, tagsTable, idColumn string
+
+	if itemType == "zakazs" {
+		tableName = "zakazs"
+		tagsTable = "zakaz_tags"
+		idColumn = "zakaz_id"
+	} else if itemType == "vakans" {
+		tableName = "vakans"
+		tagsTable = "vakans_tags"
+		idColumn = "vakans_id"
+	} else {
+		return nil, errors.New("неверный тип элемента")
+	}
+
+	query := fmt.Sprintf(`
+		SELECT %s.id, %s.name, %s.title, %s.discription, %s.price,
+		COALESCE(array_agg(tags.name) FILTER (WHERE tags.name IS NOT NULL), '{}') as tags
+		FROM %s
+		LEFT JOIN %s ON %s.id = %s.%s
+		LEFT JOIN tags ON %s.tag_id = tags.id
+	`, tableName, tableName, tableName, tableName, tableName,
+		tableName, tagsTable, tableName, tagsTable, idColumn, tagsTable)
+
+	args := []interface{}{}
+
+	if len(ids) > 0 {
+		query += ` WHERE ` + tableName + `.id = ANY($1)`
+		args = append(args, pq.Array(ids))
+	}
+
+	query += ` GROUP BY ` + tableName + `.id ORDER BY ` + tableName + `.id LIMIT 20 OFFSET $` + fmt.Sprint(len(args)+1)
+	args = append(args, offset)
+
+	rows, err := db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var cards []Cards
+	for rows.Next() {
+		var z Cards
 		var tagsArray []string
-		err := rows.Scan(&z.Avtor, &z.Label, &z.Discription, &z.Price, &tagsArray)
+		var id int
+		var name, title, discription string
+		var price int
+
+		err := rows.Scan(&id, &name, &title, &discription, &price, &tagsArray)
 		if err != nil {
 			log.Println("Scan error:", err)
 			continue
 		}
+
+		z.Avtor = name
+		z.Label = title
+		z.Discription = discription
+		z.Price = price
 		z.Tags = tagsArray
+
 		cards = append(cards, z)
 	}
 
+	if priceUpDownFalse == "Up" {
+		sort.Slice(cards, func(i, j int) bool {
+			return cards[i].Price < cards[j].Price
+		})
+	} else if priceUpDownFalse == "Down" {
+		sort.Slice(cards, func(i, j int) bool {
+			return cards[i].Price > cards[j].Price
+		})
+	}
 	return cards, nil
 }
