@@ -39,7 +39,7 @@
     </div>
     <script>
 
-        let clickCount = 0;
+        let clickCount = 1;
 
         const textBlock = document.querySelector('.text-block');
         const taskItems = document.querySelectorAll('.text2');
@@ -48,32 +48,38 @@
 
         // Функция сбора данных и отправки
         function sendRequest(isReset) {
-            if (isReset) {
-                clickCount = 0;
-                textBlock.innerHTML = ""; // Очищаем экран для новых тегов
-            } else {
-                clickCount++; // Увеличиваем счетчик для "Загрузить еще"
-            }
+    if (isReset) {
+        clickCount = 1;
+        textBlock.innerHTML = "";
+    } else {
+        clickCount++;
+    }
 
-            taskItems.forEach((item) => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                const label = item.querySelector('label');
+    // Собираем все выбранные теги
+    const selectedTags = [];
+    taskItems.forEach((item) => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        const label = item.querySelector('label');
+        if (checkbox.checked) {
+            selectedTags.push(label.textContent);
+        }
+    });
 
-                const taskData = {
-                    page: clickCount,
-                    tagFilters: checkbox.checked ? [label.textContent] : [],
-                    itemType: "zakazs",
-                    priceUpDownFalse: ""
-                };
+    const taskData = {
+        page: clickCount,
+        tagFilters: selectedTags,  // ← массив всех выбранных тегов
+        itemType: "zakazs",
+        priceUpDownFalse: ""
+    };
 
-                fetch('http://localhost:8080/api/lenta', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(taskData)
-                })
-                    .then(run => run.json())
-                    .then(json => {
-                        textBlock.innerHTML += json.map(({ label, discription, avtor, price }) => `
+    fetch('http://localhost:8080/api/lenta', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(taskData)
+    })
+    .then(run => run.json())
+    .then(json => {
+        textBlock.innerHTML += json.map(({ label, discription, avtor, price }) => `
                 <div class="box-order">
                     <div class="text">
                         <h1>${label}</h1>
@@ -84,9 +90,7 @@
                 </div>`).join('');
                     })
                     .catch(err => console.error('Ошибка:', err));
-            });
-        }
-
+                }
         // 1. Авто-запуск при загрузке страницы (счетчик 0)
         sendRequest(true);
 

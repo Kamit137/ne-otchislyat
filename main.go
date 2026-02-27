@@ -27,7 +27,7 @@ func main() {
 
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
-	// http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
+	http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
 
 	http.HandleFunc("/logout", reglog.Logout)
 

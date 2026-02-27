@@ -161,13 +161,6 @@ func LoginDb(email, password string) error {
 	return nil
 }
 
-type cases struct {
-	Title          string `json:"title"`
-	Discription    string `json:"discription"`
-	Price          int    `json:"price"`
-	DateCreateCase string `json:"dateCreateCreat"`
-}
-
 type comment struct {
 	Title              string `json:"title"`
 	Stars              int    `json:"stars"`
@@ -182,13 +175,14 @@ type profileStruct struct {
 	Rating                  int       `json:"rating"`
 	TgUs                    string    `json:"tgUs"`
 	Recvizits               int64     `json:"recvivits"`
-	Cases                   []cases   `json:"cases"`
+	Cards                   []Cards   `json:"cards"`
 	Comments                []comment `json:"comments"`
 	DateCreateprofileStruct string    `json:"dateCreateprofileStruct"`
 }
 
 func GetInfProfile(email string) (profileStruct, error) {
 	var InfprofileStruct profileStruct
+
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
 		log.Fatal("Fail open Db", err)
@@ -210,23 +204,29 @@ func GetInfProfile(email string) (profileStruct, error) {
 			return profileStruct{}, err
 		}
 	}
+	if userId == 0 {
+		return profileStruct{}, errors.New("user not found")
+	}
 
-	rowsCases, err := db.Query("SELECT title, discription, price, dateCreateCase FROM cases WHERE user_id = $1", userId)
+	rowsCards, err := db.Query("SELECT title, discription, price, dateCreateCase FROM zakazs WHERE user_id = $1", userId)
 	if err != nil {
 		return profileStruct{}, err
 	}
-	defer rowsCases.Close()
+	defer rowsCards.Close()
 
-	var casesList []cases
-	for rowsCases.Next() {
-		var c cases
-		err := rowsCases.Scan(&c.Title, &c.Discription, &c.Price, &c.DateCreateCase)
+	var cardsList []Cards
+	for rowsCards.Next() {
+		var c Cards
+		var date string
+		err := rowsCards.Scan(&c.Label, &c.Discription, &c.Price, &date)
+		c.Avtor = InfprofileStruct.Name
+
 		if err != nil {
 			return profileStruct{}, err
 		}
-		casesList = append(casesList, c)
+		cardsList = append(cardsList, c)
 	}
-	InfprofileStruct.Cases = casesList
+	InfprofileStruct.Cards = cardsList
 
 	rowsComments, err := db.Query("SELECT title, rating, avtor, dateCreateComment FROM comments WHERE user_id = $1", userId)
 	if err != nil {
@@ -386,7 +386,7 @@ func filterByTags(db *sql.DB, tags []string, itemType string) ([]int, error) {
 		return nil, errors.New("неверный тип элемента")
 	}
 
-	rows, err := db.Query(fmt.Sprintf(`SELECT %s FROM %s WHERE tag_id IN (SELECT id FROM tags WHERE name = ANY($1))	GROUP BY %s`, idColumn, tagsTable, idColumn), pq.Array(tags))
+	rows, err := db.Query(fmt.Sprintf(`SELECT %s FROM %s WHERE tag_id IN (SELECT id FROM tags WHERE name = ANY($1)) GROUP BY %s HAVING COUNT(DISTINCT tag_id) = $2 `, idColumn, tagsTable, idColumn), pq.Array(tags), len(tags))
 	if err != nil {
 		return nil, err
 	}

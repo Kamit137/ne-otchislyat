@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="/src/css/styleprof.css">
+    <link rel="stylesheet" href="/src/css/profile.css">
 
 
 <body>
@@ -119,7 +119,7 @@
                     </div>
                 </div>
                 <div>
-                    <form action=""></form>
+
                 </div>
                 <form class="form-newtask" action="">
                     <div class="text1">
@@ -127,8 +127,8 @@
                         <input class="colorbox" id="TableName" name="login" type="text">
                     </div>
                     <div class="text1">
-                        <label class="color" for="label">label:</label>
-                        <input class="colorbox" id="label" name="login" type="text">
+                        <label class="color" for="title">title:</label>
+                        <input class="colorbox" id="title" name="login" type="text">
                     </div>
                     <div class="text1">
                         <label class="color" for="discription">discription:</label>
@@ -150,14 +150,14 @@
                         </div>
                         <div class="choice-tegs">
                             <label class="label-tegs" for="angl">английский</label>
-                            <input class="colorbox" id="angle" name="login" type="checkbox">
+                            <input class="colorbox" id="angl" name="login" type="checkbox">
                         </div>
                         <div class="choice-tegs">
                             <label class="label-tegs" for="rus">русский</label>
                             <input class="colorbox" id="rus" name="login" type="checkbox">
                         </div>
                     </div>
-                    <button class="new-task">Добавить задачу</button>
+                    <button type="submit" class="new-task">Добавить задачу</button>
                 </form>
 
             </div>
@@ -182,40 +182,87 @@
         formNewtask.addEventListener('submit', (event) => {
             event.preventDefault();
 
-            const TableName = document.querySelector('#TableName');
-            const label = document.querySelector('#label');
-            const discription = document.querySelector('#discription');
-            const price = document.querySelector('#price');
+            const TableName = document.querySelector('#TableName').value;
+            const title = document.querySelector('#title').value;
+            const discription = document.querySelector('#discription').value;
+            const price = document.querySelector('#price').value;
+
+
+            const taskItems = document.querySelectorAll('.choice-tegs');
+            const selectedTags = [];
+
             taskItems.forEach((item) => {
                 const checkbox = item.querySelector('input[type="checkbox"]');
                 const label = item.querySelector('label');
 
-                const taskData = {
-                    tableName: TableName.textContent,
-                    tittle: label.textContent,
-                    discription: discription.textContent,
-                    price: price.textContent,
-                    tags: checkbox.checked ? [label.textContent] : [],
-                };
-                fetch('http://localhost:8080/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(loginData)
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            return response.text().then(text => { throw new Errorrror(text) });
-                        }
-                        return response.json();
-                    })
-                    .then(data => {
-                        console.log('Успех:', data);
-                    })
+                if (checkbox && checkbox.checked) {
+                    selectedTags.push(label.textContent);
+                }
+            });
+            
+            const taskData = {
+                tableName: TableName,
+                title: title,
+                discription: discription,
+                price: parseInt(document.querySelector('#price').value) || 0,
+                tags: selectedTags
+            };
+            
+            fetch('http://localhost:8080/api/addCard', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
             })
-        })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => {
+                            throw new Error(text)
+                        });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Успех:', data);
+
+                    formNewtask.reset();
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+        });
     </script>
+    <script>
+    // Загрузка данных профиля при открытии страницы
+    fetch('/api/profile', {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки профиля');
+        }
+        return response.json();
+    })
+    .then(data => {
+        // Заполняем поля
+        const inputs = document.querySelectorAll('.form-profile input[type="text"]');
+        if (inputs.length >= 3) {
+            inputs[0].value = data.name || '';           // Имя
+            inputs[1].value = data.email || '';          // Почта
+            inputs[2].value = data.tgUs || '';           // Телеграм
+        }
+
+        // Здесь можно добавить заполнение тегов, заказов и т.д.
+        console.log('Профиль загружен:', data);
+    })
+    .catch(err => {
+        console.error('Ошибка:', err);
+    });
+</script>
 </body>
 
 </html>

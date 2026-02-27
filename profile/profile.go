@@ -81,6 +81,7 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&NewCard); err != nil {
+		log.Println("JSON decode error:", err)
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
@@ -89,10 +90,10 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	// Добавляем карточку — email и name передаются отдельно
 	err := sql.AddItem(NewCard.TableName, email, NewCard.Name, NewCard.Title, NewCard.Discription, NewCard.Price, NewCard.Tags)
 	if err != nil {
+		log.Println("AddItem error:", err) // ← добавить
 		http.Error(w, "Failed to add card: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Card added successfully",
 	})
