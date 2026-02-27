@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/src/css/head.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="background">
+        <div class="main-menu">
+            <div class="ost">ergreger</div>
+            <div class="search-container">
+                <div class="text-block">
+                </div>
+                <button class="btn-scroll">Загрузить еще</button>
+            </div>
+            <div class="tegs">
+                <form class="form-teg" action="">
+                    <div class="text2">
+                        <label class="color" for="mat">Математика:</label>
+                        <input class="colorbox" id="mat" type="checkbox">
+                    </div>
+                    <div class="text2">
+                        <label class="color" for="angl">Англиский:</label>
+                        <input class="colorbox" id="angl" type="checkbox">
+                    </div>
+                    <div class="text2">
+                        <label class="color" for="lab">Лаба:</label>
+                        <input class="colorbox" id="lab" type="checkbox">
+                    </div>
+                    <button type="submit">Сохранить</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+    <script>
+
+        let clickCount = 0;
+
+        const textBlock = document.querySelector('.text-block');
+        const taskItems = document.querySelectorAll('.text2');
+        const formTeg = document.querySelector('.form-teg');
+        const btnScroll = document.querySelector('.btn-scroll');
+
+        // Функция сбора данных и отправки
+        function sendRequest(isReset) {
+            if (isReset) {
+                clickCount = 0;
+                textBlock.innerHTML = ""; // Очищаем экран для новых тегов
+            } else {
+                clickCount++; // Увеличиваем счетчик для "Загрузить еще"
+            }
+
+            taskItems.forEach((item) => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const label = item.querySelector('label');
+
+                const taskData = {
+                    page: clickCount,
+                    tagFilters: checkbox.checked ? [label.textContent] : [],
+                    itemType: "zakazs",
+                    priceUpDownFalse: ""
+                };
+
+                fetch('http://localhost:8080/api/lenta', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(taskData)
+                })
+                    .then(run => run.json())
+                    .then(json => {
+                        textBlock.innerHTML += json.map(({ label, discription, avtor, price }) => `
+                <div class="box-order">
+                    <div class="text">
+                        <h1>${label}</h1>
+                        <p>${discription}</p>
+                        <p>name: ${avtor}</p>
+                        <p>${price} рублей</p>
+                    </div>
+                </div>`).join('');
+                    })
+                    .catch(err => console.error('Ошибка:', err));
+            });
+        }
+
+        // 1. Авто-запуск при загрузке страницы (счетчик 0)
+        sendRequest(true);
+
+        // 2. Кнопка "Сохранить" (Изменение тегов)
+        formTeg.addEventListener('submit', (e) => {
+            e.preventDefault(); // Чтобы страница не перезагружалась
+            sendRequest(true);  // Сброс счетчика и очистка HTML
+        });
+
+        // 3. Кнопка "Загрузить еще"
+        btnScroll.addEventListener('click', () => {
+            sendRequest(false); // Прибавление счетчика и добавление HTML
+        });
+
+    </script>
+</body>
+
+</html>

@@ -10,7 +10,7 @@ import (
 const (
 	shopID    = "514065"
 	secretKey = "test_*g0KyEXeFC18jpmrJ5Gmy4UH2bpFgtMdmkW5JxvfCgCmo"
-	returnURL = "http://localhost:8080/profile"
+	returnURL = "http://localhost:8080/lenta"
 )
 
 type PaymentRequest struct {
@@ -66,4 +66,5 @@ func createPayment(w http.ResponseWriter, r *http.Request) {
 func main() {
 	http.HandleFunc("/pay", createPayment)
 	http.ListenAndServe(":8080", nil)
+
 }

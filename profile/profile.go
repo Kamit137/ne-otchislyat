@@ -64,3 +64,36 @@ func WriteInProfile(w http.ResponseWriter, r *http.Request) {
 		"message": "Profile updated successfully",
 	})
 }
+func AddCard(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var NewCard struct {
+		TableName   string   `json:"tableName"`
+		Name        string   `json:"name"`
+		Title       string   `json:"title"`
+		Discription string   `json:"discription"`
+		Price       int      `json:"price"`
+		Tags        []string `json:"tags"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&NewCard); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	// Добавляем карточку — email и name передаются отдельно
+	err := sql.AddItem(NewCard.TableName, email, NewCard.Name, NewCard.Title, NewCard.Discription, NewCard.Price, NewCard.Tags)
+	if err != nil {
+		http.Error(w, "Failed to add card: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "Card added successfully",
+	})
+}

@@ -27,6 +27,8 @@ func main() {
 
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
+	// http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
+
 	http.HandleFunc("/logout", reglog.Logout)
 
 	http.Handle("/src/", http.StripPrefix("/src/", http.FileServer(http.Dir("Project-3/src"))))

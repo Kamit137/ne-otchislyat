@@ -281,8 +281,7 @@ type Cards struct {
 	Tags        []string `json:"tags"`
 }
 
-// добавляет новый заказ или вакансию с указанными тегами
-func AddItem(userID int, tableName, name, title, discription string, price int, tags []string) error {
+func AddItem(tableName, email, name, title, discription string, price int, tags []string) error {
 	tagsTable := ""
 	tagsColumn := ""
 	if tableName == "zakazs" {
@@ -292,7 +291,7 @@ func AddItem(userID int, tableName, name, title, discription string, price int, 
 		tagsTable = "vakans_tags"
 		tagsColumn = "vakans_id"
 	} else {
-		return errors.New("Неверное поле tableName")
+		return errors.New("неверное поле tableName")
 	}
 
 	db, err := sql.Open("postgres", connStr)
@@ -301,17 +300,22 @@ func AddItem(userID int, tableName, name, title, discription string, price int, 
 	}
 	defer db.Close()
 
+	var userID int
+	err = db.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	if err != nil {
+		return errors.New("user not found")
+	}
+
 	tx, err := db.Begin()
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback()
 
-	// Вставляем элемент (заказ или вакансию)
+	// Вставляем элемент
 	var itemID int
-	err = tx.QueryRow(fmt.Sprintf(`INSERT INTO %s (user_id, name, title, discription, price)
-	VALUES ($1, $2, $3, $4, $5) RETURNING id`, tableName), userID, name, title, discription, price).Scan(&itemID)
-
+	query := fmt.Sprintf(`INSERT INTO %s (user_id, name, title, discription, price) VALUES ($1, $2, $3, $4, $5) RETURNING id`, tableName)
+	err = tx.QueryRow(query, userID, name, title, discription, price).Scan(&itemID)
 	if err != nil {
 		return err
 	}
@@ -329,7 +333,8 @@ func AddItem(userID int, tableName, name, title, discription string, price int, 
 		}
 
 		// Связываем элемент с тегом
-		_, err = tx.Exec(fmt.Sprintf(`INSERT INTO %s (%s, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, tagsTable, tagsColumn), itemID, tagID)
+		tagQuery := fmt.Sprintf(`INSERT INTO %s (%s, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING`, tagsTable, tagsColumn)
+		_, err = tx.Exec(tagQuery, itemID, tagID)
 		if err != nil {
 			return err
 		}
@@ -447,7 +452,7 @@ func getItemsByIDs(db *sql.DB, ids []int, offset int, itemType string, priceUpDo
 		var name, title, discription string
 		var price int
 
-		err := rows.Scan(&id, &name, &title, &discription, &price, &tagsArray)
+		err := rows.Scan(&id, &name, &title, &discription, &price, pq.Array(&tagsArray))
 		if err != nil {
 			log.Println("Scan error:", err)
 			continue
@@ -471,5 +476,9 @@ func getItemsByIDs(db *sql.DB, ids []int, offset int, itemType string, priceUpDo
 			return cards[i].Price > cards[j].Price
 		})
 	}
+	if cards == nil {
+		return []Cards{}, nil
+	}
+
 	return cards, nil
 }
