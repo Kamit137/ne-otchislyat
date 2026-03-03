@@ -3,10 +3,10 @@ package main
 import (
 	"fmt"
 
-	"ne-otchislyat/lenta"
-	"ne-otchislyat/profile"
-	"ne-otchislyat/reglog"
-	"ne-otchislyat/token"
+	"ne-otchislyat/internal/hendlers/lenta"
+	"ne-otchislyat/internal/hendlers/profile"
+	"ne-otchislyat/internal/hendlers/reglog"
+	"ne-otchislyat/internal/token"
 
 	"net/http"
 )

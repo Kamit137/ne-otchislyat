@@ -5,7 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	codemail "ne-otchislyat/internal/codEmail"
 	"sort"
+	"time"
 
 	"github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
@@ -25,11 +27,14 @@ func InitDB() error {
 		email VARCHAR(255) UNIQUE NOT NULL,
 		password VARCHAR(255) NOT NULL,
 		name VARCHAR(255) DEFAULT 'User',
-		isCompany BOOLEAN DEFAULT FALSE,
+		verified BOOLEAN DEFAULT FALSE,
+    	verification_code VARCHAR(6),
+    	time_live_code TIMESTAMP,
 		rating INT DEFAULT 0,
 		tgUs VARCHAR(255) DEFAULT '',
 		recvizits BIGINT DEFAULT 0,
-		dateCreateprofileStruct TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+		dateRegistr TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		countSdelanihZakazov INT DEFAULT 0
 	);`)
 	if err != nil {
 		return err
@@ -37,7 +42,7 @@ func InitDB() error {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS zakazs(
 		id SERIAL PRIMARY KEY,
-		user_id INT NOT NULL,
+		user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		name TEXT,
 		title TEXT,
 		discription TEXT,
@@ -50,7 +55,7 @@ func InitDB() error {
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS vakans(
 		id SERIAL PRIMARY KEY,
-		user_id INT NOT NULL,
+		user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
 		name TEXT,
 		title TEXT,
 		discription TEXT,
@@ -60,13 +65,26 @@ func InitDB() error {
 	if err != nil {
 		return err
 	}
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS favorites(
+		id SERIAL PRIMARY KEY,
+		user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		card_id INT NOT NULL,
+		card_type VARCHAR(10) NOT NULL CHECK (card_type IN ('zakaz', 'vakan')),
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		UNIQUE(user_id, card_id, card_type)  
+	);`)
+	if err != nil {
+		return err
+	}
 
 	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS comments(
 		id SERIAL PRIMARY KEY,
-		user_id INT NOT NULL,
+		user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+		card_id INT NOT NULL,
+    	card_type VARCHAR(10) NOT NULL CHECK (card_type IN ('zakaz', 'vakan')),
 		title TEXT,
 		avtor TEXT,
-		rating INT CHECK (rating >= 1 AND rating <= 5),
+		rating INT,
 		dateCreateComment TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 	);`)
 	if err != nil {
@@ -127,17 +145,72 @@ func RegDb(email, password, name string) error {
 	if exists {
 		return errors.New("email exist")
 	}
+
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}
-	_, err = db.Exec("INSERT INTO users(email, password, name) VALUES ($1, $2, $3)",
-		email, string(hashedPassword), name)
+
+	code := codemail.GenerateCode()
+	timeLiveCode := time.Now().Add(15 * time.Minute)
+
+	_, err = db.Exec(`
+		INSERT INTO users(email, password, name, verified, verification_code, time_live_code) 
+		VALUES ($1, $2, $3, $4, $5, $6)`,
+		email, string(hashedPassword), name, false, code, timeLiveCode)
 	if err != nil {
 		return err
 	}
 
+	go func() {
+		err := codemail.SendVerificationCode(email, code)
+		if err != nil {
+			log.Printf("Failed to send email to %s: %v", email, err)
+		}
+	}()
 	return nil
+}
+func UpdateUserVerified(email string) error {
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("Fail update verify", err)
+		return err
+	}
+
+	defer db.Close()
+
+	_, err = db.Exec(`UPDATE users SET verified = true, verification_code = NULL WHERE email = $1`, email)
+	if err != nil {
+		log.Fatal("Fail update verify", err)
+		return err
+	}
+	return nil
+}
+func VerifyCodeInSql(email string) (string, time.Time, bool, error) {
+	var storedCode string
+	var expires time.Time
+	var verified bool
+
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		log.Fatal("Fail open Db", err)
+		return "", time.Time{}, false, err
+	}
+	defer db.Close()
+
+	err = db.QueryRow(`
+		SELECT verification_code, time_live_code, verified 
+		FROM users WHERE email = $1
+	`, email).Scan(&storedCode, &expires, &verified)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return "", time.Time{}, false, errors.New("user not found")
+		}
+		return "", time.Time{}, false, err
+	}
+
+	return storedCode, expires, verified, nil
 }
 
 func LoginDb(email, password string) error {

@@ -3,7 +3,7 @@ package lenta
 import (
 	"encoding/json"
 	"log"
-	"ne-otchislyat/sql"
+	"ne-otchislyat/internal/sql"
 	"net/http"
 
 	"text/template"

@@ -2,8 +2,8 @@ package reglog
 
 import (
 	"encoding/json"
-	"ne-otchislyat/sql"
-	"ne-otchislyat/token"
+	"ne-otchislyat/internal/sql"
+	"ne-otchislyat/internal/token"
 	"net/http"
 	"text/template"
 )
@@ -46,6 +46,7 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
+
 	token, err := token.GenerateToken(req.Email)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
@@ -108,7 +109,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"success":  "true",
 		"message":  "Login successful",
-		"redirect": "/a",
+		"redirect": "/lenta",
 		"email":    req.Email,
 	})
 }

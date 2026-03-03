@@ -3,7 +3,7 @@ package profile
 import (
 	"encoding/json"
 	"log"
-	"ne-otchislyat/sql"
+	"ne-otchislyat/internal/sql"
 	"net/http"
 	"text/template"
 )
@@ -87,7 +87,6 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	// Добавляем карточку — email и name передаются отдельно
 	err := sql.AddItem(NewCard.TableName, email, NewCard.Name, NewCard.Title, NewCard.Discription, NewCard.Price, NewCard.Tags)
 	if err != nil {
 		log.Println("AddItem error:", err) // ← добавить
