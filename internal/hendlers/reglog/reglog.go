@@ -16,7 +16,7 @@ type registr struct {
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("/home/kamit/kod/ne-otchislyat/web/register.html")
+	tmpl, err := template.ParseFiles("web/templates/register.html")
 	if err != nil {
 		http.Error(w, "Ошибка шаблона ", http.StatusInternalServerError)
 		fmt.Println(err)

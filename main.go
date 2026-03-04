@@ -24,7 +24,7 @@ func main() {
 
 	http.HandleFunc("/logout", reglog.Logout)
 
-	//http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
-	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("web/"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
+	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("web/templates"))))
 	http.ListenAndServe(":8080", nil)
 }
