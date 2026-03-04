@@ -1,0 +1,226 @@
+* {
+    box-sizing: border-box;
+    margin: 0px;
+    padding: 0px;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.btn {
+    height: 56px;
+    width: 230px;
+    border-radius: 50px;
+    background-color: #0c192a00;
+    color: azure;
+    border-color: aliceblue;
+}
+
+
+
+
+
+.background {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+    background-color: #16162F;
+}
+
+.menu-block {
+    display: flex;
+    height: 536px;
+    width: 784px;
+    background-color: #242F49;
+    border-radius: 50px;
+    position: relative;
+    box-shadow: -21px 10px 19px 4px rgba(0, 0, 0, 0.2);
+}
+
+.animation-login-hidden {
+    overflow: hidden;
+}
+
+.login-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    width: 392px;
+    height: 536px;
+    transition: transform 0.6s ease-in-out;
+}
+
+.login-container.login-hidden {
+    transform: translateX(100%);
+}
+
+.form-text {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 50px;
+    height: 32px;
+    color: aliceblue;
+}
+
+.form-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 65px;
+}
+
+.form-login__data {
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 25px;
+    width: 325px;
+    height: 56px;
+    border-radius: 15px;
+    border: 0px;
+    outline: none;
+    font-size: 15px;
+}
+
+.btn-login {
+    margin-top: 81px;
+    height: 56px;
+    width: 230px;
+    border-radius: 50px;
+}
+
+.animation-register-hidden {
+    overflow: hidden;
+}
+
+.register-container {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    width: 392px;
+    height: 536px;
+    transform: translateX(-100%);
+    transition: transform 0.6s ease-in-out;
+}
+
+.register-container.register-hidden {
+    transform: translateX(0%);
+}
+
+.form-register {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 65px;
+}
+
+.form-register__data {
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-bottom: 25px;
+    width: 325px;
+    height: 56px;
+    border-radius: 15px;
+    border: 0px;
+    outline: none;
+    font-size: 15px;
+}
+
+.btn-register {
+    height: 56px;
+    width: 230px;
+    border-radius: 50px;
+}
+
+.front-container-animation-right {
+    left: 50%;
+    position: absolute;
+    overflow: hidden;
+    height: 536px;
+    width: 392px;
+}
+
+.container-animation-right {
+    position: absolute;
+    height: 536px;
+    width: 392px;
+    background: linear-gradient(45deg, rgb(28, 184, 53) 23%, rgb(104, 54, 231) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.6s ease-in-out;
+    border-top-right-radius: 50px;
+    border-bottom-right-radius: 50px;
+    overflow: hidden;
+    transform: translateX(0);
+}
+
+.container-animation-right.right-panel-active {
+    transform: translateX(-100%);
+}
+
+.text-animation-register {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.6s ease-in-out;
+    width: 100%;
+    transform: translateX(0);
+}
+
+.text-animation-register.text-a-r {
+    transform: translateX(100%);
+}
+
+.text-prewie {
+    text-align: center;
+    color: aliceblue;
+    margin-bottom: 40px;
+}
+
+.front-container-animation-left {
+    position: absolute;
+    overflow: hidden;
+    height: 536px;
+    width: 392px;
+}
+
+.container-animation-left {
+    height: 536px;
+    width: 392px;
+    background: linear-gradient(45deg, rgb(28, 184, 53) 23%, rgb(104, 54, 231) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.6s ease-in-out;
+    overflow: hidden;
+    border-top-left-radius: 50px;
+    border-bottom-left-radius: 50px;
+    transform: translateX(100%);
+}
+
+.container-animation-left.left-panel-active {
+    transform: translateX(0);
+}
+
+.text-animation-login {
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.6s ease-in-out;
+    width: 100%;
+    transform: translateX(-100%);
+}
+
+.text-animation-login.text-a-l {
+    transform: translateX(0);
+}

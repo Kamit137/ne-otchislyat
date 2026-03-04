@@ -10,7 +10,7 @@ import (
 )
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("Project-3/src/lenta.html")
+	tmpl, err := template.ParseFiles("web/static/lenta.html")
 	if err != nil {
 		log.Println("Template error:", err)
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)

@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="/web/register.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="background">
+        <div class="menu-block">
+            <div class="animation-login-hidden">
+                <div class="login-container">
+                    <form class="form-login" action="">
+                        <h1 class="form-text">Вход</h1>
+                        <input class="form-login__data" id="email-log" type="email" placeholder="Email">
+                        <input class="form-login__data" type="password" placeholder="Password">
+                        <button type="submit" class="btn-login">Отправить</button>
+                    </form>
+                </div>
+            </div>
+            <div class="animation-register-hidden">
+                <div class="register-container">
+                    <form class="form-register" action="">
+                        <h1 class="form-text">Регистрация</h1>
+                        <input type="text" class="form-register__data" id="name" placeholder="Name">
+                        <input class="form-register__data" id="email-reg" type="email" placeholder="Email">
+                        <input class="form-register__data" id="password-reg" type="password" placeholder="Password">
+                        <button type="submit" class="btn-register">Отправить</button>
+                    </form>
+                </div>
+            </div>
+            <div class="front-container-animation-left">
+                <div class="container-animation-left">
+                    <div class="text-animation-login">
+                        <h1 class="text-prewie">С возвращением<br>
+                            в сообщество</h1>
+                        <button id="login" class="btn">login</button>
+                    </div>
+                </div>
+            </div>
+            <div class="front-container-animation-right">
+                <div class="container-animation-right">
+                    <div class="text-animation-register">
+                        <h1 class="text-prewie">Станьте частью<br>
+                            нашего сообщества</h1>
+                        <button id="register" class="btn" type="button">register</button>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const registerBtn = document.querySelector('#register');
+        const loginBtn = document.querySelector('#login');
+        const loginContainer = document.querySelector('.login-container')
+        const registerContainer = document.querySelector('.register-container')
+        const fontLeft = document.querySelector('.container-animation-left')
+        const fontRight = document.querySelector('.container-animation-right')
+        const textAnimationLogin = document.querySelector('.text-animation-login')
+        const textAnimationRegister = document.querySelector('.text-animation-register')
+
+        registerBtn.addEventListener("click", () => {
+            fontRight.classList.add("right-panel-active");
+            fontLeft.classList.add("left-panel-active")
+            loginContainer.classList.add("login-hidden")
+            registerContainer.classList.add("register-hidden")
+            textAnimationRegister.classList.add("text-a-r")
+            textAnimationLogin.classList.add("text-a-l")
+            loginContainer.style.zIndex = "1";
+            registerContainer.style.zIndex = "20";
+
+
+        });
+        loginBtn.addEventListener("click", () => {
+            fontRight.classList.remove("right-panel-active");
+            loginContainer.classList.remove("login-hidden")
+            registerContainer.classList.remove("register-hidden")
+            fontLeft.classList.remove("left-panel-active");
+            textAnimationRegister.classList.remove("text-a-r")
+            textAnimationLogin.classList.remove("text-a-l")
+            loginContainer.style.zIndex = "20";
+            registerContainer.style.zIndex = "1";
+
+
+        })
+
+        const formPostRegister = document.querySelector('.form-register');
+        formPostRegister.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const name = document.querySelector('#name')
+            const login = document.querySelector('#email-reg');
+            const password = document.querySelector('#password-reg');
+
+            if (login.value.trim() === '') {
+                alert('Введите email');
+                return;
+            }
+
+            const registerData = {
+                name: name.value,
+                email: login.value,
+                password: password.value
+            };
+
+            fetch('http://localhost:8080/reg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registerData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Успех:', data);
+                    alert('Регистрация успешна!');
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка регистрации: ' + error.message);
+                });
+        });
+
+        // Кнопка входа
+        // Кнопка входа
+        const formPostLogin = document.querySelector('.form-login');
+        formPostLogin.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const login = document.querySelector('#email-log');
+            const password = document.querySelector('#password-log');
+
+            const loginData = {
+                email: login.value,
+                password: password.value
+            };
+
+            fetch('http://localhost:8080/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.text().then(text => { throw new Error(text) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Успех:', data);
+
+                    // ПЕРЕХОД ПО РЕДИРЕКТУ
+                    if (data.redirect) {
+                        console.log('Переходим на:', data.redirect);
+                        window.location.href = data.redirect; // ← ВОТ ЭТО ВАЖНО!
+                    } else {
+                        alert('Вход выполнен!');
+                    }
+                })
+                .then(data => {
+                    console.log('Успех:', data);
+                    if (data.redirect) {
+                        console.log('Переходим на:', data.redirect);
+                        window.location.href = data.redirect; // ← /a или /profile
+                    } else {
+                        alert('Вход выполнен!');
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка входа: ' + error.message);
+                });
+        });
+    </script>
+</body>
+
+</html>

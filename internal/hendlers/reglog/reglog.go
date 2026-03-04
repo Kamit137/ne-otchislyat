@@ -2,6 +2,7 @@ package reglog
 
 import (
 	"encoding/json"
+	"fmt"
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
 	"net/http"
@@ -15,9 +16,10 @@ type registr struct {
 }
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("Project-3/src/index.html")
+	tmpl, err := template.ParseFiles("/home/kamit/kod/ne-otchislyat/web/register.html")
 	if err != nil {
-		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
+		http.Error(w, "Ошибка шаблона ", http.StatusInternalServerError)
+		fmt.Println(err)
 		return
 	}
 	tmpl.Execute(w, nil)

@@ -2,6 +2,7 @@
     box-sizing: border-box;
     box-sizing: content-box;
     margin: 0px;
+    font-family: sans-serif;
 }
 
 
@@ -9,8 +10,7 @@
 .section {
     min-height: 100vh;
     width: 100%;
-    background: linear-gradient(90deg, #054c76, #0c192a, #471c3a);
-
+    background-color: #16162F;
 
 
 }
@@ -24,6 +24,11 @@
     margin-bottom: 60px;
     color: aliceblue;
 
+}
+
+p {
+    color: aliceblue;
+    font-size: 30px;
 }
 
 .container-list {
@@ -68,80 +73,30 @@ hr {
     margin-right: 100px;
     width: 30%;
     height: 800px;
-    background-color: rgba(99, 77, 124, 0.5);
+    background-color: #16162F;
     border-radius: 70px;
     box-shadow: 2px 1px 8px 11px rgba(82, 173, 243, 0.685);
+
 }
 
 h1 {
-    margin-top: 25px;
-    margin-left: 25px;
-    color: aliceblue;
-    margin-bottom: 25px;
-}
-
-.text-teg {
     display: flex;
     justify-content: center;
+    margin-top: 25px;
     color: aliceblue;
-}
-
-.user-profile__block-tegs {
-    display: flex;
-    max-width: 100%;
-    height: 200px;
-    justify-content: space-between;
     margin-bottom: 25px;
-
 }
 
-.container__block-tegs {
-    display: flex;
-    flex-direction: column;
-    max-width: 100%;
-    height: 200px;
-    margin-right: 7px;
-
-
-}
-
-.block-tegs {
-    display: flex;
-    width: 100%;
-    margin-right: 7px;
-    height: 200px;
-    flex-wrap: wrap;
-    align-items: center;
-
-}
-
-.container__block-tegs:last-child {
-    margin: 0px;
-}
-
-.lab {
-    background-color: blue;
-}
-
-.sem {
-    background-color: chartreuse;
-}
-
-.home-work {
-    background-color: chocolate;
-}
-
-.grand-work {
-    background-color: crimson;
-}
-
-.helper {
-    background-color: cyan;
-}
 
 .form-profile {
     margin-bottom: 20px;
 
+}
+
+.form-profile-count {
+    display: flex;
+    margin-bottom: 20px;
+    align-items: center;
 }
 
 .div__form-profile {
@@ -163,6 +118,7 @@ h1 {
 label {
     color: aliceblue;
     font-size: 30px;
+    margin-right: 20px;
 
 }
 
@@ -197,7 +153,7 @@ i {
 }
 
 .container__cases-comment {
-    width: 50%;
+    width: 60%;
     height: 1200px;
     display: flex;
     flex-direction: column;
@@ -206,15 +162,27 @@ i {
 }
 
 .block__comment-cases {
-
+    display: flex;
+    align-items: center;
+    flex-direction: column;
     width: 100%;
     height: 600px;
-    background-color: rgba(46, 70, 88, 0.103);
+    background-color: #16162F;
 
     margin-bottom: 100px;
     border-radius: 70px;
     box-shadow: 2px 1px 8px 11px rgba(82, 173, 243, 0.685);
+    overflow: auto;
+
 }
+
+.block__comment-cases {
+    /* ... ваши стили ... */
+    scrollbar-width: thin;
+    scrollbar-color: rgba(130, 180, 240, 0.5) rgba(50, 50, 80, 0.3);
+}
+
+
 
 .block__comment-cases:last-child {
     margin-bottom: 0px;
@@ -229,21 +197,108 @@ i {
 }
 
 .block-text1 {
+    display: flex;
+    justify-content: space-between;
     margin-top: 25px;
     margin-left: 25px;
+    margin-right: 25px;
+    align-self: stretch;
+}
+
+
+.text-time {
+    display: flex;
+    color: #f8f8f8;
+    align-items: center;
+    font-size: 23px;
+
+
+}
+
+.history {
+    margin-left: 15px;
 }
 
 .text-cases {
     border-radius: 25px;
     background-color: rgb(27, 245, 245);
-    font-size: 25px;
-    display: inline-block;
-    text-align: center;
+    display: flex;
+    align-items: center;
     box-shadow: 2px 1px 8px 7px rgb(27, 245, 245);
     text-shadow: 0px 0px 5px rgb(0, 0, 0);
     color: #f8f8f8;
     font-size: 32px;
 
+}
+
+.box-order {
+    display: flex;
+    margin-top: 25px;
+    width: 95%;
+    margin-bottom: 10px;
+    background-color: #242F49;
+    box-shadow: -21px 10px 19px 4px rgba(0, 0, 0, 0.2);
+    border-radius: 25px;
+
+}
+
+h5 {
+
+    display: flex;
+    justify-content: center;
+}
+
+.text {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    margin-left: 25px;
+    font-size: 35px;
+    overflow-wrap: break-word;
+}
+
+.head-cards {
+    align-items: center;
+    display: flex;
+    justify-content: space-between;
+    margin-right: 25px;
+    overflow-wrap: break-word;
+}
+
+.text-color1 {
+    color: rgb(247, 247, 247);
+    font-size: 30px;
+    display: flex;
+    justify-content: space-between;
+    margin-right: 20px;
+
+}
+
+
+
+.block-inf {
+    display: flex;
+    align-items: center;
+
+
+
+}
+
+
+
+.p-name {
+    font-size: 25px;
+    color: aliceblue;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    border: 0px;
+    border-radius: 15px;
+    background-color: #269e26;
+    font-weight: 100px;
 }
 
 .text-comment {
