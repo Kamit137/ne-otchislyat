@@ -38,6 +38,6 @@ func SendVerificationCode(to, code string) error {
 
 func GenerateCode() string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-	code := r.Intn(900000) + 100000
+	code := r.Intn(9000) + 1000
 	return fmt.Sprintf("%d", code)
 }

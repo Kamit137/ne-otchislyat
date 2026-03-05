@@ -4,6 +4,8 @@ import (
 	"ne-otchislyat/internal/hendlers/lenta"
 	"ne-otchislyat/internal/hendlers/profile"
 	"ne-otchislyat/internal/hendlers/reglog"
+	"ne-otchislyat/internal/hendlers/verify"
+
 	"ne-otchislyat/internal/token"
 
 	"net/http"
@@ -14,7 +16,8 @@ func main() {
 
 	http.HandleFunc("/reg", reglog.Reg)
 	http.HandleFunc("/login", reglog.Login)
-
+	http.HandleFunc("/verify", verify.IndexPage)
+	http.HandleFunc("/api/verify", verify.ValidateCod)
 	http.HandleFunc("/lenta", token.AuthMiddleware(lenta.IndexPage))
 	http.HandleFunc("/api/lenta", token.AuthMiddleware(lenta.GiveLenta))
 

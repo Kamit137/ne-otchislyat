@@ -12,6 +12,7 @@
     background-color: #0c192a00;
     color: azure;
     border-color: aliceblue;
+    font-size: 20px;
 }
 
 
@@ -43,6 +44,7 @@
 
 .login-container {
     position: relative;
+    transform: translateX(0);
     display: flex;
     justify-content: center;
     border-top-left-radius: 50px;
@@ -50,6 +52,7 @@
     width: 392px;
     height: 536px;
     transition: transform 0.6s ease-in-out;
+    z-index: 4;
 }
 
 .login-container.login-hidden {
@@ -103,11 +106,12 @@
     width: 392px;
     height: 536px;
     transform: translateX(-100%);
+    z-index: 1;
     transition: transform 0.6s ease-in-out;
 }
 
 .register-container.register-hidden {
-    transform: translateX(0%);
+    transform: translateX(0);
 }
 
 .form-register {
@@ -153,10 +157,11 @@
     justify-content: center;
     align-items: center;
     transition: transform 0.6s ease-in-out;
-    border-top-right-radius: 50px;
-    border-bottom-right-radius: 50px;
+    
+    border-radius: 50px;
     overflow: hidden;
     transform: translateX(0);
+    z-index: 10;
 }
 
 .container-animation-right.right-panel-active {
@@ -192,6 +197,7 @@
 }
 
 .container-animation-left {
+    position: absolute;
     height: 536px;
     width: 392px;
     background: linear-gradient(45deg, rgb(28, 184, 53) 23%, rgb(104, 54, 231) 100%);
@@ -201,9 +207,10 @@
     align-items: center;
     transition: transform 0.6s ease-in-out;
     overflow: hidden;
-    border-top-left-radius: 50px;
-    border-bottom-left-radius: 50px;
+    
+    border-radius: 50px;
     transform: translateX(100%);
+    z-index: 1;
 }
 
 .container-animation-left.left-panel-active {

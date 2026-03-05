@@ -2,7 +2,7 @@ package reglog
 
 import (
 	"encoding/json"
-	"fmt"
+
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
 	"net/http"
@@ -19,17 +19,15 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("web/templates/register.html")
 	if err != nil {
 		http.Error(w, "Ошибка шаблона ", http.StatusInternalServerError)
-		fmt.Println(err)
 		return
 	}
 	tmpl.Execute(w, nil)
 }
 func Reg(w http.ResponseWriter, r *http.Request) {
-
 	var req registr
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		http.Error(w, "Invalid JSON registration", http.StatusBadRequest)
 		return
 	}
 	defer r.Body.Close()
@@ -43,32 +41,56 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if err.Error() == "email exist" {
 			http.Error(w, "Email already exists", http.StatusConflict)
+		} else if err.Error() == "user not verified" {
+			http.SetCookie(w, &http.Cookie{
+				Name:     "verify_email",
+				Value:    req.Email,
+				Path:     "/",
+				HttpOnly: false, // Временно отключим HttpOnly для отладки
+				MaxAge:   3600,
+				SameSite: http.SameSiteLaxMode,
+			})
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message":  "Registration updated",
+				"redirect": "/verify",
+				"email":    req.Email,
+			})
+
+			return
 		} else {
 			http.Error(w, "Registration failed", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			json.NewEncoder(w).Encode(map[string]string{
+				"message": "Fatal Error registration.",
+				"email":   req.Email,
+				"status":  "error registration",
+			})
 		}
 		return
 	}
-
-	token, err := token.GenerateToken(req.Email)
-	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
-		return
-	}
 	http.SetCookie(w, &http.Cookie{
-		Name:     "token",
-		Value:    token,
+		Name:     "verify_email",
+		Value:    req.Email,
 		Path:     "/",
-		HttpOnly: true,
-		MaxAge:   864000,
+		HttpOnly: false, // Временно отключим HttpOnly для отладки
+		MaxAge:   3600,
+		SameSite: http.SameSiteLaxMode,
 	})
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "User registered successfully",
-		"email":   req.Email,
+		"message":  "User registered successfully. Please verify your email.",
+		"redirect": "/verify",
+		"email":    req.Email,
+		"status":   "verification_needed",
 	})
-}
 
+}
 func Login(w http.ResponseWriter, r *http.Request) {
 	var req registr
 
@@ -90,16 +112,36 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "User not found", http.StatusNotFound)
 		case "wrong password":
 			http.Error(w, "Wrong password", http.StatusUnauthorized)
+		case "email not verified":
+			http.SetCookie(w, &http.Cookie{
+				Name:     "verify_email",
+				Value:    req.Email,
+				Path:     "/",
+				HttpOnly: true,
+				MaxAge:   3600,
+			})
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusForbidden)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":    "email_not_verified",
+				"message":  "Email not verified",
+				"redirect": "/verify",
+				"email":    req.Email,
+			})
+			return
 		default:
 			http.Error(w, "Login failed", http.StatusInternalServerError)
 		}
 		return
 	}
+
 	token, err := token.GenerateToken(req.Email)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
 	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
@@ -107,6 +149,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		MaxAge:   864000,
 	})
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"success":  "true",

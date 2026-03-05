@@ -118,7 +118,6 @@ func InitDB() error {
 	}
 	return nil
 }
-
 func RegDb(email, password, name string) error {
 	if len(name) < 1 {
 		name = "User"
@@ -138,12 +137,48 @@ func RegDb(email, password, name string) error {
 	}
 
 	var exists bool
+	var verified bool
+
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
 	if err != nil {
 		return err
 	}
+
 	if exists {
-		return errors.New("email exist")
+		err = db.QueryRow("SELECT verified FROM users WHERE email = $1", email).Scan(&verified)
+		if err != nil {
+			return err
+		}
+
+		if verified {
+			return errors.New("email exist")
+		}
+
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+
+		code := codemail.GenerateCode()
+		timeLiveCode := time.Now().Add(15 * time.Minute)
+
+		_, err = db.Exec(`
+			UPDATE users 
+			SET password = $1, name = $2, verification_code = $3, time_live_code = $4
+			WHERE email = $5`,
+			string(hashedPassword), name, code, timeLiveCode, email)
+		if err != nil {
+			return err
+		}
+
+		go func() {
+			err := codemail.SendVerificationCode(email, code)
+			if err != nil {
+				log.Printf("Failed to send email to %s: %v", email, err)
+			}
+		}()
+
+		return errors.New("user not verified")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -168,6 +203,7 @@ func RegDb(email, password, name string) error {
 			log.Printf("Failed to send email to %s: %v", email, err)
 		}
 	}()
+
 	return nil
 }
 func UpdateUserVerified(email string) error {
@@ -212,7 +248,6 @@ func VerifyCodeInSql(email string) (string, time.Time, bool, error) {
 
 	return storedCode, expires, verified, nil
 }
-
 func LoginDb(email, password string) error {
 	db, err := sql.Open("postgres", connStr)
 	if err != nil {
@@ -222,8 +257,18 @@ func LoginDb(email, password string) error {
 	defer db.Close()
 
 	var storedHash string
-	err = db.QueryRow("SELECT password FROM users WHERE email = $1", email).Scan(&storedHash)
+	var verified bool
+	var userID int
+
+	err = db.QueryRow(`
+		SELECT id, password, verified 
+		FROM users 
+		WHERE email = $1`, email).Scan(&userID, &storedHash, &verified)
+
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return errors.New("user not found")
+		}
 		return err
 	}
 
@@ -231,6 +276,30 @@ func LoginDb(email, password string) error {
 	if err != nil {
 		return errors.New("wrong password")
 	}
+
+	if !verified {
+		code := codemail.GenerateCode()
+		timeLiveCode := time.Now().Add(15 * time.Minute)
+
+		_, err = db.Exec(`
+			UPDATE users 
+			SET verification_code = $1, time_live_code = $2 
+			WHERE id = $3`,
+			code, timeLiveCode, userID)
+		if err != nil {
+			log.Printf("Failed to update verification code: %v", err)
+		}
+
+		go func() {
+			err := codemail.SendVerificationCode(email, code)
+			if err != nil {
+				log.Printf("Failed to send email to %s: %v", email, err)
+			}
+		}()
+
+		return errors.New("email not verified")
+	}
+
 	return nil
 }
 
@@ -242,15 +311,17 @@ type comment struct {
 }
 
 type profileStruct struct {
+	Id                      int       `json:"id"`
+	Password                string    `json:"password"`
 	Name                    string    `json:"name"`
 	Email                   string    `json:"email"`
-	IsCompany               bool      `json:"isCompany"`
 	Rating                  int       `json:"rating"`
 	TgUs                    string    `json:"tgUs"`
 	Recvizits               int64     `json:"recvivits"`
+	DateCreateprofileStruct string    `json:"dateCreateprofileStruct"`
+	CountSdelanihZakazov    int       `json:"countSdelanihZakazov:`
 	Cards                   []Cards   `json:"cards"`
 	Comments                []comment `json:"comments"`
-	DateCreateprofileStruct string    `json:"dateCreateprofileStruct"`
 }
 
 func GetInfProfile(email string) (profileStruct, error) {
@@ -263,7 +334,7 @@ func GetInfProfile(email string) (profileStruct, error) {
 	}
 	defer db.Close()
 
-	rowsUser, err := db.Query("SELECT id, name, isCompany, rating, tgUs, recvizits, dateCreateprofileStruct FROM users WHERE email = $1", email)
+	rowsUser, err := db.Query("SELECT id, password, name, rating, tgUs, recvizits, dateRegistr, countSdelanihZakazov FROM users WHERE email = $1", email)
 	if err != nil {
 		return profileStruct{}, err
 	}
@@ -272,7 +343,7 @@ func GetInfProfile(email string) (profileStruct, error) {
 	InfprofileStruct.Email = email
 	var userId int
 	for rowsUser.Next() {
-		err := rowsUser.Scan(&userId, &InfprofileStruct.Name, &InfprofileStruct.IsCompany, &InfprofileStruct.Rating, &InfprofileStruct.TgUs, &InfprofileStruct.Recvizits, &InfprofileStruct.DateCreateprofileStruct)
+		err := rowsUser.Scan(&userId, &InfprofileStruct.Password, &InfprofileStruct.Name, &InfprofileStruct.Rating, &InfprofileStruct.TgUs, &InfprofileStruct.Recvizits, &InfprofileStruct.DateCreateprofileStruct, &InfprofileStruct.CountSdelanihZakazov)
 		if err != nil {
 			return profileStruct{}, err
 		}

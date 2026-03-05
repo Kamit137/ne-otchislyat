@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="/static/register.css">
+    <link rel="stylesheet" href="/static/register.css">
     <title>Document</title>
 </head>
 
@@ -16,7 +16,7 @@
                     <form class="form-login" action="">
                         <h1 class="form-text">Вход</h1>
                         <input class="form-login__data" id="email-log" type="email" placeholder="Email">
-                        <input class="form-login__data" type="password" placeholder="Password">
+                        <input class="form-login__data" id="password-log" type="password" placeholder="Password">
                         <button type="submit" class="btn-login">Отправить</button>
                     </form>
                 </div>
@@ -37,7 +37,7 @@
                     <div class="text-animation-login">
                         <h1 class="text-prewie">С возвращением<br>
                             в сообщество</h1>
-                        <button id="login" class="btn">login</button>
+                        <button id="login" class="btn">Login</button>
                     </div>
                 </div>
             </div>
@@ -46,7 +46,7 @@
                     <div class="text-animation-register">
                         <h1 class="text-prewie">Станьте частью<br>
                             нашего сообщества</h1>
-                        <button id="register" class="btn" type="button">register</button>
+                        <button id="register" class="btn" type="button">Register</button>
 
                     </div>
                 </div>
@@ -72,7 +72,8 @@
             textAnimationRegister.classList.add("text-a-r")
             textAnimationLogin.classList.add("text-a-l")
             loginContainer.style.zIndex = "1";
-            registerContainer.style.zIndex = "20";
+            registerContainer.style.zIndex = "1";
+
 
 
         });
@@ -83,105 +84,123 @@
             fontLeft.classList.remove("left-panel-active");
             textAnimationRegister.classList.remove("text-a-r")
             textAnimationLogin.classList.remove("text-a-l")
-            loginContainer.style.zIndex = "20";
+            loginContainer.style.zIndex = "1";
             registerContainer.style.zIndex = "1";
+
+
 
 
         })
 
-        const formPostRegister = document.querySelector('.form-register');
-        formPostRegister.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const name = document.querySelector('#name')
-            const login = document.querySelector('#email-reg');
-            const password = document.querySelector('#password-reg');
+        // РЕГИСТРАЦИЯ
+const formPostRegister = document.querySelector('.form-register'); // 👈 ДОБАВИЛ ТОЧКУ!
+formPostRegister.addEventListener('submit', (event) => {
+    event.preventDefault();
+    
+    const name = document.querySelector('#name');
+    const login = document.querySelector('#email-reg');
+    const password = document.querySelector('#password-reg');
 
-            if (login.value.trim() === '') {
-                alert('Введите email');
-                return;
-            }
+    if (login.value.trim() === '') {
+        alert('Введите email');
+        return;
+    }
 
-            const registerData = {
-                name: name.value,
-                email: login.value,
-                password: password.value
-            };
+    const registerData = {
+        name: name.value,
+        email: login.value,
+        password: password.value
+    };
 
-            fetch('http://localhost:8080/reg', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(registerData)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Успех:', data);
-                    alert('Регистрация успешна!');
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка регистрации: ' + error.message);
-                });
-        });
+    fetch('http://localhost:8080/reg', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(registerData)
+    })
+    .then(response => {
+        // Пытаемся получить JSON в любом случае
+        return response.json().then(data => ({
+            status: response.status,
+            ok: response.ok,
+            body: data
+        }));
+    })
+    .then(({ status, ok, body }) => {
+        console.log('Ответ:', status, body);
+        
+        // Если есть редирект - переходим (даже при ошибках)
+        if (body.redirect) {
+            console.log('Переходим на:', body.redirect);
+            window.location.href = body.redirect;
+            return;
+        }
+        
+        // Если статус не 2xx, но нет редиректа - показываем ошибку
+        if (!ok) {
+            alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
+            return;
+        }
+        
+        // Успех
+        alert(body.message || 'Регистрация успешна!');
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка регистрации: ' + error.message);
+    });
+});
 
-        // Кнопка входа
-        // Кнопка входа
-        const formPostLogin = document.querySelector('.form-login');
-        formPostLogin.addEventListener('submit', (event) => {
-            event.preventDefault();
+// ВХОД
+const formPostLogin = document.querySelector('.form-login');
+formPostLogin.addEventListener('submit', (event) => {
+    event.preventDefault();
+    
+    const login = document.querySelector('#email-log');
+    const password = document.querySelector('#password-log');
 
-            const login = document.querySelector('#email-log');
-            const password = document.querySelector('#password-log');
+    const loginData = {
+        email: login.value,
+        password: password.value
+    };
 
-            const loginData = {
-                email: login.value,
-                password: password.value
-            };
-
-            fetch('http://localhost:8080/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(loginData)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => { throw new Error(text) });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Успех:', data);
-
-                    // ПЕРЕХОД ПО РЕДИРЕКТУ
-                    if (data.redirect) {
-                        console.log('Переходим на:', data.redirect);
-                        window.location.href = data.redirect; // ← ВОТ ЭТО ВАЖНО!
-                    } else {
-                        alert('Вход выполнен!');
-                    }
-                })
-                .then(data => {
-                    console.log('Успех:', data);
-                    if (data.redirect) {
-                        console.log('Переходим на:', data.redirect);
-                        window.location.href = data.redirect; // ← /a или /profile
-                    } else {
-                        alert('Вход выполнен!');
-                    }
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка входа: ' + error.message);
-                });
-        });
+    fetch('http://localhost:8080/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(loginData)
+    })
+    .then(response => {
+        return response.json().then(data => ({
+            status: response.status,
+            ok: response.ok,
+            body: data
+        }));
+    })
+    .then(({ status, ok, body }) => {
+        console.log('Ответ:', status, body);
+        
+        // РЕДИРЕКТ - ВАЖНО!
+        if (body.redirect) {
+            console.log('Переходим на:', body.redirect);
+            window.location.href = body.redirect;
+            return;
+        }
+        
+        if (!ok) {
+            alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
+            return;
+        }
+        
+        alert(body.message || 'Вход выполнен!');
+    })
+    .catch(error => {
+        console.error('Ошибка:', error);
+        alert('Ошибка входа: ' + error.message);
+    });
+});
     </script>
 </body>
 
