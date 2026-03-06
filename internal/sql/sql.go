@@ -456,7 +456,6 @@ func AddItem(tableName, email, name, title, discription string, price int, tags 
 	}
 	defer tx.Rollback()
 
-	// Вставляем элемент
 	var itemID int
 	query := fmt.Sprintf(`INSERT INTO %s (user_id, name, title, discription, price) VALUES ($1, $2, $3, $4, $5) RETURNING id`, tableName)
 	err = tx.QueryRow(query, userID, name, title, discription, price).Scan(&itemID)
@@ -465,7 +464,6 @@ func AddItem(tableName, email, name, title, discription string, price int, tags 
 	}
 
 	for _, tagName := range tags {
-		// Вставляем тег, если его нет
 		var tagID int
 		err = tx.QueryRow(`
 			INSERT INTO tags (name) VALUES ($1)

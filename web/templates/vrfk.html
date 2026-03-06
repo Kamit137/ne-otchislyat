@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/vrfk.css">
-    <title>Подтверждение email</title>
+    <title>Document</title>
 </head>
 <body>
     <div class="background">
@@ -25,7 +25,7 @@
         </div>
         <div class="main-section">
             <div class="menu-block">
-                <form class="form-code" id="verifyForm">  <!-- Добавил id -->
+                <form class="form-code" id="verifyForm">
                     <label for="code">Введите код верификации:</label>
                     <input id="code" type="text" maxlength="4" placeholder="****">
                     <button class="btn" type="submit">Отправить</button>
@@ -33,77 +33,40 @@
             </div>
         </div>
     </div>
-    
     <script>
+        const verifyForm = document.querySelector('.form-code');
         
-        function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) {
-        const cookieValue = parts.pop().split(';').shift();
-        console.log(`Cookie ${name}:`, cookieValue);
-        console.log(`Cookie ${name} length:`, cookieValue.length);
-        console.log(`Cookie ${name} chars:`, cookieValue.split('').map(c => c.charCodeAt(0)));
-        return cookieValue;
-    }
-    console.log(`Cookie ${name} not found`);
-    return null;
-}
+        verifyForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            
+            const codeInput = document.querySelector('#code');
 
-const verifyForm = document.getElementById('verifyForm');
+            if (codeInput.value.trim() === '') {
+                alert('Введите код');
+                return;
+            }
 
-verifyForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    
-    const codeInput = document.getElementById('code');
-    const email = getCookie('verify_email');
+            const verifyData = {
+                code: codeInput.value
+            };
 
-    console.log('All cookies:', document.cookie); 
-    
-    if (!email) {
-        alert('Email не найден. Пожалуйста, зарегистрируйтесь снова.');
-        window.location.href = '/';
-        return;
-    }
-
-    
-    const cleanEmail = email.trim();
-    console.log('Clean email:', cleanEmail);
-    
-    const verifyData = {
-        email: cleanEmail,
-        code: codeInput.value.trim()
-    };
-
-            console.log('Отправляем данные:', verifyData);
-
-            fetch('http://localhost:8080/api/verify', {  
+            fetch('http://localhost:8080/api/verify', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(verifyData)
             })
-            .then(response => {
-                return response.json().then(data => ({
-                    status: response.status,
-                    ok: response.ok,
-                    body: data
-                }));
-            })
+            .then(response => response.json().then(data => ({
+                status: response.status,
+                ok: response.ok,
+                body: data
+            })))
             .then(({ status, ok, body }) => {
-                console.log('Ответ сервера:', status, body);
-                
                 if (body.redirect) {
-                    console.log('Переходим на:', body.redirect);
                     window.location.href = body.redirect;
                 } else if (!ok) {
                     alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
-                } else {
-                    alert(body.message || 'Успешно!');
-                    if (body.redirect) {
-                        window.location.href = body.redirect;
-                    }
                 }
             })
             .catch(error => {

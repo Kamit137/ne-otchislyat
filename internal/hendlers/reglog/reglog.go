@@ -46,7 +46,7 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 				Name:     "verify_email",
 				Value:    req.Email,
 				Path:     "/",
-				HttpOnly: false, // Временно отключим HttpOnly для отладки
+				HttpOnly: false,
 				MaxAge:   3600,
 				SameSite: http.SameSiteLaxMode,
 			})
@@ -76,7 +76,7 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		Name:     "verify_email",
 		Value:    req.Email,
 		Path:     "/",
-		HttpOnly: false, // Временно отключим HttpOnly для отладки
+		HttpOnly: false,
 		MaxAge:   3600,
 		SameSite: http.SameSiteLaxMode,
 	})

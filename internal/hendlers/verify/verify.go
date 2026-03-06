@@ -2,7 +2,6 @@ package verify
 
 import (
 	"encoding/json"
-
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
 	"net/http"
@@ -18,10 +17,24 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.Execute(w, nil)
 }
+
 func ValidateCod(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("verify_email")
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"status":   "no_cookie",
+			"message":  "Email cookie not found",
+			"redirect": "/",
+		})
+		return
+	}
+
+	email := cookie.Value
+
 	var req struct {
-		Email string `json:"email"`
-		Code  string `json:"code"`
+		Code string `json:"code"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
@@ -30,14 +43,13 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	if req.Email == "" || req.Code == "" {
+	if email == "" || req.Code == "" {
 		http.Error(w, "Email and code are required", http.StatusBadRequest)
 		return
 	}
 
-	storedCode, timeLive, verify, err := sql.VerifyCodeInSql(req.Email)
+	storedCode, timeLive, verify, err := sql.VerifyCodeInSql(email)
 	if err != nil {
-
 		if err.Error() == "user not found" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
@@ -48,14 +60,12 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		}
-
 		http.Error(w, "Database error: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if verify {
-		// НЕ удаляем куку verify_email, она и не нужна уже
-		token, err := token.GenerateToken(req.Email)
+		token, err := token.GenerateToken(email)
 		if err != nil {
 			http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 			return
@@ -67,6 +77,14 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 			Path:     "/",
 			HttpOnly: true,
 			MaxAge:   864000,
+		})
+
+		http.SetCookie(w, &http.Cookie{
+			Name:     "verify_email",
+			Value:    "",
+			Path:     "/",
+			HttpOnly: true,
+			MaxAge:   -1,
 		})
 
 		w.Header().Set("Content-Type", "application/json")
@@ -100,20 +118,13 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = sql.UpdateUserVerified(req.Email)
+	err = sql.UpdateUserVerified(email)
 	if err != nil {
 		http.Error(w, "Ошибка активации: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	http.SetCookie(w, &http.Cookie{
-		Name:     "verify_email",
-		Value:    req.Email,
-		Path:     "/",
-		HttpOnly: true,
-	})
-
-	token, err := token.GenerateToken(req.Email)
+	token, err := token.GenerateToken(email)
 	if err != nil {
 		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
 		return
@@ -125,6 +136,14 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		HttpOnly: true,
 		MaxAge:   864000,
+	})
+
+	http.SetCookie(w, &http.Cookie{
+		Name:     "verify_email",
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		MaxAge:   -1,
 	})
 
 	w.Header().Set("Content-Type", "application/json")
