@@ -21,17 +21,17 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 func GiveLenta(w http.ResponseWriter, r *http.Request) {
 	var Zapros struct {
-		Page            int      `json:"page"`
-		TagFilters      []string `json:"tagFilters"`
-		ItemType        string   `json:"itemType"`
-		PriceUpDownFals string   `json:"priceUpDownFalse"`
+		Page            int    `json:"page"`
+		Tag             string `json:"tagFilter"`
+		ItemType        string `json:"itemType"`
+		PriceUpDownFals string `json:"priceUpDownFalse"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&Zapros)
 	if err != nil || Zapros.Page < 1 {
 		Zapros.Page = 1
 	}
 
-	cards, err := sql.GetCards(Zapros.Page, Zapros.TagFilters, Zapros.ItemType, Zapros.PriceUpDownFals)
+	cards, err := sql.GetVakans(Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFals)
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cards)

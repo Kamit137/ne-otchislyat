@@ -72,12 +72,11 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var NewCard struct {
-		TableName   string   `json:"tableName"`
-		Name        string   `json:"name"`
-		Title       string   `json:"title"`
-		Discription string   `json:"discription"`
-		Price       int      `json:"price"`
-		Tags        []string `json:"tags"`
+		Avtor       string `json:"name"`
+		Title       string `json:"title"`
+		Discription string `json:"discription"`
+		Price       int    `json:"price"`
+		Tag         string `json:"tags"`
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&NewCard); err != nil {
@@ -87,7 +86,7 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	err := sql.AddItem(NewCard.TableName, email, NewCard.Name, NewCard.Title, NewCard.Discription, NewCard.Price, NewCard.Tags)
+	err := sql.AddVakans(email, NewCard.Avtor, NewCard.Title, NewCard.Discription, NewCard.Tag, NewCard.Price)
 	if err != nil {
 		log.Println("AddItem error:", err) // ← добавить
 		http.Error(w, "Failed to add card: "+err.Error(), http.StatusBadRequest)
