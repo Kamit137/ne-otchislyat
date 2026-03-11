@@ -1,5 +1,6 @@
 package sql
 
+//
 import (
 	"database/sql"
 	"errors"
