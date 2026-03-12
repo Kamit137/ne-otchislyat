@@ -10,7 +10,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-var jwtKey = []byte("твой_секретный_ключ_никому_не_говори")
+var jwtKey = []byte("bibaaboba")
 
 type Claims struct {
 	Email string `json:"email"`

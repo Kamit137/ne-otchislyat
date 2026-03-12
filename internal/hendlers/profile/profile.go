@@ -45,10 +45,8 @@ func WriteInProfile(w http.ResponseWriter, r *http.Request) {
 	type UpdateData struct {
 		Name      string `json:"name"`
 		Password  string `json:"password"`
-		IsCompany bool   `json:"isCompany"`
-		Rating    int    `json:"rating"`
 		TgUs      string `json:"tgUs"`
-		Recvizits int64  `json:"recvizits"`
+		Recvizits int    `json:"recvizits"`
 	}
 	var updateData UpdateData
 	if err := json.NewDecoder(r.Body).Decode(&updateData); err != nil {
@@ -56,7 +54,7 @@ func WriteInProfile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	err := sql.UpdateProf(updateData.Name, updateData.Password, updateData.IsCompany, updateData.Rating, updateData.TgUs, updateData.Recvizits, email)
+	err := sql.UpdateProf(updateData.Name, updateData.Password, updateData.TgUs, updateData.Recvizits, email)
 	if err != nil {
 		http.Error(w, "Invalid write infProf", http.StatusBadRequest)
 	}

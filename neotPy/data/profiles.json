@@ -1,0 +1,55 @@
+{
+  "type": {
+    "cases": [
+      {
+        "Title": "Премиум дизайн сайта",
+        "Description": "Разработка современного сайта под ключ",
+        "Price": 15000,
+        "DateCreateCase": "2024-01-15"
+      },
+      {
+        "Title": "SEO продвижение",
+        "Description": "Комплексное SEO продвижение вашего сайта",
+        "Price": 25000,
+        "DateCreateCase": "2024-02-01"
+      }
+    ],
+    "comment": []
+  },
+  "profile": [
+    {
+      "Name": "Иван Петров",
+      "Email": "ivan@example.com",
+      "Rating": 5,
+      "TgUs": "@ivan_designer",
+      "Cases": [
+        {
+          "Title": "Премиум дизайн сайта",
+          "Description": "Разработка современного сайта под ключ",
+          "Price": 15000,
+          "DateCreateCase": "2024-01-15"
+        }
+      ],
+      "Comments": [],
+      "DateCreateProfile": "2024-01-01"
+    },
+    {
+      "Name": "SEO-студия",
+      "Email": "info@seostudio.ru",
+      "IsCompany": true,
+      "Rating": 4,
+      "TgUs": "@seo_studio",
+      "Recvizits": 9876543210,
+      "Cases": [
+        {
+          "Title": "SEO продвижение",
+          "Description": "Комплексное SEO продвижение вашего сайта",
+          "Price": 25000,
+          "DateCreateCase": "2024-02-01"
+        }
+      ],
+      "Comments": [],
+      "DateCreateProfile": "2024-01-10"
+    }
+  ]
+}
