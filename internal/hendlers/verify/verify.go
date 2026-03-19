@@ -2,6 +2,7 @@ package verify
 
 import (
 	"encoding/json"
+	"log"
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
 	"net/http"
@@ -15,7 +16,9 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err = tmpl.Execute(w, nil); err != nil {
+		log.Fatal("Ошибка загрузки html lenta", err)
+	}
 }
 
 func ValidateCod(w http.ResponseWriter, r *http.Request) {

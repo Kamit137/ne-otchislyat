@@ -3,6 +3,7 @@ package reglog
 import (
 	"encoding/json"
 
+	"log"
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
 	"net/http"
@@ -21,11 +22,12 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка шаблона ", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err = tmpl.Execute(w, nil); err != nil {
+		log.Fatal("Ошибка загрузки html lenta", err)
+	}
 }
 func Reg(w http.ResponseWriter, r *http.Request) {
 	var req registr
-
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		http.Error(w, "Invalid JSON registration", http.StatusBadRequest)
 		return
@@ -61,9 +63,8 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 
 			return
 		} else {
-			http.Error(w, "Registration failed", http.StatusInternalServerError)
 			w.Header().Set("Content-Type", "application/json")
-			w.WriteHeader(http.StatusCreated)
+			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{
 				"message": "Fatal Error registration.",
 				"email":   req.Email,

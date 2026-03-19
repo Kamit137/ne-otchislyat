@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"ne-otchislyat/internal/sql"
 	"net/http"
+	"strconv"
 
 	"github.com/google/uuid"
 )
@@ -34,12 +35,33 @@ type PaymentRequest struct {
 	Metadata     map[string]string `json:"metadata"`
 }
 
+func jsonError(w http.ResponseWriter, msg string, code int) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	json.NewEncoder(w).Encode(map[string]string{"error": msg})
+}
+
 func HandleDeposit(w http.ResponseWriter, r *http.Request) {
-	email := r.Context().Value("email").(string)
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
 	var req struct {
 		Amount float64 `json:"amount"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Неверный формат запроса", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
+	if req.Amount <= 0 {
+		jsonError(w, "Сумма должна быть больше нуля", http.StatusBadRequest)
+		return
+	}
+
 	payment := PaymentRequest{
 		Amount: Amount{
 			Value:    fmt.Sprintf("%.2f", req.Amount),
@@ -56,25 +78,48 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 		},
 	}
 
-	jsonData, _ := json.Marshal(payment)
+	jsonData, err := json.Marshal(payment)
+	if err != nil {
+		jsonError(w, "Ошибка формирования запроса", http.StatusInternalServerError)
+		return
+	}
 
-	// Отправляем в ЮKassa
 	client := &http.Client{}
-	request, _ := http.NewRequest("POST", apiURL+"/payments", bytes.NewBuffer(jsonData))
+	request, err := http.NewRequest("POST", apiURL+"/payments", bytes.NewBuffer(jsonData))
+	if err != nil {
+		jsonError(w, "Ошибка создания запроса к ЮKassa", http.StatusInternalServerError)
+		return
+	}
 	request.SetBasicAuth(shopID, secretKey)
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("Idempotence-Key", uuid.New().String())
 
-	resp, _ := client.Do(request)
+	resp, err := client.Do(request)
+	if err != nil {
+		jsonError(w, "Ошибка соединения с ЮKassa", http.StatusBadGateway)
+		return
+	}
 	defer resp.Body.Close()
 
 	var result map[string]interface{}
-	json.NewDecoder(resp.Body).Decode(&result)
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		jsonError(w, "Ошибка ответа от ЮKassa", http.StatusBadGateway)
+		return
+	}
 
-	// Отдаем ссылку на оплату
-	json.NewEncoder(w).Encode(map[string]string{
-		"url": result["confirmation"].(map[string]interface{})["confirmation_url"].(string),
-	})
+	confirmation, ok := result["confirmation"].(map[string]interface{})
+	if !ok {
+		jsonError(w, "Неверный ответ от ЮKassa: нет confirmation", http.StatusBadGateway)
+		return
+	}
+	confirmURL, ok := confirmation["confirmation_url"].(string)
+	if !ok {
+		jsonError(w, "Неверный ответ от ЮKassa: нет confirmation_url", http.StatusBadGateway)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{"url": confirmURL})
 }
 
 // ЮKassa присылает подтверждение оплаты
@@ -91,19 +136,28 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 		} `json:"object"`
 	}
 
-	json.NewDecoder(r.Body).Decode(&notification)
+	if err := json.NewDecoder(r.Body).Decode(&notification); err != nil {
+		jsonError(w, "Неверный формат уведомления", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 
-	// платеж прошел успешно
 	if notification.Event == "payment.succeeded" {
 		email := notification.Object.Metadata["email"]
+		if email == "" {
+			jsonError(w, "Email не найден в метаданных", http.StatusBadRequest)
+			return
+		}
 
-		var rubles int64
-		fmt.Sscanf(notification.Object.Amount.Value, "%f", &rubles)
-		rubles *= 100
-
-		err := sql.DepositSql(rubles, email)
+		rubles, err := strconv.ParseFloat(notification.Object.Amount.Value, 64)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			jsonError(w, "Ошибка парсинга суммы: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		kopecks := int64(rubles * 100)
+
+		if err := sql.DepositSql(kopecks, email); err != nil {
+			jsonError(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 	}
@@ -112,14 +166,19 @@ func HandleWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetBalance(w http.ResponseWriter, r *http.Request) {
-	email := r.Context().Value("email").(string)
-
-	balance, frozen, err := sql.GetUserBalance(email)
-	if err != nil {
-		http.Error(w, "Ошибка получения баланса", http.StatusInternalServerError)
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
+	balance, frozen, err := sql.GetUserBalance(email)
+	if err != nil {
+		jsonError(w, "Ошибка получения баланса", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"balance": float64(balance) / 100,
 		"frozen":  float64(frozen) / 100,
@@ -127,18 +186,28 @@ func GetBalance(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateOrder(w http.ResponseWriter, r *http.Request) {
-	email := r.Context().Value("email").(string)
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		jsonError(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
 
 	var req struct {
 		VakansID int `json:"vakans_id"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Неверный формат запроса", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
+
 	orderID, err := sql.CreateOrder(req.VakansID, email)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"order_id": orderID,
 		"message":  "Заказ создан, деньги заморожены",
@@ -149,32 +218,39 @@ func CompleteOrder(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		OrderID int64 `json:"order_id"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Неверный формат запроса", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 
-	err := sql.CompleteOrder(req.OrderID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := sql.CompleteOrder(req.OrderID); err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Заказ выполнен, деньги переведены",
 	})
 }
 
-// sdf
 func CancelOrder(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		OrderID int64 `json:"order_id"`
 	}
-	json.NewDecoder(r.Body).Decode(&req)
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		jsonError(w, "Неверный формат запроса", http.StatusBadRequest)
+		return
+	}
+	defer r.Body.Close()
 
-	err := sql.CancelOrder(req.OrderID)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+	if err := sql.CancelOrder(req.OrderID); err != nil {
+		jsonError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"message": "Заказ отменен, деньги возвращены",
 	})

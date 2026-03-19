@@ -15,7 +15,9 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err = tmpl.Execute(w, nil); err != nil {
+		log.Fatal("Ошибка загрузки html lenta", err)
+	}
 }
 
 func ProfilePrint(w http.ResponseWriter, r *http.Request) {
@@ -33,7 +35,11 @@ func ProfilePrint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(prof)
+	err = json.NewEncoder(w).Encode(prof)
+	if err != nil {
+		log.Fatal("ошибка отправки json в профильпринт")
+	}
+
 }
 
 func WriteInProfile(w http.ResponseWriter, r *http.Request) {
@@ -58,9 +64,12 @@ func WriteInProfile(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Invalid write infProf", http.StatusBadRequest)
 	}
-	json.NewEncoder(w).Encode(map[string]string{
+	err = json.NewEncoder(w).Encode(map[string]string{
 		"message": "Profile updated successfully",
 	})
+	if err != nil {
+		log.Fatal("Ошибка обновления инфы в профиль", err)
+	}
 }
 func AddCard(w http.ResponseWriter, r *http.Request) {
 	email, ok := r.Context().Value("email").(string)
@@ -86,7 +95,7 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 
 	err := sql.AddVakans(email, NewCard.Avtor, NewCard.Title, NewCard.Discription, NewCard.Tag, NewCard.Price)
 	if err != nil {
-		log.Println("AddItem error:", err) // ← добавить
+		log.Println("AddItem error:", err)
 		http.Error(w, "Failed to add card: "+err.Error(), http.StatusBadRequest)
 		return
 	}

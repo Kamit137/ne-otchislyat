@@ -16,7 +16,10 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
 		return
 	}
-	tmpl.Execute(w, nil)
+	if err = tmpl.Execute(w, nil); err != nil {
+		log.Fatal("Ошибка загрузки html lenta", err)
+	}
+
 }
 
 func GiveLenta(w http.ResponseWriter, r *http.Request) {
@@ -32,7 +35,9 @@ func GiveLenta(w http.ResponseWriter, r *http.Request) {
 	}
 
 	cards, err := sql.GetVakans(Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFals)
-
+	if err != nil {
+		log.Fatal("Ошибка загрузки ленты", err)
+	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cards)
 }

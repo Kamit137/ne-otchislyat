@@ -42,6 +42,7 @@ func InitDB() error {
 		rating INT DEFAULT 0,
 		tgUs VARCHAR(255) DEFAULT '',
 		balance BIGINT NOT NULL DEFAULT 0 CHECK (balance >= 0),
+		recvizits BIGING NOT NULL DEFAULT 0,
 		frozen_balance BIGINT NOT NULL DEFAULT 0 CHECK (frozen_balance >= 0),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		countSdelanihZakazov INT DEFAULT 0
@@ -131,7 +132,7 @@ func RegDb(email, password, name string) error {
 
 	err := DB.QueryRow("SELECT EXISTS(SELECT 1 FROM users WHERE email = $1)", email).Scan(&exists)
 	if err != nil {
-		log.Fatal("Fail open Db", err)
+		log.Fatal("Fail open Db при регистрации ", err)
 		return err
 	}
 
@@ -617,4 +618,22 @@ func DepositSql(rubles int64, email string) error {
 	}
 	log.Printf("User %s deposited %d kopecks", email, rubles)
 	return nil
+}
+
+func GetFavorite(email string) ([]Vakans, error) {
+	user_id := DB.QueryRow("SELECT id FROM users WHERE emeail=$1", email)
+	vakans_id, err := DB.Query("SELECT vakans_id FROM favorites WHERE user_id=$1", user_id)
+	if err != nil {
+		return []Vakans{}, err
+	}
+	var vakansList []Vakans
+	for vakans_id.Next() {
+		var v Vakans
+		err := vakans_id.Scan(&v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
+		if err != nil {
+			return []Vakans{}, err
+		}
+		vakansList = append(vakansList, v)
+	}
+	return vakansList, nil
 }

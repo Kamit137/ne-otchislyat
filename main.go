@@ -1,10 +1,12 @@
 package main
 
 import (
+	"ne-otchislyat/internal/hendlers/favorite"
 	"ne-otchislyat/internal/hendlers/lenta"
 	"ne-otchislyat/internal/hendlers/profile"
 	"ne-otchislyat/internal/hendlers/reglog"
 	"ne-otchislyat/internal/hendlers/verify"
+
 	"ne-otchislyat/internal/pay"
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
@@ -36,6 +38,10 @@ func main() {
 	http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))
 	http.HandleFunc("/api/order/complete", token.AuthMiddleware(pay.CompleteOrder))
 	http.HandleFunc("/api/order/cancel", token.AuthMiddleware(pay.CancelOrder))
+
+	http.HandleFunc("/favorite", token.AuthMiddleware(favorite.IndexPage))
+	http.HandleFunc("/api/printfavorite", token.AuthMiddleware(favorite.GetCards))
+	http.HandleFunc("/api/addfavorite", token.AuthMiddleware(favorite.AddCard))
 
 	http.HandleFunc("/logout", reglog.Logout)
 
