@@ -29,11 +29,15 @@ func GetCards(w http.ResponseWriter, r *http.Request) {
 	cards, err := sql.GetFavorite(email)
 	if err != nil {
 		log.Println("Ошибка favorites ", err)
+		http.Error(w, "Failed GetCards", http.StatusInternalServerError)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(cards)
 	if err != nil {
 		log.Fatal("Ошибка отправки json в getcards favorite", err)
+		http.Error(w, "Failed GetCards", http.StatusInternalServerError)
+		return
 	}
 }
 
@@ -43,5 +47,15 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-
+	id_card := r.FormValue("id_card")
+	if id_card == "" {
+		http.Error(w, "id_card is required", http.StatusBadRequest)
+		return
+	}
+	err := sql.AddFavorite(email, id_card)
+	if err != nil {
+		log.Println("ошибка добавления в избранное", err)
+		http.Error(w, "Failed to add favorite", http.StatusInternalServerError)
+		return
+	}
 }
