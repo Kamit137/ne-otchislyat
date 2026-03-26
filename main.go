@@ -20,13 +20,14 @@ func main() {
 		log.Fatal("Ошибка инициализации БД:", err)
 	}
 
-	http.HandleFunc("/", reglog.IndexPage)
+	http.HandleFunc("/registration", reglog.IndexPage)
+
 	http.HandleFunc("/reg", reglog.Reg)
 	http.HandleFunc("/login", reglog.Login)
 	http.HandleFunc("/verify", verify.IndexPage)
 	http.HandleFunc("/api/verify", verify.ValidateCod)
-	http.HandleFunc("/lenta", token.AuthMiddleware(lenta.IndexPage))
-	http.HandleFunc("/api/lenta", token.AuthMiddleware(lenta.GiveLenta))
+	http.HandleFunc("/", lenta.IndexPage)
+	http.HandleFunc("/api/lenta", lenta.GiveLenta)
 
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))

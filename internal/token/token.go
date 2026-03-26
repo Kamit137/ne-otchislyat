@@ -2,6 +2,7 @@ package token
 
 import (
 	"context"
+
 	"errors"
 	"net/http"
 
@@ -44,7 +45,7 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			http.Error(w, "No token", http.StatusUnauthorized)
+			http.Redirect(w, r, "/registration", http.StatusFound)
 			return
 		}
 

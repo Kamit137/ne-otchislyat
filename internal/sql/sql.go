@@ -42,7 +42,7 @@ func InitDB() error {
 		rating INT DEFAULT 0,
 		tgUs VARCHAR(255) DEFAULT '',
 		balance BIGINT NOT NULL DEFAULT 0 CHECK (balance >= 0),
-		recvizits BIGING NOT NULL DEFAULT 0,
+		recvizits BIGINT NOT NULL DEFAULT 0,
 		frozen_balance BIGINT NOT NULL DEFAULT 0 CHECK (frozen_balance >= 0),
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		countSdelanihZakazov INT DEFAULT 0

@@ -2,7 +2,7 @@
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    
 }
 
 .btn {
@@ -20,6 +20,7 @@
 
 
 .background {
+    font-family: 'Roboto', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -230,4 +231,9 @@
 
 .text-animation-login.text-a-l {
     transform: translateX(0);
+}
+.container-logo h4{
+    color: aliceblue;
+    font-family: 'Playwrite NZ Basic', cursive;
+
 }

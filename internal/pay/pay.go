@@ -69,7 +69,7 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 		},
 		Confirmation: Confirmation{
 			Type:      "redirect",
-			ReturnURL: "http://localhost:8080/lenta",
+			ReturnURL: "http://localhost:8080/",
 		},
 		Capture:     true,
 		Description: "Пополнение баланса",

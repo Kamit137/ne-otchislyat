@@ -29,20 +29,36 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 func Reg(w http.ResponseWriter, r *http.Request) {
 	var req registr
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON registration", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error":   "invalid_json",
+			"message": "Invalid JSON registration",
+		})
 		return
 	}
 	defer r.Body.Close()
 
 	if req.Email == "" || req.Password == "" {
-		http.Error(w, "Email and password are required", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error":   "missing_fields",
+			"message": "Email and password are required",
+		})
 		return
 	}
 
 	err := sql.RegDb(req.Email, req.Password, req.Name)
 	if err != nil {
 		if err.Error() == "email exist" {
-			http.Error(w, "Email already exists", http.StatusConflict)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusConflict)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "email_exists",
+				"message": "Email already exists",
+			})
+			return
 		} else if err.Error() == "user not verified" {
 			http.SetCookie(w, &http.Cookie{
 				Name:     "verify_email",
@@ -60,19 +76,18 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 				"redirect": "/verify",
 				"email":    req.Email,
 			})
-
 			return
 		} else {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "registration_failed",
 				"message": "Fatal Error registration.",
-				"email":   req.Email,
-				"status":  "error registration",
 			})
+			return
 		}
-		return
 	}
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "verify_email",
 		Value:    req.Email,
@@ -90,19 +105,28 @@ func Reg(w http.ResponseWriter, r *http.Request) {
 		"email":    req.Email,
 		"status":   "verification_needed",
 	})
-
 }
 func Login(w http.ResponseWriter, r *http.Request) {
 	var req registr
 
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error":   "invalid_json",
+			"message": "Invalid JSON",
+		})
 		return
 	}
 	defer r.Body.Close()
 
 	if req.Email == "" || req.Password == "" {
-		http.Error(w, "Email and password are required", http.StatusBadRequest)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error":   "missing_fields",
+			"message": "Email and password are required",
+		})
 		return
 	}
 
@@ -110,9 +134,21 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.Error() {
 		case "user not found":
-			http.Error(w, "User not found", http.StatusNotFound)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "user_not_found",
+				"message": "User not found",
+			})
+			return
 		case "wrong password":
-			http.Error(w, "Wrong password", http.StatusUnauthorized)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusUnauthorized)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "wrong_password",
+				"message": "Wrong password",
+			})
+			return
 		case "email not verified":
 			http.SetCookie(w, &http.Cookie{
 				Name:     "verify_email",
@@ -132,14 +168,24 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			})
 			return
 		default:
-			http.Error(w, "Login failed", http.StatusInternalServerError)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error":   "login_failed",
+				"message": "Login failed",
+			})
+			return
 		}
-		return
 	}
 
 	token, err := token.GenerateToken(req.Email)
 	if err != nil {
-		http.Error(w, "Failed to generate token", http.StatusInternalServerError)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{
+			"error":   "token_failed",
+			"message": "Failed to generate token",
+		})
 		return
 	}
 
@@ -152,14 +198,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	})
 
 	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]string{
 		"success":  "true",
 		"message":  "Login successful",
-		"redirect": "/lenta",
+		"redirect": "/",
 		"email":    req.Email,
 	})
 }
-
 func Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",

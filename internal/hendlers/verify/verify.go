@@ -29,7 +29,7 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":   "no_cookie",
 			"message":  "Email cookie not found",
-			"redirect": "/",
+			"redirect": "/registration",
 		})
 		return
 	}
@@ -59,7 +59,7 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 			json.NewEncoder(w).Encode(map[string]string{
 				"status":   "user_not_found",
 				"message":  "Email not found. Please register again.",
-				"redirect": "/",
+				"redirect": "/registration",
 			})
 			return
 		}
@@ -95,7 +95,7 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":   "already_verified",
 			"message":  "Email already verified",
-			"redirect": "/lenta",
+			"redirect": "/",
 		})
 		return
 	}
@@ -105,7 +105,7 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusGone)
 		json.NewEncoder(w).Encode(map[string]string{
 			"status":   "code_expired",
-			"redirect": "/reg",
+			"redirect": "/registration",
 			"message":  "Verification code expired",
 		})
 		return
@@ -154,6 +154,6 @@ func ValidateCod(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"status":   "success",
 		"message":  "Email verified successfully",
-		"redirect": "/lenta",
+		"redirect": "/",
 	})
 }
