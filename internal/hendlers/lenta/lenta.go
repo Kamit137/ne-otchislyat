@@ -24,19 +24,22 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 
 func GiveLenta(w http.ResponseWriter, r *http.Request) {
 	var Zapros struct {
-		Page            int    `json:"page"`
-		Tag             string `json:"tagFilter"`
-		ItemType        string `json:"itemType"`
-		PriceUpDownFals string `json:"priceUpDownFalse"`
+		Page             int    `json:"page"`
+		Tag              string `json:"tag"`
+		PriceUpDownFalse string `json:"priceUpDownFalse"`
 	}
 	err := json.NewDecoder(r.Body).Decode(&Zapros)
 	if err != nil || Zapros.Page < 1 {
 		Zapros.Page = 1
 	}
 
-	cards, err := sql.GetVakans(Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFals)
+	cards, err := sql.GetVakans(Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFalse)
 	if err != nil {
-		log.Fatal("Ошибка загрузки ленты", err)
+		log.Printf("Ошибка загрузки ленты: %v", err)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to load vacancies"})
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cards)

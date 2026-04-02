@@ -5,6 +5,7 @@ import (
 	"log"
 	"ne-otchislyat/internal/sql"
 	"net/http"
+	"strconv"
 	"text/template"
 )
 
@@ -79,7 +80,6 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var NewCard struct {
-		Avtor       string `json:"name"`
 		Title       string `json:"title"`
 		Discription string `json:"discription"`
 		Price       int    `json:"price"`
@@ -93,13 +93,17 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 
-	err := sql.AddVakans(email, NewCard.Avtor, NewCard.Title, NewCard.Discription, NewCard.Tag, NewCard.Price)
-	if err != nil {
+	err, avtor, userID := sql.AddVakans(email, NewCard.Title, NewCard.Discription, NewCard.Tag, NewCard.Price)
+	if err != nil || avtor == "" || userID == 0 {
 		log.Println("AddItem error:", err)
 		http.Error(w, "Failed to add card: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Card added successfully",
+		"id":          strconv.Itoa(userID),
+		"avtor":       avtor,
+		"title":       NewCard.Title,
+		"discription": NewCard.Discription,
+		"price":       strconv.Itoa(NewCard.Price),
 	})
 }

@@ -42,7 +42,7 @@ func main() {
 
 	http.HandleFunc("/favorite", token.AuthMiddleware(favorite.IndexPage))
 	http.HandleFunc("/api/printfavorite", token.AuthMiddleware(favorite.GetCards))
-	http.HandleFunc("/api/addfavorite", token.AuthMiddleware(favorite.AddCard))
+	http.HandleFunc("/api/favorites", token.AuthMiddleware(favorite.AddCard))
 
 	http.HandleFunc("/logout", reglog.Logout)
 

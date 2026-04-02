@@ -42,20 +42,35 @@ func GetCards(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddCard(w http.ResponseWriter, r *http.Request) {
+	log.Println("✅ Вызван AddCard")
 	email, ok := r.Context().Value("email").(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
-	id_card := r.FormValue("id_card")
-	if id_card == "" {
-		http.Error(w, "id_card is required", http.StatusBadRequest)
+	var req struct {
+		ID int `json:"id"`
+	}
+
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
-	err := sql.AddFavorite(email, id_card)
+
+	if req.ID == 0 {
+		http.Error(w, "ID is required", http.StatusBadRequest)
+		return
+	}
+	id_card := req.ID
+
+	err := sql.Like(email, id_card)
 	if err != nil {
 		log.Println("ошибка добавления в избранное", err)
 		http.Error(w, "Failed to add favorite", http.StatusInternalServerError)
+
 		return
 	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{"status": "ok"})
 }

@@ -1,44 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/vrfk.css">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
     <title>Document</title>
 </head>
+
 <body>
-    <div class="background">
-        <div class="section-conatiner__list">
-            <div class="container-logo">
-                <h4>ne-otchislyat.ru</h4>
-            </div>
-            <div class="container-list">
-                <div class="header-list">
-                    <span>На главную</span>
-                    <hr>
-                </div>
-                <div class="header-list">
-                    <span>Выход</span>
-                    <hr>
-                </div>
-            </div>
+
+    <div class="section-conatiner__list">
+        <div class="container-logo">
+            <h4>ne-otchislyat.ru</h4>
         </div>
-        <div class="main-section">
-            <div class="menu-block">
-                <form class="form-code" id="verifyForm">
-                    <label for="code">Введите код верификации:</label>
-                    <input id="code" type="text" maxlength="4" placeholder="****">
-                    <button class="btn" type="submit">Отправить</button>
-                </form>
+        <div class="container-list">
+            <div id="header-list-home" class="header-list">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#3071E7">
+                    <path
+                        d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+
+                </svg>
+                <span>На главную</span>
+
+            </div>
+            <div id="header-list-back" class="header-list">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#3071E7">
+                    <path d="m313-440 224 224-57 56-320-320 320-320 57 56-224 224h487v80H313Z" />
+                </svg>
+                <span>Назад</span>
+
             </div>
         </div>
     </div>
+    <div class="main-section">
+        <div class="menu-block">
+            <form class="form-code" id="verifyForm">
+                <label for="code">Введите код верификации:</label>
+                <input id="code" type="text" maxlength="4" placeholder="****">
+                <button class="btn" type="submit">Отправить</button>
+            </form>
+        </div>
+    </div>
+
     <script>
         const verifyForm = document.querySelector('.form-code');
-        
+
         verifyForm.addEventListener('submit', (event) => {
             event.preventDefault();
-            
+
             const codeInput = document.querySelector('#code');
 
             if (codeInput.value.trim() === '') {
@@ -57,23 +72,39 @@
                 },
                 body: JSON.stringify(verifyData)
             })
-            .then(response => response.json().then(data => ({
-                status: response.status,
-                ok: response.ok,
-                body: data
-            })))
-            .then(({ status, ok, body }) => {
-                if (body.redirect) {
-                    window.location.href = body.redirect;
-                } else if (!ok) {
-                    alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка:', error);
-                alert('Ошибка: ' + error.message);
-            });
+                .then(response => response.json().then(data => ({
+                    status: response.status,
+                    ok: response.ok,
+                    body: data
+                })))
+                .then(({ status, ok, body }) => {
+                    if (body.redirect) {
+                        window.location.href = body.redirect;
+                    } else if (!ok) {
+                        alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
+                    }
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка: ' + error.message);
+                });
         });
+        const LogoBtn = document.querySelector('.container-logo')
+        LogoBtn.addEventListener('click', () => {
+            location.assign("http://127.0.0.1:5500/src/lenta.html");
+
+        })
+        const TextBtn = document.querySelector('#header-list-home')
+        TextBtn.addEventListener('click', () => {
+            location.assign("http://127.0.0.1:5500/src/lenta.html");
+
+        })
+        const TextBtnBack = document.querySelector('#header-list-back')
+        TextBtnBack.addEventListener('click', () => {
+            location.assign("http://127.0.0.1:5500/src/register.html");
+
+        })
     </script>
 </body>
+
 </html>

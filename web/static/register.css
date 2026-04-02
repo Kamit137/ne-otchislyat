@@ -2,7 +2,20 @@
     box-sizing: border-box;
     margin: 0px;
     padding: 0px;
-    
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+:root {
+    --bg-dark: #080C25;
+    /* Самый темный */
+    --panel-bg: #161E35;
+    /* Панели и карточки */
+    --accent-blue: #3071E7;
+    /* Яркий синий для кнопок */
+    --text-main: #A6B2EC;
+    /* Светло-голубой текст */
+    --border-color: #293659;
+    /* Цвет границ */
 }
 
 .btn {
@@ -16,17 +29,86 @@
 }
 
 
+html {
+    height: 100%;
+    width: 100%;
+
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    background-color: #16162F;
+    /* Убирает скролл */
 
 
+    font-family: 'Roboto', sans-serif;
+}
+
+.section-conatiner__list {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    background-color: var(--panel-bg);
+    /* Четкая граница */
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
+    /* Тень, чтобы меню "приподнялось" */
+
+
+
+    color: aliceblue;
+
+}
+
+.container-list {
+    display: flex;
+}
+
+.header-list {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    margin-top: 25px;
+    margin-right: 25px;
+    font-size: 14px;
+    cursor: pointer;
+
+}
+
+.container-logo {
+    display: flex;
+    align-items: center;
+
+    font-size: 50px;
+    margin-left: 50px;
+    cursor: pointer;
+    justify-content: center;
+}
+
+
+
+
+
+.name-block-br {
+    display: flex;
+    flex-direction: column;
+}
+
+.name-line {
+    background-color: rgb(64, 255, 26);
+    height: 1px;
+    width: 100%;
+    border: none;
+}
 
 .background {
-    font-family: 'Roboto', sans-serif;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100vh;
-    width: 100%;
-    background-color: #16162F;
 }
 
 .menu-block {
@@ -158,7 +240,7 @@
     justify-content: center;
     align-items: center;
     transition: transform 0.6s ease-in-out;
-    
+
     border-radius: 50px;
     overflow: hidden;
     transform: translateX(0);
@@ -208,7 +290,7 @@
     align-items: center;
     transition: transform 0.6s ease-in-out;
     overflow: hidden;
-    
+
     border-radius: 50px;
     transform: translateX(100%);
     z-index: 1;
@@ -232,8 +314,138 @@
 .text-animation-login.text-a-l {
     transform: translateX(0);
 }
-.container-logo h4{
-    color: aliceblue;
+
+.container-logo h4 {
+    color: var(--text-white);
     font-family: 'Playwrite NZ Basic', cursive;
 
+    margin-bottom: 25px;
+}
+
+:root {
+
+    /* Глубокий темный */
+    --bg-card: #161E35;
+    /* Панели форм */
+    --stroke: #293659;
+    /* Границы */
+    --accent: #3071E7;
+    /* Яркий синий */
+    --text-dim: #A6B2EC;
+    /* Вторичный текст */
+    --text-white: #ffffff;
+    /* Заголовки */
+}
+
+
+
+/* --- Левое меню (как на главной) --- */
+
+
+
+
+.header-list span {
+    color: var(--text-white);
+    cursor: pointer;
+
+}
+
+
+
+/* --- Основной фон --- */
+
+
+/* --- Контейнер форм --- */
+.menu-block {
+
+    background-color: var(--bg-card);
+    position: relative;
+    display: flex;
+    height: 536px;
+    width: 784px;
+    border-radius: 50px;
+    box-shadow: -21px 10px 19px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* --- Поля ввода --- */
+.form-login__data,
+.form-register__data {
+    width: 100%;
+    background: var(--bg-main);
+    border: 1px solid var(--stroke);
+    border-radius: 12px;
+    padding: 12px 15px;
+    color: var(--text-white);
+    margin-bottom: 15px;
+    outline: none;
+    transition: 0.3s;
+}
+
+.form-login__data:focus,
+.form-register__data:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(48, 113, 231, 0.2);
+}
+
+/* --- Кнопки внутри форм --- */
+.btn-login,
+.btn-register {
+    width: 100%;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-login:hover,
+.btn-register:hover {
+    background-color: #4682f4;
+    box-shadow: 0 0 20px rgba(48, 113, 231, 0.4);
+}
+
+/* --- Анимационные панели (Front-containers) --- */
+.container-animation-left,
+.container-animation-right {
+    background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.text-prewie {
+    color: white;
+    font-size: 28px;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+/* --- Кнопки переключения (Login/Register) --- */
+.btn {
+    background: transparent;
+    border: 2px solid white;
+    color: white;
+    padding: 10px 30px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn:hover {
+    background: white;
+    color: var(--accent);
+}
+
+/* Заголовки форм */
+.form-text {
+    color: var(--text-white);
+    margin-bottom: 25px;
+    font-size: 32px;
 }

@@ -192,7 +192,7 @@ body {
 .lxl-text {
     display: flex;
     margin-right: 25px;
-    color:#fff;
+    color: #fff;
     font-size: 25px;
     line-height: 0.9;
 }
@@ -379,7 +379,7 @@ h5 {
     cursor: pointer;
 }
 
-.teg-input:checked + .teg-button {
+.teg-input:checked+.teg-button {
     border-left: 4px solid var(--accent-blue);
     background: rgba(48, 113, 231, 0.1);
     color: #fff;
@@ -481,4 +481,30 @@ h2 {
 img {
     width: 24px;
     height: 24px;
+}
+
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    transition: transform 0.2s;
+}
+
+.favorite-btn:active {
+    transform: scale(1.1);
+}
+
+/* Пустое сердечко (белое с черной обводкой) */
+.heart-path {
+    fill: rgb(177, 175, 175);
+
+    stroke-width: 40;
+    transition: all 0.2s ease;
+}
+
+/* Красное сердечко (активное) */
+.favorite-btn.active .heart-path {
+    fill: #ff4444;
+    stroke: none;
 }

@@ -151,9 +151,7 @@ func RegDb(email, password, name string) error {
 		code := codemail.GenerateCode()
 		timeLiveCode := time.Now().Add(15 * time.Minute)
 
-		_, err = DB.Exec(`
-			UPDATE users 
-			SET password = $1, name = $2, verification_code = $3, time_live_code = $4
+		_, err = DB.Exec(`UPDATE users SET password = $1, name = $2, verification_code = $3, time_live_code = $4
 			WHERE email = $5`, string(hashedPassword), name, code, timeLiveCode, email)
 		if err != nil {
 			return err
@@ -175,8 +173,7 @@ func RegDb(email, password, name string) error {
 	}
 	code := codemail.GenerateCode()
 	timeLiveCode := time.Now().Add(15 * time.Minute)
-	_, err = DB.Exec(`
-		INSERT INTO users(email, password, name, verified, verification_code, time_live_code) 
+	_, err = DB.Exec(`INSERT INTO users(email, password, name, verified, verification_code, time_live_code) 
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		email, string(hashedPassword), name, false, code, timeLiveCode)
 	if err != nil {
@@ -269,7 +266,7 @@ type comment struct {
 }
 
 type Vakans struct {
-	Id          string `json:"id"`
+	Id          int    `json:"id"`
 	Label       string `json:"label"`
 	Discription string `json:"discription"`
 	Avtor       string `json:"avtor"`
@@ -372,21 +369,22 @@ func UpdateProf(name, password, tgUs string, recvizits int, email string) error 
 	return nil
 }
 
-func AddVakans(email, avtor, title, discription, tag string, price int) error {
+func AddVakans(email, title, discription, tag string, price int) (error, string, int) {
 	var userID int
-	err := DB.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	var avtor string
+	err := DB.QueryRow("SELECT id, name FROM users WHERE email = $1", email).Scan(&userID, &avtor)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return errors.New("user not found")
+			return errors.New("user not found"), "", 0
 		}
-		return err
+		return err, "", 0
 	}
 
 	_, err = DB.Exec(`
 		INSERT INTO vakans (user_id, avtor, title, discription, price, tag)
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		userID, avtor, title, discription, price, tag)
-	return err
+	return err, avtor, userID
 }
 
 func GetVakans(page int, tag, priceUpDownFalse string) ([]Vakans, error) {
@@ -622,15 +620,26 @@ func DepositSql(rubles int64, email string) error {
 }
 
 func GetFavorite(email string) ([]Vakans, error) {
-	user_id := DB.QueryRow("SELECT id FROM users WHERE emeail=$1", email)
-	vakans_id, err := DB.Query("SELECT vakans_id FROM favorites WHERE user_id=$1", user_id)
+	var user_id int
+	err := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(&user_id)
 	if err != nil {
 		return []Vakans{}, err
 	}
+
+	rows, err := DB.Query(`
+		SELECT v.id, v.avtor, v.title, v.discription, v.price, v.tag 
+		FROM favorites f 
+		JOIN vakans v ON f.vakans_id = v.id 
+		WHERE f.user_id = $1`, user_id)
+	if err != nil {
+		return []Vakans{}, err
+	}
+	defer rows.Close()
+
 	var vakansList []Vakans
-	for vakans_id.Next() {
+	for rows.Next() {
 		var v Vakans
-		err := vakans_id.Scan(&v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
+		err := rows.Scan(&v.Id, &v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
 		if err != nil {
 			return []Vakans{}, err
 		}
@@ -639,7 +648,29 @@ func GetFavorite(email string) ([]Vakans, error) {
 	return vakansList, nil
 }
 
-func AddFavorite(email, id string) error {
+func Like(email string, card_id int) error {
+	var user_id int
+	err := DB.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&user_id)
+	if err != nil {
+		return err
+	}
+	var card_in_favorite bool
 
+	err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM favorites WHERE user_id = $1 AND vakans_id = $2)", user_id, card_id).Scan(&card_in_favorite)
+	if err != nil {
+		return err
+	}
+
+	if card_in_favorite == false {
+		_, err := DB.Exec("INSERT INTO favorites (user_id, vakans_id) VALUES ($1, $2)", user_id, card_id)
+		if err != nil {
+			return errors.New("ошибка добавления в избранное")
+		}
+	} else if card_in_favorite == true {
+		_, err := DB.Exec("DELETE FROM favorites WHERE user_id = $1 AND vakans_id = $2", user_id, card_id)
+		if err != nil {
+			return errors.New("ошибка удаления из избранного")
+		}
+	}
 	return nil
 }

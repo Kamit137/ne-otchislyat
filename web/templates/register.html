@@ -5,15 +5,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/static/register.css">
-    <link href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
+        rel="stylesheet">
     <title>Document</title>
 </head>
 
 <body>
-    <div class="background">
+    <div class="section-conatiner__list">
         <div class="container-logo">
-        <h4>ne-otchislyat.ru</h4>
-      </div>
+            <h4>ne-otchislyat.ru</h4>
+        </div>
+        <div class="container-list">
+            <div id="header-list-prof" class="header-list">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
+                    fill="#3071E7">
+                    <path
+                        d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
+                </svg>
+                <span>На главную</span>
+
+            </div>
+
+        </div>
+    </div>
+    <div class="background">
         <div class="menu-block">
             <div class="animation-login-hidden">
                 <div class="login-container">
@@ -97,114 +113,125 @@
         })
 
         // РЕГИСТРАЦИЯ
-const formPostRegister = document.querySelector('.form-register'); // 👈 ДОБАВИЛ ТОЧКУ!
-formPostRegister.addEventListener('submit', (event) => {
-    event.preventDefault();
-    
-    const name = document.querySelector('#name');
-    const login = document.querySelector('#email-reg');
-    const password = document.querySelector('#password-reg');
+        const formPostRegister = document.querySelector('.form-register'); // 👈 ДОБАВИЛ ТОЧКУ!
+        formPostRegister.addEventListener('submit', (event) => {
+            event.preventDefault();
 
-    if (login.value.trim() === '') {
-        alert('Введите email');
-        return;
-    }
+            const name = document.querySelector('#name');
+            const login = document.querySelector('#email-reg');
+            const password = document.querySelector('#password-reg');
 
-    const registerData = {
-        name: name.value,
-        email: login.value,
-        password: password.value
-    };
+            if (login.value.trim() === '') {
+                alert('Введите email');
+                return;
+            }
 
-    fetch('http://localhost:8080/reg', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(registerData)
-    })
-    .then(response => {
-        // Пытаемся получить JSON в любом случае
-        return response.json().then(data => ({
-            status: response.status,
-            ok: response.ok,
-            body: data
-        }));
-    })
-    .then(({ status, ok, body }) => {
-        console.log('Ответ:', status, body);
-        
-        // Если есть редирект - переходим (даже при ошибках)
-        if (body.redirect) {
-            console.log('Переходим на:', body.redirect);
-            window.location.href = body.redirect;
-            return;
-        }
-        
-        // Если статус не 2xx, но нет редиректа - показываем ошибку
-        if (!ok) {
-            alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
-            return;
-        }
-        
-        // Успех
-        alert(body.message || 'Регистрация успешна!');
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        alert('Ошибка регистрации: ' + error.message);
-    });
-});
+            const registerData = {
+                name: name.value,
+                email: login.value,
+                password: password.value
+            };
 
-// ВХОД
-const formPostLogin = document.querySelector('.form-login');
-formPostLogin.addEventListener('submit', (event) => {
-    event.preventDefault();
-    
-    const login = document.querySelector('#email-log');
-    const password = document.querySelector('#password-log');
+            fetch('http://localhost:8080/reg', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(registerData)
+            })
+                .then(response => {
+                    // Пытаемся получить JSON в любом случае
+                    return response.json().then(data => ({
+                        status: response.status,
+                        ok: response.ok,
+                        body: data
+                    }));
+                })
+                .then(({ status, ok, body }) => {
+                    console.log('Ответ:', status, body);
 
-    const loginData = {
-        email: login.value,
-        password: password.value
-    };
+                    // Если есть редирект - переходим (даже при ошибках)
+                    if (body.redirect) {
+                        console.log('Переходим на:', body.redirect);
+                        window.location.href = body.redirect;
+                        return;
+                    }
 
-    fetch('http://localhost:8080/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(loginData)
-    })
-    .then(response => {
-        return response.json().then(data => ({
-            status: response.status,
-            ok: response.ok,
-            body: data
-        }));
-    })
-    .then(({ status, ok, body }) => {
-        console.log('Ответ:', status, body);
-        
-        // РЕДИРЕКТ - ВАЖНО!
-        if (body.redirect) {
-            console.log('Переходим на:', body.redirect);
-            window.location.href = body.redirect;
-            return;
-        }
-        
-        if (!ok) {
-            alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
-            return;
-        }
-        
-        alert(body.message || 'Вход выполнен!');
-    })
-    .catch(error => {
-        console.error('Ошибка:', error);
-        alert('Ошибка входа: ' + error.message);
-    });
-});
+                    // Если статус не 2xx, но нет редиректа - показываем ошибку
+                    if (!ok) {
+                        alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
+                        return;
+                    }
+
+                    // Успех
+                    alert(body.message || 'Регистрация успешна!');
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка регистрации: ' + error.message);
+                });
+        });
+
+        // ВХОД
+        const formPostLogin = document.querySelector('.form-login');
+        formPostLogin.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const login = document.querySelector('#email-log');
+            const password = document.querySelector('#password-log');
+
+            const loginData = {
+                email: login.value,
+                password: password.value
+            };
+
+            fetch('http://localhost:8080/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(loginData)
+            })
+                .then(response => {
+                    return response.json().then(data => ({
+                        status: response.status,
+                        ok: response.ok,
+                        body: data
+                    }));
+                })
+                .then(({ status, ok, body }) => {
+                    console.log('Ответ:', status, body);
+
+                    // РЕДИРЕКТ - ВАЖНО!
+                    if (body.redirect) {
+                        console.log('Переходим на:', body.redirect);
+                        window.location.href = body.redirect;
+                        return;
+                    }
+
+                    if (!ok) {
+                        alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
+                        return;
+                    }
+
+                    alert(body.message || 'Вход выполнен!');
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                    alert('Ошибка входа: ' + error.message);
+                });
+        });
+        const textBtn = document.querySelector('.header-list')
+        textBtn.addEventListener('click', () => {
+            location.assign("/lenta");
+
+        })
+        const LogoBtn = document.querySelector('.container-logo')
+        LogoBtn.addEventListener('click', () => {
+            location.assign("/lenta");
+
+        })
+
     </script>
 </body>
 
