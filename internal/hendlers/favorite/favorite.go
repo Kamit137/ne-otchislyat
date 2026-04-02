@@ -42,7 +42,7 @@ func GetCards(w http.ResponseWriter, r *http.Request) {
 }
 
 func AddCard(w http.ResponseWriter, r *http.Request) {
-	log.Println("✅ Вызван AddCard")
+
 	email, ok := r.Context().Value("email").(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
