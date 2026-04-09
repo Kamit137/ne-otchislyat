@@ -243,7 +243,7 @@
     // ========== ИЗБРАННОЕ ==========
     async function sendFavoriteRequest(cardId) {
       try {
-        const response = await fetch('http://localhost:8080/api/favorites', {
+        const response = await fetch('/api/favorites', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -277,7 +277,7 @@
 
             
 
-            fetch('http://localhost:8080/api/deposit', {
+            fetch('/api/deposit', {
                 method:'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -403,7 +403,7 @@
     priceUpDownFalse: ""
   };
 
-  fetch('http://localhost:8080/api/lenta', {
+  fetch('/api/lenta', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(taskData)

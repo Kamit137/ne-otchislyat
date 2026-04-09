@@ -187,7 +187,7 @@
     <script>
         async function sendFavoriteRequest(cardId, isAdding) {
             try {
-                const response = await fetch('http://localhost:8080/api/favorites', {
+                const response = await fetch('/api/favorites', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -281,7 +281,7 @@
     priceUpDownFalse: ""
   };
 
-  fetch('http://localhost:8080/api/printfavorite', {
+  fetch('/api/printfavorite', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(taskData)

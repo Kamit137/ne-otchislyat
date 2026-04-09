@@ -387,7 +387,7 @@
                 tags: tagValue  // или tags: [tagValue] если сервер ждет массив
             };
 
-            fetch('http://localhost:8080/api/addCard', {
+            fetch('/api/addCard', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
