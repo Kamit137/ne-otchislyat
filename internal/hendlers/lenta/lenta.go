@@ -23,6 +23,10 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GiveLenta(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		email = ""
+	}
 	var Zapros struct {
 		Page             int    `json:"page"`
 		Tag              string `json:"tag"`
@@ -33,7 +37,7 @@ func GiveLenta(w http.ResponseWriter, r *http.Request) {
 		Zapros.Page = 1
 	}
 
-	cards, err := sql.GetVakans(Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFalse)
+	cards, err := sql.GetVakans(email, Zapros.Page, Zapros.Tag, Zapros.PriceUpDownFalse)
 	if err != nil {
 		log.Printf("Ошибка загрузки ленты: %v", err)
 		w.Header().Set("Content-Type", "application/json")

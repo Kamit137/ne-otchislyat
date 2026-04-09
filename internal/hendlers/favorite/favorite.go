@@ -21,6 +21,7 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GetCards(w http.ResponseWriter, r *http.Request) {
+
 	email, ok := r.Context().Value("email").(string)
 	if !ok {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
@@ -34,6 +35,7 @@ func GetCards(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	err = json.NewEncoder(w).Encode(cards)
+
 	if err != nil {
 		log.Fatal("Ошибка отправки json в getcards favorite", err)
 		http.Error(w, "Failed GetCards", http.StatusInternalServerError)

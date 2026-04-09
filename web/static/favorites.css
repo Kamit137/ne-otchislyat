@@ -482,13 +482,26 @@ img {
     width: 24px;
     height: 24px;
 }
-
-.favorite-heart {
+.favorite-btn {
+    background: none;
+    border: none;
     cursor: pointer;
-    transition: fill 0.3s ease;
+    padding: 8px;
+    transition: transform 0.2s;
 }
 
-.favorite-heart.active {
-    fill: #ff4444 !important;
-    /* Красный */
+.favorite-btn:active {
+    transform: scale(1.1);
+}
+.favorite-btn.active .heart-path {
+    fill: rgb(177, 175, 175);
+
+    stroke-width: 40;
+    transition: all 0.2s ease;
+}
+
+/* Красное сердечко (активное) */
+.heart-path {
+    fill: #ff4444;
+    stroke: none;
 }

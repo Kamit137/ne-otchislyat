@@ -28,11 +28,7 @@
                         <path fill="currentColor"
                             d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z" />
                     </svg>
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" class="ag5_8_0-b5">
-                        <path fill="#F8134B" fill-rule="evenodd"
-                            d="M12 22c-.316-.02-.56-.147-.848-.278a23.5 23.5 0 0 1-4.781-2.942C3.777 16.705 1 13.449 1 9a6 6 0 0 1 6-6 6.18 6.18 0 0 1 5 2.568A6.18 6.18 0 0 1 17 3a6 6 0 0 1 6 6c0 4.448-2.78 7.705-5.375 9.78a23.6 23.6 0 0 1-4.78 2.942c-.543.249-.732.278-.845.278"
-                            clip-rule="evenodd"></path>
-                    </svg>
+                   
                     <span>Профиль</span>
                     <hr class="head-br">
                     <svg class="favorite-heart" data-id="${id}" xmlns="http://www.w3.org/2000/svg" height="40px"
@@ -274,25 +270,21 @@
                 clickCount = 1;
                 textBlock.innerHTML = "";
             }
-            const selectedTags = [];
-            taskItems.forEach((item) => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                const label = item.querySelector('label');
-                if (checkbox && checkbox.checked) {
-                    selectedTags.push(label.textContent.trim());
-                }
-            });
-            const taskData = {
-                page: clickCount,
-                tagFilters: selectedTags,
-                itemType: "zakazs",
-                priceUpDownFalse: ""
-            };
+             const selectedTagInput = document.querySelector('input[name="tegs"]:checked');
+  const selectedTag = selectedTagInput ? selectedTagInput.value : "";
 
-             fetch('http://localhost:8080/api/favorites', {
-    method: 'GET',
+  console.log("🏷 Выбранный тег:", selectedTag); // Для отладки
+
+  const taskData = {
+    page: clickCount,
+    tag: selectedTag,
+    priceUpDownFalse: ""
+  };
+
+  fetch('http://localhost:8080/api/printfavorite', {
+    method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    
+    body: JSON.stringify(taskData)
   })
   .then(response => {
       if (!response.ok) throw new Error('Network error: ' + response.status);
@@ -308,7 +300,7 @@
               <div class="text">
                 <div class="head-cards">
                   <h4 class="text-color1">${label}</h4>
-                  <button class="favorite-btn" data-card-id="${id}">
+                   <button class="favorite-btn" data-card-id="${id}">
                     <svg class="favorite-heart" xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 -960 960 960" width="40px">
                       <path class="heart-path" d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/>
                     </svg>
@@ -364,11 +356,11 @@
         }
 
         // Навигация
-        const BtnReg = document.querySelector('#header-list-reg');
+        const BtnReg = document.querySelector('#header-list-home');
         if (BtnReg) {
             BtnReg.addEventListener('click', (e) => {
                 e.preventDefault();
-                location.assign("/registration");
+                location.assign("/");
             });
         }
 
@@ -379,13 +371,8 @@
                 window.location.href = '/profile';
             });
         }
-        const textBtnFavor = document.querySelector('#header-list-prof');
-        if (textBtnProf) {
-            textBtnProf.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.href = '/favorite';
-            });
-        }
+        
+    
 
         // Инициализируем сердечки
         initFavoriteButtons();

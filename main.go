@@ -1,21 +1,22 @@
 package main
 
 import (
+	"fmt"
 	"ne-otchislyat/internal/hendlers/favorite"
 	"ne-otchislyat/internal/hendlers/lenta"
 	"ne-otchislyat/internal/hendlers/profile"
 	"ne-otchislyat/internal/hendlers/reglog"
 	"ne-otchislyat/internal/hendlers/verify"
 
+	"log"
 	"ne-otchislyat/internal/pay"
 	"ne-otchislyat/internal/sql"
 	"ne-otchislyat/internal/token"
-
-	"log"
 	"net/http"
 )
 
 func main() {
+	fmt.Println("biba")
 	if err := sql.InitDB(); err != nil {
 		log.Fatal("Ошибка инициализации БД:", err)
 	}
@@ -34,11 +35,11 @@ func main() {
 	http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
 
 	http.HandleFunc("/api/deposit", token.AuthMiddleware(pay.HandleDeposit))
-	http.HandleFunc("/api/yookassa/webhook", pay.HandleWebhook)
-	http.HandleFunc("/api/balance", token.AuthMiddleware(pay.GetBalance))
-	http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))
-	http.HandleFunc("/api/order/complete", token.AuthMiddleware(pay.CompleteOrder))
-	http.HandleFunc("/api/order/cancel", token.AuthMiddleware(pay.CancelOrder))
+	// http.HandleFunc("/api/yookassa/webhook", pay.HandleWebhook)
+	// http.HandleFunc("/api/balance", token.AuthMiddleware(pay.GetBalance))
+	// http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))
+	// http.HandleFunc("/api/order/complete", token.AuthMiddleware(pay.CompleteOrder))
+	// http.HandleFunc("/api/order/cancel", token.AuthMiddleware(pqay.CancelOrder))
 
 	http.HandleFunc("/favorite", token.AuthMiddleware(favorite.IndexPage))
 	http.HandleFunc("/api/printfavorite", token.AuthMiddleware(favorite.GetCards))

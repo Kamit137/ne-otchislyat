@@ -272,6 +272,7 @@ type Vakans struct {
 	Avtor       string `json:"avtor"`
 	Price       int    `json:"price"`
 	Tag         string `json:"tag"`
+	InFavorite  bool   `json:"infavorite"`
 }
 
 type profileStruct struct {
@@ -387,32 +388,39 @@ func AddVakans(email, title, discription, tag string, price int) (error, string,
 	return err, avtor, userID
 }
 
-func GetVakans(page int, tag, priceUpDownFalse string) ([]Vakans, error) {
+func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, error) {
 	if page < 1 {
 		page = 1
 	}
-	offset := (page - 1) * 20
+	offset := (page - 1) * 60
+	var user_id int
 
+	if email != "" {
+		proverka := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(user_id)
+		if proverka != nil {
+			return nil, errors.New("ошибка проверки юзера в getVakans")
+		}
+	}
 	var rows *sql.Rows
 	var err error
 
 	if tag != "" {
 		switch priceUpDownFalse {
 		case "Up":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price ASC LIMIT 20 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price ASC LIMIT 60 OFFSET $2`, tag, offset)
 		case "Down":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price DESC LIMIT 20 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price DESC LIMIT 60 OFFSET $2`, tag, offset)
 		default:
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY id ASC LIMIT 20 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY id ASC LIMIT 60 OFFSET $2`, tag, offset)
 		}
 	} else {
 		switch priceUpDownFalse {
 		case "Up":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price ASC LIMIT 20 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price ASC LIMIT 60 OFFSET $1`, offset)
 		case "Down":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price DESC LIMIT 20 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price DESC LIMIT 60 OFFSET $1`, offset)
 		default:
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY id ASC LIMIT 20 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY id ASC LIMIT 60 OFFSET $1`, offset)
 		}
 	}
 	if err != nil {
@@ -423,7 +431,13 @@ func GetVakans(page int, tag, priceUpDownFalse string) ([]Vakans, error) {
 	var vakansList []Vakans
 	for rows.Next() {
 		var v Vakans
+		v.InFavorite = false
 		err := rows.Scan(&v.Id, &v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
+		if err != nil {
+			return nil, err
+		}
+		err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM favorites WHERE user_id = $1 AND vakans_id = $2)", user_id, v.Id).Scan(&v.InFavorite)
+
 		if err != nil {
 			return nil, err
 		}
