@@ -34,7 +34,7 @@ type PaymentRequest struct {
 func CreatePayment(amount float64, returnURL string, metadata map[string]string) (string, error) {
 	shopID := "515309"
 	secretKey := "test_*g1lrspzB6cRGyDpQvvFBe5p2K5ZwPY-jrW9ZMO1ub3Xw"
-	apiURL := "https://api.yookassa.ru"
+	apiURL := "https://api.yookassa.ru/v3"
 
 	payment := PaymentRequest{
 		Amount: Amount{
@@ -55,7 +55,7 @@ func CreatePayment(amount float64, returnURL string, metadata map[string]string)
 		return "", fmt.Errorf("ошибка сериализации: %v", err)
 	}
 
-	req, err := http.NewRequest("POST", apiURL, bytes.NewBuffer(jsonData))
+	req, err := http.NewRequest("POST", apiURL+"/payments", bytes.NewBuffer(jsonData))
 	if err != nil {
 		return "", fmt.Errorf("ошибка создания запроса: %v", err)
 	}
