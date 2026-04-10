@@ -10,22 +10,17 @@ footer {
     height: 250px;
     justify-content: center;
 
-
-
 }
 
 .public-inf {
     margin-top: 25px;
-    margin-right: 100px;
 }
 
-.text-block-public-inf-file,
 .text-block-public-inf {
     color: #ffffff;
     cursor: pointer;
 }
 
-.text-block-public-inf-file:hover,
 .text-block-public-inf:hover {
     color: #beb9b9;
 }
@@ -49,7 +44,7 @@ body {
 
     --border-color: #293659;
     --accent-hover: #4583f5;
-    --white: #ffffff;
+    --white: #e0e0e0;
 }
 
 /* === Layout === */
@@ -61,7 +56,7 @@ body {
     flex-direction: column;
     min-height: 100vh;
     width: 100%;
-    background-color: #16162F;
+    background-color: var(--white);
 }
 
 .section-conatiner__list {
@@ -136,7 +131,7 @@ body {
     overflow: hidden;
     flex-direction: column;
     align-items: center;
-    padding: 20px;
+    padding: 25px;
     box-sizing: border-box;
 }
 
@@ -648,4 +643,84 @@ img {
 
 .btn:active {
     transform: translateY(-1px);
+}
+
+.accordion-item {
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 10px;
+}
+
+.accordion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    cursor: pointer;
+}
+
+.accordion-title {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.accordion-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background-color: #f0f0f0;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.accordion-btn:hover {
+    background-color: #ddd;
+}
+
+.accordion-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+    padding: 0;
+}
+
+.accordion-content.open {
+    max-height: 500px;
+    /* Достаточно большое значение, чтобы вместить весь текст */
+    padding-bottom: 15px;
+}
+
+.all-list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+
+
+    background: #2A2D3E;
+    border-right: 1px solid var(--border-color);
+    color: aliceblue;
+
+}
+
+.head-oferta {
+    width: 100%;
+    height: 250px;
+    background: #A6B2EC;
+    display: flex;
+    justify-content: center;
+    align-items: end;
+
+
+}
+
+.head-oferta_text {
+    width: 100%;
+    margin-bottom: 25px;
+    margin-left: 25px;
+}
+
+h3 {
+    font-size: 50px;
 }

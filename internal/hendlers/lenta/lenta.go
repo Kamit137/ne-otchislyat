@@ -2,10 +2,11 @@ package lenta
 
 import (
 	"encoding/json"
+
 	"log"
 	"ne-otchislyat/internal/sql"
 	"net/http"
-
+	"os"
 	"text/template"
 )
 
@@ -47,4 +48,19 @@ func GiveLenta(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(cards)
+}
+
+func DownloadOferta(w http.ResponseWriter, r *http.Request) {
+	filename := "oferta.pdf"
+	filePath := "/root/ne-otchislyat/oferta.pdf"
+
+	fileContent, err := os.ReadFile(filePath)
+	if err != nil {
+		http.Error(w, "Файл не найден", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Disposition", "attachment; filename="+filename)
+	w.Header().Set("Content-Type", "application/octet-stream")
+	w.Write(fileContent)
 }

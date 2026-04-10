@@ -29,6 +29,7 @@ func main() {
 	http.HandleFunc("/api/verify", verify.ValidateCod)
 	http.HandleFunc("/", lenta.IndexPage)
 	http.HandleFunc("/api/lenta", lenta.GiveLenta)
+	http.HandleFunc("/api/lenta/downloadOferta", lenta.DownloadOferta)
 
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
