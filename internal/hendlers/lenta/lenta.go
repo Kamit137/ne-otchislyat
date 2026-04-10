@@ -52,7 +52,7 @@ func GiveLenta(w http.ResponseWriter, r *http.Request) {
 
 func DownloadOferta(w http.ResponseWriter, r *http.Request) {
 	filename := "oferta.pdf"
-	filePath := "/root/ne-otchislyat/oferta.pdf"
+	filePath := "oferta.pdf"
 
 	fileContent, err := os.ReadFile(filePath)
 	if err != nil {
