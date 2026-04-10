@@ -396,7 +396,7 @@ func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, 
 	var user_id int
 
 	if email != "" {
-		proverka := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(user_id)
+		proverka := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(&user_id)
 		if proverka != nil {
 			return nil, errors.New("ошибка проверки юзера в getVakans")
 		}
