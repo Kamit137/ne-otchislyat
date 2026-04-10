@@ -153,7 +153,7 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 
 	paymentURL, err := CreatePayment(
 		req.Amount,
-		"http://localhost:8080/profile",
+		"http://ne-otchislyat.ru/profile",
 		metadata,
 	)
 
