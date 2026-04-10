@@ -34,7 +34,8 @@ func main() {
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
 	http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
 
-	http.HandleFunc("/api/deposit", token.AuthMiddleware(pay.HandleDeposit))
+	http.HandleFunc("/api/deposit", token.AuthMiddleware(pay.HandleDepositRobokassa))
+	http.HandleFunc("/payment/result", pay.HandlePaymentNotification) // URL, который укажете в настройках магазина
 	// http.HandleFunc("/api/yookassa/webhook", pay.HandleWebhook)
 	// http.HandleFunc("/api/balance", token.AuthMiddleware(pay.GetBalance))
 	// http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))

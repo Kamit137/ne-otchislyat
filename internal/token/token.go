@@ -43,13 +43,25 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("token")
 		if err != nil {
+			// Нет куки → редирект на регистрацию
 			http.Redirect(w, r, "/registration", http.StatusFound)
 			return
 		}
 
 		claims, err := ValidateToken(cookie.Value)
 		if err != nil {
-			http.Error(w, "Invalid token", http.StatusUnauthorized)
+			// Токен есть, но он невалидный (просрочен, подделан и т.д.)
+			// Удаляем испорченную куку, чтобы не создавать мусор
+			http.SetCookie(w, &http.Cookie{
+				Name:     "token",
+				Value:    "",
+				Path:     "/",
+				Expires:  time.Unix(0, 0),
+				MaxAge:   -1,
+				HttpOnly: true,
+			})
+			// Редирект на регистрацию
+			http.Redirect(w, r, "/registration", http.StatusFound)
 			return
 		}
 

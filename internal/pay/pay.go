@@ -1,126 +1,102 @@
 package pay
 
 import (
-	"bytes"
+	"crypto/md5"
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
+
 	"fmt"
-	"io"
+
 	"log"
 	"net/http"
-	"time"
+	"net/url"
 
-	"github.com/google/uuid"
+	"strings"
+	"time"
 )
 
-type Amount struct {
-	Value    string `json:"value"`
-	Currency string `json:"currency"`
+// --- Конфигурация (замените на свои данные) ---
+var (
+	merchantLogin = "ne-otchislyat.ru"     // Ваш MerchantLogin
+	password1     = "P7DZ3ID5v0W9znRuqKFI" // Пароль №1 для создания платежей
+	password2     = "Xg5zLXc770dKr7VorLCS" // Пароль №2 для проверки уведомлений
+	isTest        = true                   // true для тестов, false для боевого режима
+)
+
+// HashAlgorithm определяет алгоритм для подписи
+type HashAlgorithm string
+
+const (
+	MD5    HashAlgorithm = "md5"
+	SHA256 HashAlgorithm = "sha256"
+)
+
+// --- Генерация подписи ---
+func calculateSignature(values url.Values, password string, algo HashAlgorithm) string {
+	// Собираем строку для подписи согласно документации: https://docs.robokassa.ru/ru/quick-start#2368
+	var signatureParts []string
+	if algo == MD5 {
+		signatureParts = append(signatureParts, values.Get("MerchantLogin"))
+		signatureParts = append(signatureParts, values.Get("OutSum"))
+		signatureParts = append(signatureParts, values.Get("InvId"))
+		signatureParts = append(signatureParts, password)
+	} else { // SHA256
+		signatureParts = append(signatureParts, values.Get("MerchantLogin"))
+		signatureParts = append(signatureParts, values.Get("OutSum"))
+		signatureParts = append(signatureParts, values.Get("InvId"))
+		signatureParts = append(signatureParts, password)
+	}
+	signatureString := strings.Join(signatureParts, ":")
+
+	var hash []byte
+	if algo == MD5 {
+		hasher := md5.Sum([]byte(signatureString))
+		hash = hasher[:]
+	} else {
+		hasher := sha256.Sum256([]byte(signatureString))
+		hash = hasher[:]
+	}
+	return hex.EncodeToString(hash)
 }
 
-type Confirmation struct {
-	Type      string `json:"type"`
-	ReturnURL string `json:"return_url"`
+// --- 1. Создание платежа и получение URL для редиректа ---
+// GeneratePaymentURL создает ссылку на оплату в Robokassa
+func GeneratePaymentURL(amount float64, orderID string, email string, userParams map[string]string) (string, error) {
+	// Формируем параметры запроса
+	values := url.Values{}
+	values.Set("MerchantLogin", merchantLogin)
+	values.Set("OutSum", fmt.Sprintf("%.2f", amount))
+	values.Set("InvId", orderID)
+	values.Set("Description", "Пополнение баланса пользователя")
+	values.Set("Email", email)
+	values.Set("Culture", "ru") // Язык интерфейса
+
+	// Добавляем пользовательские параметры (обязательно с префиксом shp_)
+	for k, v := range userParams {
+		values.Set("shp_"+k, v)
+	}
+
+	// Устанавливаем алгоритм (лучше SHA256)
+	algo := SHA256
+	values.Set("SignatureValue", calculateSignature(values, password1, algo))
+	// В тестовом режиме нужно добавить параметр IsTest=1
+	if isTest {
+		values.Set("IsTest", "1")
+	}
+
+	// Формируем URL для редиректа
+	paymentURL := "https://auth.robokassa.ru/Merchant/Index.aspx?" + values.Encode()
+	log.Printf("✅ Сгенерирован URL для оплаты: %s", paymentURL)
+	return paymentURL, nil
 }
 
-type PaymentRequest struct {
-	Amount       Amount            `json:"amount"`
-	Confirmation Confirmation      `json:"confirmation"`
-	Capture      bool              `json:"capture"`
-	Description  string            `json:"description"`
-	Metadata     map[string]string `json:"metadata"`
-}
+// --- 2. Обработчик для пополнения баланса (заменяет ваш HandleDeposit) ---
+// HandleDepositRobokassa обрабатывает запрос на создание платежа
+func HandleDepositRobokassa(w http.ResponseWriter, r *http.Request) {
+	log.Println("💰 Обработка депозита через Robokassa")
 
-// CreatePayment создает платеж в ЮKassa и возвращает URL для оплаты
-func CreatePayment(amount float64, returnURL string, metadata map[string]string) (string, error) {
-	shopID := "515309"
-	secretKey := "test_*g1lrspzB6cRGyDpQvvFBe5p2K5ZwPY-jrW9ZMO1ub3Xw"
-	apiURL := "https://api.yookassa.ru/v3"
-
-	payment := PaymentRequest{
-		Amount: Amount{
-			Value:    fmt.Sprintf("%.2f", amount),
-			Currency: "RUB",
-		},
-		Confirmation: Confirmation{
-			Type:      "redirect",
-			ReturnURL: returnURL,
-		},
-		Capture:     true,
-		Description: "Пополнение баланса",
-		Metadata:    metadata,
-	}
-
-	jsonData, err := json.Marshal(payment)
-	if err != nil {
-		return "", fmt.Errorf("ошибка сериализации: %v", err)
-	}
-
-	req, err := http.NewRequest("POST", apiURL+"/payments", bytes.NewBuffer(jsonData))
-	if err != nil {
-		return "", fmt.Errorf("ошибка создания запроса: %v", err)
-	}
-
-	req.SetBasicAuth(shopID, secretKey) // ← это всё, что нужно
-	req.Header.Set("Content-Type", "application/json")
-	req.Header.Set("Idempotence-Key", uuid.New().String())
-
-	client := &http.Client{Timeout: 30 * time.Second}
-	resp, err := client.Do(req)
-	// ... остальной код без изменений
-
-	if err != nil {
-		return "", fmt.Errorf("ошибка запроса к ЮKassa: %v", err)
-	}
-	defer resp.Body.Close()
-
-	// Читаем тело ответа
-	bodyBytes, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("ошибка чтения ответа: %v", err)
-	}
-
-	log.Printf("📥 Ответ ЮKassa (статус %d): %s", resp.StatusCode, string(bodyBytes))
-
-	// Парсим JSON
-	var result map[string]interface{}
-	if err := json.Unmarshal(bodyBytes, &result); err != nil {
-		return "", fmt.Errorf("ошибка парсинга ответа: %v", err)
-	}
-
-	// Проверяем статус ответа
-	if resp.StatusCode != http.StatusOK {
-		errorMsg := "неизвестная ошибка"
-		if description, ok := result["description"].(string); ok {
-			errorMsg = description
-		}
-		if errMsg, ok := result["error"].(string); ok {
-			errorMsg = errMsg
-		}
-		return "", fmt.Errorf("❌ ЮKassa ошибка %d: %s", resp.StatusCode, errorMsg)
-	}
-
-	// Проверяем наличие поля confirmation
-	confirmation, ok := result["confirmation"].(map[string]interface{})
-	if !ok {
-		status, _ := result["status"].(string)
-		id, _ := result["id"].(string)
-		return "", fmt.Errorf("❌ неверный ответ: нет confirmation. Статус: %s, ID: %s", status, id)
-	}
-
-	confirmURL, ok := confirmation["confirmation_url"].(string)
-	if !ok {
-		return "", fmt.Errorf("❌ неверный ответ: нет confirmation_url")
-	}
-
-	log.Printf("✅ Платеж создан, URL: %s", confirmURL)
-	return confirmURL, nil
-}
-
-// HandleDeposit - обработчик для пополнения баланса
-func HandleDeposit(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("💰 Обработка депозита")
-
-	// Получаем email пользователя из контекста
+	// Получаем email пользователя из контекста (как в вашем коде)
 	email, ok := r.Context().Value("email").(string)
 	if !ok || email == "" {
 		log.Printf("❌ Ошибка: email не найден в контексте")
@@ -138,25 +114,22 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("📝 Запрос на депозит: email=%s, amount=%.2f", email, req.Amount)
-
 	if req.Amount <= 0 {
 		http.Error(w, "Сумма должна быть больше 0", http.StatusBadRequest)
 		return
 	}
+	log.Printf("📝 Запрос на депозит: email=%s, amount=%.2f", email, req.Amount)
 
-	// Создаем платеж в ЮKassa
-	metadata := map[string]string{
-		"email":  email,
-		"amount": fmt.Sprintf("%.2f", req.Amount),
+	// Генерируем уникальный ID заказа (InvId)
+	orderID := fmt.Sprintf("%d", time.Now().UnixNano())
+
+	// Передаем email как пользовательский параметр, чтобы потом знать, кому начислить
+	userParams := map[string]string{
+		"email": email,
 	}
 
-	paymentURL, err := CreatePayment(
-		req.Amount,
-		"http://ne-otchislyat.ru/profile",
-		metadata,
-	)
-
+	// Создаем ссылку на оплату
+	paymentURL, err := GeneratePaymentURL(req.Amount, orderID, email, userParams)
 	if err != nil {
 		log.Printf("❌ Ошибка создания платежа: %v", err)
 		w.Header().Set("Content-Type", "application/json")
@@ -173,4 +146,52 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(map[string]string{
 		"payment_url": paymentURL,
 	})
+}
+
+// --- 3. Обработка уведомлений от Robokassa (Result URL) ---
+// HandlePaymentNotification обрабатывает POST-запросы от Robokassa
+func HandlePaymentNotification(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		log.Printf("❌ Ошибка парсинга формы: %v", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	// Получаем параметры от Robokassa
+	outSum := r.FormValue("OutSum")
+	invId := r.FormValue("InvId")
+	signature := r.FormValue("SignatureValue")
+
+	// ВНИМАНИЕ: Для проверки подписи используем password2!
+	// Собираем параметры для проверки
+	values := url.Values{}
+	values.Set("OutSum", outSum)
+	values.Set("InvId", invId)
+	values.Set("MerchantLogin", merchantLogin) // Нужен для формирования подписи
+
+	// Проверяем подпись (алгоритм должен совпадать с тем, что использовали при создании)
+	expectedSignature := calculateSignature(values, password2, SHA256)
+	if signature != expectedSignature {
+		log.Printf("❌ Ошибка проверки подписи для заказа %s", invId)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("FAIL"))
+		return
+	}
+
+	// Извлекаем пользовательские параметры (shp_email)
+	email := r.FormValue("shp_email")
+	if email == "" {
+		log.Printf("⚠️ Не передан email в shp_email для заказа %s", invId)
+		// Но все равно можем попробовать найти пользователя по-другому
+	}
+
+	// --- ВАША ЛОГИКА ЗАЧИСЛЕНИЯ СРЕДСТВ ---
+	// 1. Найти пользователя по email
+	// 2. Начислить ему сумму outSum
+	// 3. Записать операцию в БД
+	log.Printf("✅ Платеж подтвержден! Заказ: %s, Сумма: %s, Email: %s", invId, outSum, email)
+
+	// Обязательно вернуть "OK<InvId>", иначе Robokassa будет повторять запросы [citation:2][citation:8]
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("OK%s", invId)))
 }
