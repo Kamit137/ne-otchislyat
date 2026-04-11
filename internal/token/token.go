@@ -69,3 +69,20 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		next.ServeHTTP(w, r.WithContext(ctx))
 	}
 }
+
+func AuthOptionalMiddleware(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("token")
+		if err == nil {
+			claims, err := ValidateToken(cookie.Value)
+			if err == nil {
+				ctx := context.WithValue(r.Context(), "email", claims.Email)
+				next.ServeHTTP(w, r.WithContext(ctx))
+				return
+			}
+		}
+		// Если нет токена или он невалидный - просто передаем пустой контекст
+		ctx := context.WithValue(r.Context(), "email", "")
+		next.ServeHTTP(w, r.WithContext(ctx))
+	}
+}

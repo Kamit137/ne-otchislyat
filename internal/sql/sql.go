@@ -389,6 +389,7 @@ func AddVakans(email, title, discription, tag string, price int) (error, string,
 }
 
 func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, error) {
+
 	if page < 1 {
 		page = 1
 	}
@@ -398,7 +399,8 @@ func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, 
 	if email != "" {
 		proverka := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(&user_id)
 		if proverka != nil {
-			return nil, errors.New("ошибка проверки юзера в getVakans")
+			log.Printf("❌ Ошибка EXISTS: %v", proverka)
+			return nil, proverka
 		}
 	}
 	var rows *sql.Rows

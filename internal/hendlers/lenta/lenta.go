@@ -24,10 +24,8 @@ func IndexPage(w http.ResponseWriter, r *http.Request) {
 }
 
 func GiveLenta(w http.ResponseWriter, r *http.Request) {
-	email, ok := r.Context().Value("email").(string)
-	if !ok {
-		email = ""
-	}
+	email, _ := r.Context().Value("email").(string)
+
 	var Zapros struct {
 		Page             int    `json:"page"`
 		Tag              string `json:"tag"`
