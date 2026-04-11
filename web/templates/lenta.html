@@ -393,7 +393,7 @@
 
       };
 
-      fetch('http://localhost:8080/deposit', {
+      fetch('/deposit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -458,7 +458,7 @@
         priceUpDownFalse: ""
       };
 
-      fetch('http://localhost:8080/api/lenta', {
+      fetch('/api/lenta', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(taskData)
