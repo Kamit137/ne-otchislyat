@@ -2,6 +2,7 @@ package reglog
 
 import (
 	"encoding/json"
+	"time"
 
 	"log"
 	"ne-otchislyat/internal/sql"
@@ -211,8 +212,9 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		Name:     "token",
 		Value:    "",
 		Path:     "/",
-		HttpOnly: true,
 		MaxAge:   -1,
+		Expires:  time.Unix(0, 0), // ← добавь это
+		HttpOnly: true,
 	})
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }

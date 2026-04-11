@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"text/template"
+	"time"
 )
 
 func IndexPage(w http.ResponseWriter, r *http.Request) {
@@ -106,4 +107,20 @@ func AddCard(w http.ResponseWriter, r *http.Request) {
 		"discription": NewCard.Discription,
 		"price":       strconv.Itoa(NewCard.Price),
 	})
+}
+
+func Exit(w http.ResponseWriter, r *http.Request) {
+	// Удаляем куку с путем /
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	// Удаляем куку с путем /registration (если есть)
+
+	http.Redirect(w, r, "/registration", http.StatusFound)
 }

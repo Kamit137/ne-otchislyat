@@ -30,6 +30,7 @@ func main() {
 	http.HandleFunc("/", lenta.IndexPage)
 	http.HandleFunc("/api/lenta", token.AuthOptionalMiddleware(lenta.GiveLenta))
 	http.HandleFunc("/api/lenta/downloadOferta", lenta.DownloadOferta)
+	http.HandleFunc("/api/exit", profile.Exit)
 
 	http.HandleFunc("/profile", token.AuthMiddleware(profile.IndexPage))
 	http.HandleFunc("/api/profile", token.AuthMiddleware(profile.ProfilePrint))
@@ -46,8 +47,6 @@ func main() {
 	http.HandleFunc("/favorite", token.AuthMiddleware(favorite.IndexPage))
 	http.HandleFunc("/api/printfavorite", token.AuthMiddleware(favorite.GetCards))
 	http.HandleFunc("/api/favorites", token.AuthMiddleware(favorite.AddCard))
-
-	http.HandleFunc("/logout", reglog.Logout)
 
 	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("web/static"))))
 	http.Handle("/templates/", http.StripPrefix("/templates/", http.FileServer(http.Dir("web/templates"))))
