@@ -259,7 +259,7 @@
 
 
     <script>
-    const textBlock = document.querySelector('.orders');
+    const textBlock = document.querySelector('.list-orders-all');
 
       fetch('/api/lenta', {
         method: 'GET',
@@ -276,8 +276,8 @@
         .then(json => {
           
             textBlock.innerHTML += json.map(({ label, price,  id}) => `
-         
-                    <div class="list-headers-name-task" data-card-id="${id}">
+            <div class="orders">
+                      <div class="list-headers-name-task" data-card-id="${id}">
                         <span class="text-name-task">${label}</span>
                         <span class="price-task">${price}P</span>
                     </div>
@@ -306,6 +306,8 @@
                         </div>
 
                     </div>
+
+                </div>
 
                 
             `).join('');
