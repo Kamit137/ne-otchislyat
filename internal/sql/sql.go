@@ -399,7 +399,7 @@ func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, 
 	if email != "" {
 		proverka := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(&user_id)
 		if proverka != nil {
-			log.Printf("❌ Ошибка EXISTS: %v", proverka)
+			log.Printf("Ошибка EXISTS: %v", proverka)
 			return nil, proverka
 		}
 	}

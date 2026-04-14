@@ -379,63 +379,83 @@
         overlayDep.classList.remove('active');
       }
     });
-    // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛЕННИЯ 
-    const formDeposit = document.querySelector('.form-deposit'); // 👈 ДОБАВИЛ ТОЧКУ!
-    formDeposit.addEventListener('submit', (event) => {
-      event.preventDefault();
+   // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
+const formDeposit = document.querySelector('.form-deposit');
+formDeposit.addEventListener('submit', (event) => {
+  event.preventDefault();
 
-      const depositSum = document.querySelector('#sum');
+  const depositSumInput = document.querySelector('#sum');
+  const depositValue = depositSumInput.value.trim();
+  
+  if (depositValue === '') {
+    alert('Введите сумму пополнения');
+    return;
+  }
 
+  const amount = parseFloat(depositValue);
+  
+  if (isNaN(amount) || amount <= 0) {
+    alert('Введите корректную сумму (больше 0)');
+    return;
+  }
 
-      if (depositSum.value.trim() === '') {
-        alert('Введите email');
-        return;
-      }
+  if (amount < 1) {
+    alert('Минимальная сумма пополнения: 1 ₽');
+    return;
+  }
 
-      const DepositData = {
-        amount: Number(depositSum),
+  const DepositData = {
+    amount: amount
+  };
 
-      };
+  console.log('📤 Отправка данных:', DepositData);
 
-      fetch('/deposit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(DepositData)
-      })
-        .then(response => {
-          // Пытаемся получить JSON в любом случае
-          return response.json().then(data => ({
-            status: response.status,
-            ok: response.ok,
-            body: data
-          }));
-        })
-        .then(({ status, ok, body }) => {
-          console.log('Ответ:', status, body);
-
-          // Если есть редирект - переходим (даже при ошибках)
-          if (body.redirect) {
-            console.log('Переходим на:', body.redirect);
-            window.location.href = body.redirect;
-            return;
-          }
-
-          // Если статус не 2xx, но нет редиректа - показываем ошибку
-          if (!ok) {
-            alert('Ошибка: ' + (body.message || 'Неизвестная ошибка'));
-            return;
-          }
-
-          // Успех
-          alert(body.message || 'ABOBA успешна!');
-        })
-        .catch(error => {
-          console.error('Ошибка:', error);
-          alert('Ошибка ABOBЫ: ' + error.message);
+  fetch('/api/deposit', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(DepositData)
+  })
+    .then(response => {
+      if (!response.ok) {
+        return response.json().then(data => {
+          throw new Error(data.error || data.message || `Ошибка ${response.status}`);
         });
+      }
+      return response.json();
+    })
+    .then(data => {
+      console.log('✅ Успех:', data);
+      
+      // Закрываем модальное окно
+      const overlayDep = document.querySelector('.modal-overlay-dep');
+      if (overlayDep) {
+        overlayDep.classList.remove('active');
+      }
+      
+      // Очищаем поле ввода
+      depositSumInput.value = '';
+      
+      // Если есть ссылка на оплату - перенаправляем
+      if (data.payment_url) {
+        // Для тестового режима показываем доп. информацию
+        if (data.test_mode) {
+          alert(`🧪 Тестовый счет создан!\nСумма: ${amount} TST\n\nИспользуйте тестовую карту:\n5555 5555 5555 5599\nСрок: любой будущий\nCVV: любой`);
+        } else {
+          alert(`Счет на ${amount} ₽ создан. Перенаправляем на страницу оплаты...`);
+        }
+        window.location.href = data.payment_url;
+      } else {
+        alert('Счет создан, но ссылка на оплату не получена');
+      }
+      
+    })
+    .catch(error => {
+      console.error('❌ Ошибка:', error);
+      alert('Ошибка при создании счета: ' + error.message);
     });
+});
 
     // ========== ОСНОВНАЯ ЛОГИКА ЛЕНТЫ ==========
     let clickCount = 1;

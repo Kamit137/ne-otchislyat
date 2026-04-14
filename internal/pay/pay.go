@@ -1,197 +1,441 @@
 package pay
 
 import (
+	"bytes"
 	"crypto/md5"
-	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
-
 	"fmt"
-
+	"io"
 	"log"
+	"ne-otchislyat/internal/sql"
 	"net/http"
-	"net/url"
-
-	"strings"
+	"strconv"
 	"time"
 )
 
-// --- Конфигурация (замените на свои данные) ---
-var (
-	merchantLogin = "ne-otchislyat.ru"     // Ваш MerchantLogin
-	password1     = "P7DZ3ID5v0W9znRuqKFI" // Пароль №1 для создания платежей
-	password2     = "Xg5zLXc770dKr7VorLCS" // Пароль №2 для проверки уведомлений
-	isTest        = true                   // true для тестов, false для боевого режима
-)
+const baseURL = "https://api.intellectmoney.ru/merchant"
 
-// HashAlgorithm определяет алгоритм для подписи
-type HashAlgorithm string
-
-const (
-	MD5    HashAlgorithm = "md5"
-	SHA256 HashAlgorithm = "sha256"
-)
-
-// --- Генерация подписи ---
-func calculateSignature(values url.Values, password string, algo HashAlgorithm) string {
-	// Собираем строку для подписи согласно документации: https://docs.robokassa.ru/ru/quick-start#2368
-	var signatureParts []string
-	if algo == MD5 {
-		signatureParts = append(signatureParts, values.Get("MerchantLogin"))
-		signatureParts = append(signatureParts, values.Get("OutSum"))
-		signatureParts = append(signatureParts, values.Get("InvId"))
-		signatureParts = append(signatureParts, password)
-	} else { // SHA256
-		signatureParts = append(signatureParts, values.Get("MerchantLogin"))
-		signatureParts = append(signatureParts, values.Get("OutSum"))
-		signatureParts = append(signatureParts, values.Get("InvId"))
-		signatureParts = append(signatureParts, password)
-	}
-	signatureString := strings.Join(signatureParts, ":")
-
-	var hash []byte
-	if algo == MD5 {
-		hasher := md5.Sum([]byte(signatureString))
-		hash = hasher[:]
-	} else {
-		hasher := sha256.Sum256([]byte(signatureString))
-		hash = hasher[:]
-	}
-	return hex.EncodeToString(hash)
+type client struct {
+	eshopID    string
+	secretKey  string
+	httpClient *http.Client
 }
 
-// --- 1. Создание платежа и получение URL для редиректа ---
-// GeneratePaymentURL создает ссылку на оплату в Robokassa
-func GeneratePaymentURL(amount float64, orderID string, email string, userParams map[string]string) (string, error) {
-	// Формируем параметры запроса
-	values := url.Values{}
-	values.Set("MerchantLogin", merchantLogin)
-	values.Set("OutSum", fmt.Sprintf("%.2f", amount))
-	values.Set("InvId", orderID)
-	values.Set("Description", "Пополнение баланса пользователя")
-	values.Set("Email", email)
-	values.Set("Culture", "ru") // Язык интерфейса
+var c *client
 
-	// Добавляем пользовательские параметры (обязательно с префиксом shp_)
-	for k, v := range userParams {
-		values.Set("shp_"+k, v)
+func InitPay(eshopID, secretKey string) {
+	c = &client{
+		eshopID:    eshopID,
+		secretKey:  secretKey,
+		httpClient: &http.Client{Timeout: 30 * time.Second},
 	}
-
-	// Устанавливаем алгоритм (лучше SHA256)
-	algo := SHA256
-	values.Set("SignatureValue", calculateSignature(values, password1, algo))
-	// В тестовом режиме нужно добавить параметр IsTest=1
-	if isTest {
-		values.Set("IsTest", "1")
-	}
-
-	// Формируем URL для редиректа
-	paymentURL := "https://auth.robokassa.ru/Merchant/Index.aspx?" + values.Encode()
-	log.Printf("✅ Сгенерирован URL для оплаты: %s", paymentURL)
-	return paymentURL, nil
 }
 
-// --- 2. Обработчик для пополнения баланса (заменяет ваш HandleDeposit) ---
-// HandleDepositRobokassa обрабатывает запрос на создание платежа
-func HandleDepositRobokassa(w http.ResponseWriter, r *http.Request) {
-	log.Println("💰 Обработка депозита через Robokassa")
+func md5hash(s string) string {
+	h := md5.Sum([]byte(s))
+	return hex.EncodeToString(h[:])
+}
 
-	// Получаем email пользователя из контекста (как в вашем коде)
+// ─── Создание инвойса ─────────────────────────────────────────────────────────
+
+type invoiceResponse struct {
+	OperationState struct {
+		Code int    `json:"Code"`
+		Desc string `json:"Desc"`
+	} `json:"OperationState"`
+	EshopID int `json:"EshopId"`
+	Result  struct {
+		State struct {
+			Code             int    `json:"Code"`
+			Desc             string `json:"Desc"`
+			ErrorSourceParam string `json:"ErrorSourceParam,omitempty"`
+		} `json:"State"`
+		InvoiceID   interface{} `json:"InvoiceId"`
+		PaymentWays []struct {
+			ID         int    `json:"Id"`
+			Preference string `json:"Preference"`
+		} `json:"PaymentWays"`
+	} `json:"Result"`
+}
+
+func (r *invoiceResponse) getInvoiceID() string {
+	if r.Result.InvoiceID == nil {
+		return ""
+	}
+	switch v := r.Result.InvoiceID.(type) {
+	case string:
+		return v
+	case float64:
+		return strconv.FormatFloat(v, 'f', 0, 64)
+	case int:
+		return strconv.Itoa(v)
+	case int64:
+		return strconv.FormatInt(v, 10)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
+func createInvoice(orderID string, amount float64, email, successURL, failURL, resultURL string) (*invoiceResponse, error) {
+	amountStr := fmt.Sprintf("%.2f", amount)
+	serviceName := "Пополнение баланса"
+	currency := "TST" // Тестовая валюта
+
+	// Формируем строку для хеша (15 элементов, разделенных ::)
+	hashStr := fmt.Sprintf("%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s::%s",
+		c.eshopID,   // eshopId
+		orderID,     // orderId
+		serviceName, // serviceName
+		amountStr,   // recipientAmount
+		currency,    // recipientCurrency
+		"",          // userName
+		email,       // email
+		successURL,  // successUrl
+		failURL,     // failUrl
+		"",          // backUrl
+		resultURL,   // resultUrl
+		"",          // expireDate
+		"",          // holdMode
+		"",          // preference
+		c.secretKey, // secretKey
+	)
+
+	paramHash := md5hash(hashStr)
+
+	log.Printf("🔐 Хеш-строка: %s", hashStr)
+	log.Printf("🔐 MD5 хеш: %s", paramHash)
+
+	body := map[string]interface{}{
+		"eshopId":           c.eshopID,
+		"orderId":           orderID,
+		"recipientAmount":   amountStr,
+		"recipientCurrency": currency,
+		"email":             email,
+		"serviceName":       serviceName,
+		"successUrl":        successURL,
+		"failUrl":           failURL,
+		"resultUrl":         resultURL,
+		"hash":              paramHash,
+	}
+
+	jsonBody, _ := json.Marshal(body)
+	log.Printf("📤 Запрос к IntellectMoney: %s", string(jsonBody))
+
+	req, err := http.NewRequest("POST", baseURL+"/createInvoice", bytes.NewReader(jsonBody))
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Accept", "application/json")
+
+	resp, err := c.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("запрос к IntellectMoney: %w", err)
+	}
+	defer resp.Body.Close()
+
+	respBody, _ := io.ReadAll(resp.Body)
+	log.Printf("📥 IntellectMoney createInvoice (статус %d): %s", resp.StatusCode, string(respBody))
+
+	var result invoiceResponse
+	if err := json.Unmarshal(respBody, &result); err != nil {
+		return nil, fmt.Errorf("парсинг ответа: %w, тело: %s", err, string(respBody))
+	}
+
+	if result.OperationState.Code != 0 {
+		return nil, fmt.Errorf("ошибка API OperationState: %s", result.OperationState.Desc)
+	}
+
+	if result.Result.State.Code != 0 {
+		return nil, fmt.Errorf("ошибка API Result.State: %s (параметр: %s)",
+			result.Result.State.Desc, result.Result.State.ErrorSourceParam)
+	}
+
+	return &result, nil
+}
+
+func paymentLink(invoiceID string) string {
+	return fmt.Sprintf("https://merchant.intellectmoney.ru/pay/%s", invoiceID)
+}
+
+// ─── HTTP-обработчики ─────────────────────────────────────────────────────────
+
+// HandleDeposit — пополнение баланса (тестовый режим)
+func HandleDeposit(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	email, ok := r.Context().Value("email").(string)
 	if !ok || email == "" {
-		log.Printf("❌ Ошибка: email не найден в контексте")
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// Парсим запрос
 	var req struct {
 		Amount float64 `json:"amount"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		log.Printf("❌ Ошибка парсинга JSON: %v", err)
 		http.Error(w, "Неверный формат запроса", http.StatusBadRequest)
 		return
 	}
-
-	if req.Amount <= 0 {
-		http.Error(w, "Сумма должна быть больше 0", http.StatusBadRequest)
+	if req.Amount < 1 {
+		http.Error(w, "Минимальная сумма: 1 TST", http.StatusBadRequest)
 		return
 	}
-	log.Printf("📝 Запрос на депозит: email=%s, amount=%.2f", email, req.Amount)
 
-	// Генерируем уникальный ID заказа (InvId)
-	orderID := fmt.Sprintf("%d", time.Now().UnixNano())
+	orderID := fmt.Sprintf("dep_%d", time.Now().UnixNano())
 
-	// Передаем email как пользовательский параметр, чтобы потом знать, кому начислить
-	userParams := map[string]string{
-		"email": email,
+	// Сохраняем pending-транзакцию
+	tx, err := sql.DB.Begin()
+	if err != nil {
+		log.Printf("❌ Ошибка начала транзакции: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	var userID int
+	if err := tx.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID); err != nil {
+		log.Printf("❌ Пользователь не найден: %v", err)
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
 	}
 
-	// Создаем ссылку на оплату
-	paymentURL, err := GeneratePaymentURL(req.Amount, orderID, email, userParams)
+	_, err = tx.Exec(`
+		INSERT INTO transactions (user_id, type, amount, status, payment_id)
+		VALUES ($1, 'deposit', $2, 'pending', $3)`,
+		userID, int64(req.Amount*100), orderID)
 	if err != nil {
-		log.Printf("❌ Ошибка создания платежа: %v", err)
+		log.Printf("❌ Ошибка создания транзакции: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Printf("❌ Ошибка коммита: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	// Создаём инвойс
+	inv, err := createInvoice(
+		orderID, req.Amount, email,
+		"http://localhost:8080/profile", // successURL
+		"http://localhost:8080/profile", // failURL
+		"https://ne-otchislyat.ru/",     // resultURL (должен быть публичным)
+	)
+	if err != nil {
+		log.Printf("❌ createInvoice: %v", err)
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
-		json.NewEncoder(w).Encode(map[string]string{
-			"error":   "payment_creation_failed",
-			"message": err.Error(),
-		})
+		json.NewEncoder(w).Encode(map[string]string{"error": err.Error()})
 		return
 	}
 
-	// Возвращаем URL для редиректа
+	invoiceID := inv.getInvoiceID()
+	log.Printf("✅ Тестовый инвойс создан: %s", invoiceID)
+
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(map[string]string{
-		"payment_url": paymentURL,
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"payment_url": paymentLink(invoiceID),
+		"invoice_id":  invoiceID,
+		"test_mode":   true,
 	})
 }
 
-// --- 3. Обработка уведомлений от Robokassa (Result URL) ---
-// HandlePaymentNotification обрабатывает POST-запросы от Robokassa
+// HandlePaymentNotification — callback от IntellectMoney
 func HandlePaymentNotification(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		log.Printf("❌ Ошибка парсинга формы: %v", err)
-		w.WriteHeader(http.StatusBadRequest)
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Получаем параметры от Robokassa
-	outSum := r.FormValue("OutSum")
-	invId := r.FormValue("InvId")
-	signature := r.FormValue("SignatureValue")
-
-	// ВНИМАНИЕ: Для проверки подписи используем password2!
-	// Собираем параметры для проверки
-	values := url.Values{}
-	values.Set("OutSum", outSum)
-	values.Set("InvId", invId)
-	values.Set("MerchantLogin", merchantLogin) // Нужен для формирования подписи
-
-	// Проверяем подпись (алгоритм должен совпадать с тем, что использовали при создании)
-	expectedSignature := calculateSignature(values, password2, SHA256)
-	if signature != expectedSignature {
-		log.Printf("❌ Ошибка проверки подписи для заказа %s", invId)
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("FAIL"))
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Printf("❌ Ошибка чтения тела: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
 
-	// Извлекаем пользовательские параметры (shp_email)
-	email := r.FormValue("shp_email")
-	if email == "" {
-		log.Printf("⚠️ Не передан email в shp_email для заказа %s", invId)
-		// Но все равно можем попробовать найти пользователя по-другому
+	log.Printf("📥 Payment notification: %s", string(body))
+
+	// Проверяем подпись
+	receivedHash := r.Header.Get("Hash")
+	expected := md5hash(string(body) + c.secretKey)
+	if expected != receivedHash {
+		log.Printf("❌ Неверная подпись callback. Ожидалась: %s, получена: %s", expected, receivedHash)
+		http.Error(w, "Invalid signature", http.StatusForbidden)
+		return
 	}
 
-	// --- ВАША ЛОГИКА ЗАЧИСЛЕНИЯ СРЕДСТВ ---
-	// 1. Найти пользователя по email
-	// 2. Начислить ему сумму outSum
-	// 3. Записать операцию в БД
-	log.Printf("✅ Платеж подтвержден! Заказ: %s, Сумма: %s, Email: %s", invId, outSum, email)
+	var data map[string]interface{}
+	if err := json.Unmarshal(body, &data); err != nil {
+		log.Printf("❌ Ошибка парсинга JSON: %v", err)
+		http.Error(w, "Bad request", http.StatusBadRequest)
+		return
+	}
 
-	// Обязательно вернуть "OK<InvId>", иначе Robokassa будет повторять запросы [citation:2][citation:8]
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("OK%s", invId)))
+	orderID, _ := data["orderId"].(string)
+	state, _ := data["state"].(string)
+
+	log.Printf("📝 Callback: orderId=%s, state=%s", orderID, state)
+
+	if orderID == "" || state != "Paid" {
+		log.Printf("⚠️ Пропускаем: state=%s", state)
+		w.Write([]byte("OK"))
+		return
+	}
+
+	tx, err := sql.DB.Begin()
+	if err != nil {
+		log.Printf("❌ Ошибка начала транзакции: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	defer tx.Rollback()
+
+	var userID int
+	var amount int64
+	var status string
+	err = tx.QueryRow(`
+		SELECT user_id, amount, status FROM transactions
+		WHERE payment_id = $1 AND type = 'deposit'`, orderID).Scan(&userID, &amount, &status)
+	if err != nil {
+		log.Printf("❌ Транзакция не найдена: %v", err)
+		http.Error(w, "Transaction not found", http.StatusNotFound)
+		return
+	}
+
+	if status == "success" {
+		log.Printf("⚠️ Транзакция уже обработана: %s", orderID)
+		tx.Commit()
+		w.Write([]byte("OK"))
+		return
+	}
+
+	_, err = tx.Exec(`UPDATE transactions SET status = 'success' WHERE payment_id = $1`, orderID)
+	if err != nil {
+		log.Printf("❌ Ошибка обновления статуса: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	_, err = tx.Exec(`UPDATE users SET balance = balance + $1 WHERE id = $2`, amount, userID)
+	if err != nil {
+		log.Printf("❌ Ошибка обновления баланса: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	if err := tx.Commit(); err != nil {
+		log.Printf("❌ Ошибка коммита: %v", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("✅ Тестовый депозит зачислен: user_id=%d amount=%d копеек", userID, amount)
+	w.Write([]byte("OK"))
+}
+
+// GetBalance — баланс пользователя
+func GetBalance(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value("email").(string)
+	if !ok || email == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	balance, frozen, err := sql.GetUserBalance(email)
+	if err != nil {
+		http.Error(w, "User not found", http.StatusNotFound)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"balance": float64(balance) / 100,
+		"frozen":  float64(frozen) / 100,
+	})
+}
+
+// CreateOrder — создание заказа
+func CreateOrder(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	email, ok := r.Context().Value("email").(string)
+	if !ok || email == "" {
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	var req struct {
+		VakansID int `json:"vakans_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	orderID, err := sql.CreateOrder(req.VakansID, email)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"success": true, "order_id": orderID})
+}
+
+// CompleteOrder — завершение заказа
+func CompleteOrder(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		OrderID int64 `json:"order_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if err := sql.CompleteOrder(req.OrderID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
+}
+
+// CancelOrder — отмена заказа
+func CancelOrder(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req struct {
+		OrderID int64 `json:"order_id"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "Invalid request", http.StatusBadRequest)
+		return
+	}
+
+	if err := sql.CancelOrder(req.OrderID); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{"success": true})
 }
