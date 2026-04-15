@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/src/static/register (1).css">
+    <link rel="stylesheet" href="/static/register.css">
     <link
         href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
@@ -132,7 +132,7 @@
                 password: password.value
             };
 
-            fetch('http://localhost:8080/reg', {
+            fetch('/reg', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -185,7 +185,7 @@
                 password: password.value
             };
 
-            fetch('http://localhost:8080/login', {
+            fetch('/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
