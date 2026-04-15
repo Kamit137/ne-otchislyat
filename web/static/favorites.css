@@ -27,7 +27,9 @@ body {
     line-height: 1.5;
     overflow-x: hidden;
 }
-
+.favorite-btn svg{
+    fill: #ff4444;
+}
 /* === Layout === */
 .background {
     display: flex;
@@ -607,4 +609,5 @@ button:focus {
     .head-cards button {
         padding: 8px;
     }
+    
 }
