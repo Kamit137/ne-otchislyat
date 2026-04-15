@@ -7,15 +7,15 @@
 
 :root {
     --bg-dark: #080C25;
-    /* Самый темный */
     --panel-bg: #161E35;
-    /* Панели и карточки */
     --accent-blue: #3071E7;
-    /* Яркий синий для кнопок */
     --text-main: #A6B2EC;
-    /* Светло-голубой текст */
     --border-color: #293659;
-    /* Цвет границ */
+    --bg-card: #161E35;
+    --stroke: #293659;
+    --accent: #3071E7;
+    --text-dim: #A6B2EC;
+    --text-white: #ffffff;
 }
 
 .btn {
@@ -28,11 +28,9 @@
     font-size: 20px;
 }
 
-
 html {
     height: 100%;
     width: 100%;
-
 }
 
 body {
@@ -40,87 +38,88 @@ body {
     flex-direction: column;
     margin: 0;
     padding: 0;
-    height: 100vh;
+    min-height: 100vh;
     background-color: #16162F;
-    /* Убирает скролл */
-
-
     font-family: 'Roboto', sans-serif;
+    overflow-x: hidden;
 }
 
+/* === HEADER === */
 .section-conatiner__list {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    background-color: var(--panel-bg);
-    /* Четкая граница */
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: #2A2D3E;
     box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
-    /* Тень, чтобы меню "приподнялось" */
-
-
-
     color: aliceblue;
-
+    padding: 12px 24px;
 }
 
 .container-list {
     display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
 .header-list {
     align-items: center;
     display: flex;
     flex-direction: column;
-    margin-top: 25px;
-    margin-right: 25px;
     font-size: 14px;
     cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
 
+.header-list:hover {
+    background: rgba(48, 113, 231, 0.2);
+}
+
+.header-list span {
+    color: var(--text-white);
+    cursor: pointer;
 }
 
 .container-logo {
     display: flex;
     align-items: center;
-
-    font-size: 50px;
-    margin-left: 50px;
     cursor: pointer;
     justify-content: center;
 }
 
-
-
-
-
-.name-block-br {
-    display: flex;
-    flex-direction: column;
+.container-logo h4 {
+    color: var(--text-white);
+    font-family: 'Playwrite NZ Basic', cursive;
+    font-size: clamp(18px, 5vw, 28px);
+    margin: 0;
 }
 
-.name-line {
-    background-color: rgb(64, 255, 26);
-    height: 1px;
-    width: 100%;
-    border: none;
-}
-
+/* === ОСНОВНОЙ БЛОК === */
 .background {
-    height: 100%;
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
+    padding: 20px;
+    min-height: calc(100vh - 80px);
 }
 
 .menu-block {
     display: flex;
     height: 536px;
     width: 784px;
-    background-color: #242F49;
     border-radius: 50px;
     position: relative;
+    background: #2A2D3E;
     box-shadow: -21px 10px 19px 4px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
 }
 
+/* === ОРИГИНАЛЬНЫЕ СТИЛИ АНИМАЦИИ (ДЛЯ ДЕСКТОПА - ГОРИЗОНТАЛЬНАЯ) === */
 .animation-login-hidden {
     overflow: hidden;
 }
@@ -148,6 +147,7 @@ body {
     margin-bottom: 50px;
     height: 32px;
     color: aliceblue;
+    font-size: 32px;
 }
 
 .form-login {
@@ -155,6 +155,8 @@ body {
     flex-direction: column;
     align-items: center;
     margin-top: 65px;
+    width: 100%;
+    padding: 0 20px;
 }
 
 .form-login__data {
@@ -162,11 +164,18 @@ body {
     padding-right: 20px;
     margin-bottom: 25px;
     width: 325px;
+    max-width: 100%;
     height: 56px;
     border-radius: 15px;
     border: 0px;
     outline: none;
     font-size: 15px;
+    background-color: #f5f0d8;
+    color: black;
+}
+
+.form-login__data:focus {
+    box-shadow: 0 0 10px rgba(48, 113, 231, 0.2);
 }
 
 .btn-login {
@@ -174,6 +183,17 @@ body {
     height: 56px;
     width: 230px;
     border-radius: 50px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-login:hover {
+    background-color: #4682f4;
+    box-shadow: 0 0 20px rgba(48, 113, 231, 0.4);
 }
 
 .animation-register-hidden {
@@ -202,6 +222,8 @@ body {
     flex-direction: column;
     align-items: center;
     margin-top: 65px;
+    width: 100%;
+    padding: 0 20px;
 }
 
 .form-register__data {
@@ -209,17 +231,35 @@ body {
     padding-right: 20px;
     margin-bottom: 25px;
     width: 325px;
+    max-width: 100%;
     height: 56px;
     border-radius: 15px;
     border: 0px;
     outline: none;
     font-size: 15px;
+    background-color: #f5f0d8;
+    color: black;
+}
+
+.form-register__data:focus {
+    box-shadow: 0 0 10px rgba(48, 113, 231, 0.2);
 }
 
 .btn-register {
     height: 56px;
     width: 230px;
     border-radius: 50px;
+    background-color: var(--accent);
+    color: white;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-register:hover {
+    background-color: #4682f4;
+    box-shadow: 0 0 20px rgba(48, 113, 231, 0.4);
 }
 
 .front-container-animation-right {
@@ -234,17 +274,18 @@ body {
     position: absolute;
     height: 536px;
     width: 392px;
-    background: linear-gradient(45deg, rgb(28, 184, 53) 23%, rgb(104, 54, 231) 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: transform 0.6s ease-in-out;
-
     border-radius: 50px;
     overflow: hidden;
     transform: translateX(0);
     z-index: 10;
+    background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
+    color: white;
+    text-align: center;
 }
 
 .container-animation-right.right-panel-active {
@@ -270,6 +311,8 @@ body {
     text-align: center;
     color: aliceblue;
     margin-bottom: 40px;
+    font-size: 28px;
+    line-height: 1.2;
 }
 
 .front-container-animation-left {
@@ -283,25 +326,26 @@ body {
     position: absolute;
     height: 536px;
     width: 392px;
-    background: linear-gradient(45deg, rgb(28, 184, 53) 23%, rgb(104, 54, 231) 100%);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     transition: transform 0.6s ease-in-out;
     overflow: hidden;
-
     border-radius: 50px;
     transform: translateX(100%);
     z-index: 1;
+    background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
+    color: white;
+    text-align: center;
 }
 
 .container-animation-left.left-panel-active {
     transform: translateX(0);
+
 }
 
 .text-animation-login {
-
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -315,137 +359,369 @@ body {
     transform: translateX(0);
 }
 
-.container-logo h4 {
-    color: var(--text-white);
-    font-family: 'Playwrite NZ Basic', cursive;
+/* === АДАПТИВ ДЛЯ ПЛАНШЕТОВ === */
+@media (max-width: 850px) {
+    .menu-block {
+        width: 700px;
+        height: 500px;
+    }
 
-    margin-bottom: 25px;
+    .login-container,
+    .register-container,
+    .front-container-animation-left,
+    .front-container-animation-right,
+    .container-animation-left,
+    .container-animation-right {
+        width: 350px;
+        height: 500px;
+    }
+
+    .form-login,
+    .form-register {
+        margin-top: 40px;
+    }
+
+    .form-login__data,
+    .form-register__data {
+        width: 280px;
+    }
+
+    .btn-login,
+    .btn-register {
+        width: 200px;
+        margin-top: 40px;
+    }
+
+    .form-text {
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+
+    .text-prewie {
+        font-size: 24px;
+        margin-bottom: 25px;
+    }
+
+    .btn {
+        width: 180px;
+        height: 48px;
+        font-size: 18px;
+    }
 }
 
-:root {
+/* === АДАПТИВ ДЛЯ ТЕЛЕФОНОВ (ВЕРТИКАЛЬНАЯ АНИМАЦИЯ - ТОЧНО КАК ГОРИЗОНТАЛЬНАЯ) === */
+@media (max-width: 700px) {
+    .background {
+        padding: 15px;
+        min-height: auto;
+    }
 
-    /* Глубокий темный */
-    --bg-card: #161E35;
-    /* Панели форм */
-    --stroke: #293659;
-    /* Границы */
-    --accent: #3071E7;
-    /* Яркий синий */
-    --text-dim: #A6B2EC;
-    /* Вторичный текст */
-    --text-white: #ffffff;
-    /* Заголовки */
+    .menu-block {
+        display: block;
+        width: 100%;
+        max-width: 400px;
+        height: 620px;
+        border-radius: 40px;
+        position: relative;
+    }
+
+    /* Вертикальная анимация - копия горизонтальной логики */
+    .animation-login-hidden {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        overflow: hidden;
+    }
+
+    .animation-register-hidden {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        overflow: hidden;
+    }
+
+    .login-container {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translateY(0);
+        display: flex;
+        justify-content: center;
+        border-radius: 0;
+        transition: transform 0.6s ease-in-out;
+        z-index: 4;
+    }
+
+    /* Форма входа уезжает вверх */
+    .login-container.login-hidden {
+        transform: translateY(-100%);
+    }
+
+    .register-container {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transform: translateY(100%);
+        display: flex;
+        justify-content: center;
+        border-radius: 0;
+        transition: transform 0.6s ease-in-out;
+        z-index: 1;
+    }
+
+    /* Форма регистрации выезжает */
+    .register-container.register-hidden {
+        transform: translateY(0);
+    }
+
+    /* Панели анимации */
+    .front-container-animation-left {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        overflow: hidden;
+    }
+
+    .front-container-animation-right {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 50%;
+        overflow: hidden;
+    }
+
+    .container-animation-left {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.6s ease-in-out;
+        border-radius: 0;
+        transform: translateY(100%);
+        z-index: 1;
+        background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
+    }
+
+    .container-animation-left.left-panel-active {
+        transform: translateY(0);
+        display: flex;
+        justify-content: center;
+    }
+
+    .container-animation-right {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.6s ease-in-out;
+        border-radius: 0;
+        transform: translateY(0);
+        z-index: 10;
+        background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
+    }
+
+    .container-animation-right.right-panel-active {
+        transform: translateY(-100%);
+    }
+
+    .text-animation-login {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.6s ease-in-out;
+        width: 100%;
+        transform: translateY(0);
+    }
+
+    .text-animation-login.text-a-l {
+        transform: translateY(-100%);
+    }
+
+    .text-animation-register {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        transition: transform 0.6s ease-in-out;
+        width: 100%;
+        transform: translateY(100%);
+    }
+
+    .text-animation-register.text-a-r {
+        transform: translateY(0);
+    }
+
+    /* Стили форм */
+    .form-login,
+    .form-register {
+        margin-top: 0;
+        justify-content: center;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-login__data,
+    .form-register__data {
+        width: 85%;
+        max-width: 280px;
+        height: 50px;
+    }
+
+    .btn-login,
+    .btn-register {
+        width: 180px;
+        margin-top: 20px;
+        height: 50px;
+    }
+
+    .form-text {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
+
+    .text-prewie {
+        font-size: 20px;
+        margin-bottom: 15px;
+    }
+
+    .btn {
+        width: 150px;
+        height: 44px;
+        font-size: 16px;
+    }
 }
 
+/* === ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ === */
+@media (max-width: 480px) {
+    .section-conatiner__list {
+        flex-direction: column;
+        text-align: center;
+    }
 
+    .container-logo {
+        margin-left: 0;
+        justify-content: center;
+    }
 
-/* --- Левое меню (как на главной) --- */
+    .container-list {
+        justify-content: center;
+    }
 
+    .header-list {
+        margin-top: 0;
+        margin-right: 0;
+    }
 
+    .menu-block {
+        max-width: 95%;
+        height: 580px;
+    }
 
+    .form-login__data,
+    .form-register__data {
+        width: 90%;
+        height: 46px;
+        font-size: 14px;
+    }
 
-.header-list span {
-    color: var(--text-white);
-    cursor: pointer;
+    .btn-login,
+    .btn-register {
+        width: 160px;
+        height: 46px;
+        font-size: 16px;
+    }
 
+    .form-text {
+        font-size: 22px;
+    }
+
+    .text-prewie {
+        font-size: 18px;
+    }
+
+    .btn {
+        width: 130px;
+        height: 40px;
+        font-size: 14px;
+    }
 }
 
+/* === АЛЬБОМНАЯ ОРИЕНТАЦИЯ === */
+@media (max-width: 800px) and (orientation: landscape) {
+    .background {
+        padding: 10px;
+    }
 
+    .menu-block {
+        max-width: 90%;
+        height: 400px;
+    }
 
-/* --- Основной фон --- */
+    .form-login__data,
+    .form-register__data {
+        margin-bottom: 12px;
+        height: 40px;
+    }
 
+    .btn-login,
+    .btn-register {
+        margin-top: 10px;
+        height: 40px;
+    }
 
-/* --- Контейнер форм --- */
-.menu-block {
+    .form-text {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
 
-    background-color: var(--bg-card);
-    position: relative;
-    display: flex;
-    height: 536px;
-    width: 784px;
-    border-radius: 50px;
-    box-shadow: -21px 10px 19px 4px rgba(0, 0, 0, 0.2);
+    .text-prewie {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        width: 120px;
+        height: 36px;
+        font-size: 14px;
+    }
 }
 
-/* --- Поля ввода --- */
-.form-login__data,
-.form-register__data {
-    width: 100%;
-    background: var(--bg-main);
-    border: 1px solid var(--stroke);
-    border-radius: 12px;
-    padding: 12px 15px;
-    color: var(--text-white);
-    margin-bottom: 15px;
-    outline: none;
-    transition: 0.3s;
+/* === СКРОЛЛБАР === */
+::-webkit-scrollbar {
+    width: 6px;
 }
 
-.form-login__data:focus,
-.form-register__data:focus {
-    border-color: var(--accent);
-    box-shadow: 0 0 10px rgba(48, 113, 231, 0.2);
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
 }
 
-/* --- Кнопки внутри форм --- */
-.btn-login,
-.btn-register {
-    width: 100%;
-    background-color: var(--accent);
-    color: white;
-    border: none;
-    padding: 14px;
-    border-radius: 12px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn-login:hover,
-.btn-register:hover {
-    background-color: #4682f4;
-    box-shadow: 0 0 20px rgba(48, 113, 231, 0.4);
-}
-
-/* --- Анимационные панели (Front-containers) --- */
-.container-animation-left,
-.container-animation-right {
-    background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
-    color: white;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-}
-
-.text-prewie {
-    color: white;
-    font-size: 28px;
-    margin-bottom: 20px;
-    line-height: 1.2;
-}
-
-/* --- Кнопки переключения (Login/Register) --- */
-.btn {
-    background: transparent;
-    border: 2px solid white;
-    color: white;
-    padding: 10px 30px;
-    border-radius: 50px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.btn:hover {
-    background: white;
-    color: var(--accent);
-}
-
-/* Заголовки форм */
-.form-text {
-    color: var(--text-white);
-    margin-bottom: 25px;
-    font-size: 32px;
+::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 10px;
 }
