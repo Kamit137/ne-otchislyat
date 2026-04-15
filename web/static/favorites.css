@@ -27,8 +27,38 @@ body {
     line-height: 1.5;
     overflow-x: hidden;
 }
-.favorite-btn svg{
-    fill: #ff4444;
+/* === СТИЛИ ДЛЯ СЕРДЕЧЕК (ИЗБРАННОЕ) === */
+
+/* Базовый стиль кнопки */
+.favorite-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Неактивное сердечко (серое) */
+.favorite-btn svg {
+    fill:  #ff4444 !important;
+    transition: fill 0.2s ease;
+}
+
+/* Активное сердечко (красное) */
+.favorite-btn.active svg {
+    fill: #c3c7d3 !important;
+}
+
+/* Ховер эффект */
+.favorite-btn:hover svg {
+    transform: scale(1.05);
+}
+
+.favorite-btn.active:hover svg {
+    fill: #cc0000 !important;
 }
 /* === Layout === */
 .background {
