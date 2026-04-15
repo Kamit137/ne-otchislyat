@@ -7,13 +7,13 @@
     --border-color: #293659;
     --white: #ffffff;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --header-bg: #1E2433;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: Verdana, Geneva, Tahoma, sans-serif;
 }
 
 body {
@@ -21,140 +21,166 @@ body {
     flex-direction: column;
     margin: 0;
     padding: 0;
-    height: 100vh;
-    background-color: #16162F;
-    /* Убирает скролл */
-
-
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f1128 0%, #1a1f3a 100%);
     font-family: 'Roboto', sans-serif;
+    overflow-x: hidden;
 }
 
+/* === HEADER / NAVIGATION === */
 .section-conatiner__list {
     width: 100%;
     display: flex;
     justify-content: space-between;
-    background-color: var(--panel-bg);
-    /* Четкая граница */
-    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.3);
-    /* Тень, чтобы меню "приподнялось" */
-
-
-
-    color: aliceblue;
-
-}
-
-.container-list {
-    display: flex;
-}
-
-.header-list {
     align-items: center;
-    display: flex;
-    flex-direction: column;
-    margin-top: 25px;
-    margin-right: 25px;
-    font-size: 14px;
-    cursor: pointer;
-
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: var(--header-bg);
+    border-bottom: 1px solid var(--border-color);
+    padding: 12px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 }
 
 .container-logo {
     display: flex;
     align-items: center;
-
-    font-size: 50px;
-    margin-left: 50px;
     cursor: pointer;
-    justify-content: center;
 }
 
 .container-logo h4 {
     color: var(--white);
     font-family: 'Playwrite NZ Basic', cursive;
-
-    margin-bottom: 25px;
+    font-size: clamp(18px, 5vw, 28px);
+    margin: 0;
 }
 
-/* --- Центральный блок --- */
+.container-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+}
+
+.header-list {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(48, 113, 231, 0.1);
+}
+
+.header-list:hover {
+    background: rgba(48, 113, 231, 0.2);
+    transform: translateY(-2px);
+}
+
+.header-list span {
+    font-size: 12px;
+    margin-top: 5px;
+    color: var(--white);
+}
+
+.header-list svg {
+    width: 24px;
+    height: 24px;
+    fill: var(--accent-blue);
+}
+
+/* === ОСНОВНОЙ БЛОК === */
 .main-section {
-    flex-grow: 1;
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
-
-    /* Смещение вверх для визуального баланса */
+    padding: 40px 20px;
+    min-height: calc(100vh - 80px);
 }
 
 .menu-block {
     background-color: var(--panel-bg);
     width: 100%;
     max-width: 500px;
-    padding: 60px 40px;
-    border-radius: 24px;
+    padding: 50px 40px;
+    border-radius: 28px;
     border: 1px solid var(--border-color);
     box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
-    /* Эффект матового стекла */
     animation: fadeIn 0.6s ease-out;
 }
 
+/* === ФОРМА === */
 .form-code {
     display: flex;
     flex-direction: column;
     align-items: center;
     width: 100%;
+    gap: 20px;
 }
 
 label {
-    font-size: 18px;
-    margin-bottom: 30px;
+    font-size: clamp(16px, 4vw, 20px);
+    margin-bottom: 10px;
     text-align: center;
-    font-weight: 400;
-    opacity: 0.9;
-    color: #ffffff;
+    font-weight: 500;
+    color: var(--white);
+    letter-spacing: 0.5px;
 }
 
 input {
     width: 100%;
-    max-width: 300px;
-    height: 65px;
+    max-width: 280px;
+    height: 70px;
     background: rgba(8, 12, 37, 0.6);
     border: 2px solid var(--border-color);
-    border-radius: 16px;
+    border-radius: 18px;
     color: var(--white);
-    font-size: 32px;
+    font-size: clamp(28px, 8vw, 36px);
     font-weight: 700;
     text-align: center;
     letter-spacing: 8px;
-    margin-bottom: 30px;
     transition: var(--transition);
+    outline: none;
+    font-family: monospace;
 }
 
 input:focus {
-    outline: none;
     border-color: var(--accent-blue);
-    box-shadow: 0 0 20px rgba(48, 113, 231, 0.2);
-    background: var(--bg-dark);
+    box-shadow: 0 0 20px rgba(48, 113, 231, 0.3);
+    background: rgba(8, 12, 37, 0.8);
+}
+
+/* Убираем стрелки у number input */
+input[type="number"] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .btn {
     width: 100%;
-    max-width: 300px;
-    height: 60px;
-    background-color: var(--accent-blue);
+    max-width: 280px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--accent-blue), var(--accent-hover));
     color: var(--white);
     border: none;
-    border-radius: 16px;
+    border-radius: 50px;
     font-size: 18px;
     font-weight: 600;
     cursor: pointer;
     transition: var(--transition);
     box-shadow: 0 4px 15px rgba(48, 113, 231, 0.3);
+    margin-top: 10px;
 }
 
 .btn:hover {
-    background-color: var(--accent-hover);
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(48, 113, 231, 0.4);
 }
@@ -163,4 +189,219 @@ input:focus {
     transform: translateY(-1px);
 }
 
-/* Анимация появления */
+/* === АНИМАЦИИ === */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ========== АДАПТИВ ДЛЯ ПЛАНШЕТОВ ========== */
+@media (max-width: 768px) {
+    .section-conatiner__list {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .container-logo {
+        justify-content: center;
+    }
+
+    .container-list {
+        justify-content: center;
+    }
+
+    .main-section {
+        padding: 30px 20px;
+    }
+
+    .menu-block {
+        padding: 40px 30px;
+        max-width: 450px;
+    }
+
+    input {
+        letter-spacing: 6px;
+        height: 65px;
+    }
+}
+
+/* ========== АДАПТИВ ДЛЯ ТЕЛЕФОНОВ ========== */
+@media (max-width: 600px) {
+    .section-conatiner__list {
+        padding: 10px 16px;
+    }
+
+    .header-list {
+        padding: 6px 10px;
+    }
+
+    .header-list span {
+        font-size: 10px;
+    }
+
+    .header-list svg {
+        width: 20px;
+        height: 20px;
+    }
+
+    .main-section {
+        padding: 20px 16px;
+    }
+
+    .menu-block {
+        padding: 35px 24px;
+        border-radius: 24px;
+    }
+
+    label {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    input {
+        height: 60px;
+        max-width: 250px;
+        font-size: 28px;
+        letter-spacing: 6px;
+        border-radius: 16px;
+    }
+
+    .btn {
+        height: 52px;
+        max-width: 250px;
+        font-size: 16px;
+    }
+}
+
+/* ========== ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ (до 400px) ========== */
+@media (max-width: 400px) {
+    .container-list {
+        gap: 8px;
+    }
+
+    .header-list {
+        padding: 5px 8px;
+    }
+
+    .menu-block {
+        padding: 30px 20px;
+    }
+
+    label {
+        font-size: 14px;
+    }
+
+    input {
+        height: 55px;
+        max-width: 220px;
+        font-size: 24px;
+        letter-spacing: 4px;
+    }
+
+    .btn {
+        height: 48px;
+        max-width: 220px;
+        font-size: 15px;
+    }
+}
+
+/* ========== АЛЬБОМНАЯ ОРИЕНТАЦИЯ ========== */
+@media (max-width: 800px) and (orientation: landscape) {
+    .main-section {
+        padding: 20px;
+        min-height: auto;
+    }
+
+    .menu-block {
+        padding: 25px 30px;
+    }
+
+    input {
+        height: 50px;
+        font-size: 26px;
+    }
+
+    .btn {
+        height: 48px;
+    }
+
+    label {
+        margin-bottom: 5px;
+    }
+}
+
+/* ========== ВЫСОКИЕ ЭКРАНЫ ========== */
+@media (min-height: 800px) {
+    .main-section {
+        min-height: calc(100vh - 80px);
+    }
+}
+
+/* ========== СКРОЛЛБАР ========== */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--accent-hover);
+}
+
+/* ========== ДОПОЛНИТЕЛЬНЫЕ УЛУЧШЕНИЯ ========== */
+button {
+    font-family: inherit;
+}
+
+/* Убираем outline при тапе на мобильных */
+button:focus,
+input:focus {
+    outline: none;
+}
+
+/* Плейсхолдер стили */
+input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+    font-size: 16px;
+    letter-spacing: 2px;
+}
+
+/* Автозаполнение */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: var(--white);
+    transition: background-color 5000s ease-in-out 0s;
+    background-color: transparent;
+}
+
+/* Улучшаем таргет на мобильных */
+@media (max-width: 600px) {
+
+    .header-list,
+    .btn {
+        cursor: default;
+    }
+
+    /* Увеличиваем область нажатия */
+    .header-list {
+        min-width: 60px;
+    }
+}

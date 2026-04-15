@@ -12,10 +12,12 @@
 
 <body>
 
-    <div class="section-conatiner__list ">
+
+
+
+    <div class="section-conatiner__list">
         <div class="container-logo">
             <h4>ne-otchislyat.ru</h4>
-            
         </div>
         <div class="container-list">
             <div id="header-list-home" class="header-list">
@@ -25,7 +27,6 @@
                         d="M240-200h120v-240h240v240h120v-360L480-740 240-560v360Zm-80 80v-480l320-240 320 240v480H520v-240h-80v240H160Zm320-350Z" />
                 </svg>
                 <span>На главную</span>
-
             </div>
             <div class="header-list">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -34,14 +35,15 @@
                         d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
                 </svg>
                 <span>Выход</span>
-
             </div>
         </div>
     </div>
-    <div class="section-container__user">
 
+    <div class="section-container__user">
         <div class="modal-overlay" id="modalOverlay"></div>
-        <div class="make-cards invisible">
+
+        <!-- Модальное окно создания карточки -->
+        <div class="make-cards invisible" id="createModal">
             <div class="head-craete-cards">
                 <h2 class="head-text-cards">Создание карточки</h2>
                 <svg class="btnX" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -50,96 +52,68 @@
                         d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
                 </svg>
             </div>
-            <form class="form-newtask" action="">
-                <div class="block-form-text">
-                    <div class="create-block">
-                        <label class="name-inf" for="TableName">Название карточки:</label>
-                        <div class="form-profile__text">
-                            <input class="colorbox" id="TableName" name="login" type="text" maxlength="50">
-
-                        </div>
-
-                    </div>
-                    <div class="create-block ">
-                        <label class="name-inf" for="discription">Описание товара:</label>
-                        <textarea class="block-textarea" id="discription"
-                            placeholder="Расскажите подробно о товаре"></textarea>
-                    </div>
-                    <div class="create-block">
-                        <label class="name-inf" for="price">Цена:</label>
-                        <div class="form-profile__text">
-                            <input class="center-text" id="price" name="login" type="number" max="99999"
-                                inputmode="numeric" placeholder="0-99999">
-
-                        </div>
-
-                    </div>
+            <form class="form-newtask" id="createTaskForm">
+                <div class="create-block">
+                    <label class="name-inf" for="TableName">Название карточки:</label>
+                    <input class="colorbox" id="TableName" name="title" type="text" maxlength="50" required>
                 </div>
-
+                <div class="create-block">
+                    <label class="name-inf" for="discription">Описание товара:</label>
+                    <textarea class="block-textarea" id="discription"
+                        placeholder="Расскажите подробно о товаре"></textarea>
+                </div>
+                <div class="create-block">
+                    <label class="name-inf" for="price">Цена:</label>
+                    <input class="center-text" id="price" type="number" max="99999" placeholder="0-99999" required>
+                </div>
                 <div class="choice-tegs">
                     <label class="color">Выберите теги:</label>
                     <div class="tegs-container">
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="математика" class="teg-input">
-                            <span class="teg-button">Математика</span>
-                        </label>
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="термех" class="teg-input">
-                            <span class="teg-button">Термех</span>
-                        </label>
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="английский" class="teg-input">
-                            <span class="teg-button">Английский</span>
-                        </label>
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="русский" class="teg-input">
-                            <span class="teg-button">Русский</span>
-                        </label>
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="русский" class="teg-input">
-                            <span class="teg-button">физика</span>
-                        </label>
-                        <label class="teg-item">
-                            <input type="radio" name="tegs" value="русский" class="teg-input">
-                            <span class="teg-button">Информтика</span>
-                        </label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="математика"
+                                class="teg-input"><span class="teg-button">Математика</span></label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="термех" class="teg-input"><span
+                                class="teg-button">Термех</span></label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="английский"
+                                class="teg-input"><span class="teg-button">Английский</span></label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="русский" class="teg-input"><span
+                                class="teg-button">Русский</span></label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="физика" class="teg-input"><span
+                                class="teg-button">Физика</span></label>
+                        <label class="teg-item"><input type="radio" name="tegs" value="информатика"
+                                class="teg-input"><span class="teg-button">Информатика</span></label>
                     </div>
                 </div>
                 <div class="btn-div">
                     <button type="submit" class="new-task">Добавить задачу</button>
                 </div>
             </form>
-
         </div>
 
-
+        <!-- Профиль пользователя -->
         <div class="container-user__profile block-profile">
             <h1>Профиль</h1>
             <div class="section-logo-name-profile">
                 <div class="logo-circle">
-                    <svg xmlns="http://www.w3.org/2000/svg" height="125px" viewBox="0 -960 960 960" width="125px"
-                        fill="#ffffff">
+                    <svg viewBox="0 -960 960 960" fill="#ffffff">
                         <path
                             d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z" />
                     </svg>
                 </div>
                 <div class="inf-profile-name-data">
-                    <h1 id="Name"></h1>
-                    <div class="text-data-profile ">
-                        <span class="text-data-profile1">Регистрация:</span>
+                    <h1 id="Name">KyKyXa</h1>
+                    <div class="text-data-profile">
+                        <span class="text-data-profile1">Регистрация: </span>
                         <span class="text-data-profile" id="Date"></span>
-                         </div>
-                    <div class="gmail-profile1">
+                    </div>
+                    <div class="gmail-profile">
                         <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
                             fill="#0e1f2f">
                             <path
                                 d="M160-160q-33 0-56.5-23.5T80-240v-480q0-33 23.5-56.5T160-800h640q33 0 56.5 23.5T880-720v480q0 33-23.5 56.5T800-160H160Zm320-280L160-640v400h640v-400L480-440Zm0-80 320-200H160l320 200ZM160-640v-80 480-400Z" />
                         </svg>
-                        <span class="text-gmail-profile" id="gmail"> </span>
+                        <span class="text-gmail-profile" id="gmail">GlebGleb567@gmail.com</span>
                     </div>
                 </div>
-
-
             </div>
             <div class="other-inf-profile">
                 <div class="gmail-profile">
@@ -151,8 +125,7 @@
                 <div class="gmail-profile">
                     <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" fill="#fffa20">
                         <path
-                            d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z">
-                        </path>
+                            d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" />
                     </svg>
                     <span class="text-gmail-profile">Рейтинг: 4.9</span>
                 </div>
@@ -162,292 +135,334 @@
                         <path
                             d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Zm-57-480 57 400h422l57-400H212Zm226 320 198-198-57-56-141 141-57-57-57 57 114 113ZM320-680h320v-80H320v80Zm160 280Z" />
                     </svg>
-                    <span class="text-gmail-profile">Выполенно заказов: 435</span>
+                    <span class="text-gmail-profile">Выполнено заказов: 435</span>
                 </div>
-
             </div>
             <div class="profile-btn">
-                <button class="btn-change">Редактировать
-                </button>
+                <button class="btn-change">Редактировать</button>
             </div>
         </div>
+
+        <!-- Блок заказов -->
         <div class="container-user__orders">
             <div class="user__orders-list-header">
                 <div class="list-headers-orders">
                     <h1>Заказы</h1>
                 </div>
                 <div class="list-headers__center-text">
-                    <span class="list-headers__small-text">
-                        Мои заказы
-                    </span>
-                    <span>
-                        История
-                    </span>
+                    <span class="list-headers__small-text">Мои заказы</span>
+                    <span>История</span>
                 </div>
                 <button class="Btn-new_orders" id="filter-open">Создать заказ</button>
             </div>
-            <div class="list-orders-all">
-                <div class="orders">
+            <div class="list-orders-all" id="ordersContainer">
+                <div class="orders" data-card-id="${id}">
                     <div class="list-headers-name-task">
-                        <span class="text-name-task">ЛаБа за 1 денб</span>
-                        <span class="price-task">8500P</span>
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
                     </div>
                     <div class="data-task-create">
-                        <span>Создано: 15.08.2006</span>
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
                     </div>
                     <div class="box-other-inf">
                         <div class="other-inf-task">
                             <div class="inf-status">
-                                <div class="circle-status"></div>
-                                Oпубликован
+                                <div class="circle-status"></div> Опубликован
                             </div>
-                            
-
                         </div>
                         <div class="other-inf-Btn-task">
-                            <button class="Btns-task-remake ">
-
-                                Открыть</button>
-                            <button class="Btns-task-remake">
-
-                                Редактировать</button>
-                            <button class="Btns-task-remake1 ">Удалить</button>
-
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
                         </div>
-
                     </div>
-
                 </div>
-                <div class="orders">
-
+                <div class="orders" data-card-id="${id}">
+                    <div class="list-headers-name-task">
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
+                    </div>
+                    <div class="data-task-create">
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                    <div class="box-other-inf">
+                        <div class="other-inf-task">
+                            <div class="inf-status">
+                                <div class="circle-status"></div> Опубликован
+                            </div>
+                        </div>
+                        <div class="other-inf-Btn-task">
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="orders">
-
+                <div class="orders" data-card-id="${id}">
+                    <div class="list-headers-name-task">
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
+                    </div>
+                    <div class="data-task-create">
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                    <div class="box-other-inf">
+                        <div class="other-inf-task">
+                            <div class="inf-status">
+                                <div class="circle-status"></div> Опубликован
+                            </div>
+                        </div>
+                        <div class="other-inf-Btn-task">
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="orders">
-
+                <div class="orders" data-card-id="${id}">
+                    <div class="list-headers-name-task">
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
+                    </div>
+                    <div class="data-task-create">
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                    <div class="box-other-inf">
+                        <div class="other-inf-task">
+                            <div class="inf-status">
+                                <div class="circle-status"></div> Опубликован
+                            </div>
+                        </div>
+                        <div class="other-inf-Btn-task">
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="orders">
-
+                <div class="orders" data-card-id="${id}">
+                    <div class="list-headers-name-task">
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
+                    </div>
+                    <div class="data-task-create">
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                    <div class="box-other-inf">
+                        <div class="other-inf-task">
+                            <div class="inf-status">
+                                <div class="circle-status"></div> Опубликован
+                            </div>
+                        </div>
+                        <div class="other-inf-Btn-task">
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="orders" data-card-id="${id}">
+                    <div class="list-headers-name-task">
+                        <span class="text-name-task">${escapeHtml(label)}</span>
+                        <span class="price-task">${price}₽</span>
+                    </div>
+                    <div class="data-task-create">
+                        <span>Создано: ${new Date().toLocaleDateString()}</span>
+                    </div>
+                    <div class="box-other-inf">
+                        <div class="other-inf-task">
+                            <div class="inf-status">
+                                <div class="circle-status"></div> Опубликован
+                            </div>
+                        </div>
+                        <div class="other-inf-Btn-task">
+                            <button class="Btns-task-remake">Открыть</button>
+                            <button class="Btns-task-remake">Редактировать</button>
+                            <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                        </div>
+                    </div>
                 </div>
 
-
+                <!-- Карточки подгрузятся через JS -->
+                <div style="color: white; text-align: center; padding: 40px;">Загрузка заказов...</div>
             </div>
         </div>
-
-
-
-
-
-
-
-
     </div>
-
-
-
-
-
-
-
-
-    </div>
-
-    </div>
-    </div>
-
-
 
     <script>
-    const textBlock = document.querySelector('.list-orders-all');
-
-      fetch('/api/lenta', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' }
-        
-      })
-        .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка загрузки профиля');
-                }
-                return response.json();
-            })
-    
-        .then(json => {
-          
-            textBlock.innerHTML += json.map(({ label, price,  id}) => `
-            <div class="orders">
-                      <div class="list-headers-name-task" data-card-id="${id}">
-                        <span class="text-name-task">${label}</span>
-                        <span class="price-task">${price}P</span>
-                    </div>
-                    <div class="data-task-create">
-                        <span>Создано: 15.08.2006</span>
-                    </div>
-                    <div class="box-other-inf">
-                        <div class="other-inf-task">
-                            <div class="inf-status">
-                                <div class="circle-status"></div>
-                                Oпубликован
-                            </div>
-                           
-
-
-                        </div>
-                        <div class="other-inf-Btn-task">
-                            <button class="Btns-task-remake ">
-
-                                Открыть</button>
-                            <button class="Btns-task-remake">
-
-                                Редактировать</button>
-                            <button class="Btns-task-remake1 ">Удалить</button>
-
-                        </div>
-
-                    </div>
-
-                </div>
-
-                
-            `).join('');
-
-            // После добавления новых карточек - инициализируем обработчики для их сердечек
-            initFavoriteButtons();
-          }
-        )
-        .catch(err => console.error('Ошибка:', err));
-    
-
-
+        // ---------- DOM элементы ----------
+        const ordersContainer = document.getElementById('ordersContainer');
         const modal = document.querySelector('.make-cards');
-        const showBtn = document.querySelector('#filter-open');
-        const closeBtn = document.querySelector('.btnX');
-        const mainContent1 = document.querySelector('.section-conatiner__list');
-        const mainContent2 = document.querySelector('.container-user__profile');
-        const mainContent3 = document.querySelector('.container__cases-comment');
+        const overlay = document.getElementById('modalOverlay');
+        const showBtn = document.getElementById('filter-open');
+        const closeModalBtn = document.querySelector('.btnX');
+        const mainHeader = document.querySelector('.section-conatiner__list');
+        const profileBlock = document.querySelector('.container-user__profile');
+        const ordersBlock = document.querySelector('.container-user__orders');
 
-        // Функция открытия модального окна
+        // Функции модалки
         function openModal() {
             modal.classList.remove('invisible');
-            mainContent1.classList.add('blurred');
-            mainContent2.classList.add('blurred');
-            mainContent3.classList.add('blurred');
+            overlay.classList.add('active');
+            if (mainHeader) mainHeader.classList.add('blurred');
+            if (profileBlock) profileBlock.classList.add('blurred');
+            if (ordersBlock) ordersBlock.classList.add('blurred');
+            document.body.style.overflow = 'hidden';
         }
-
-        // Функция закрытия модального окна
         function closeModal() {
             modal.classList.add('invisible');
-            mainContent1.classList.remove('blurred');
-            mainContent2.classList.remove('blurred');
-            mainContent3.classList.remove('blurred');
+            overlay.classList.remove('active');
+            if (mainHeader) mainHeader.classList.remove('blurred');
+            if (profileBlock) profileBlock.classList.remove('blurred');
+            if (ordersBlock) ordersBlock.classList.remove('blurred');
+            document.body.style.overflow = '';
         }
-
         showBtn.addEventListener('click', openModal);
-        closeBtn.addEventListener('click', closeModal);
-
-
-
-        // Закрытие по клавише Escape
+        closeModalBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', closeModal);
         document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('invisible')) {
-                closeModal();
-            }
+            if (e.key === 'Escape' && !modal.classList.contains('invisible')) closeModal();
         });
 
+        // ---------- ЗАГРУЗКА ЗАКАЗОВ ----------
+        async function loadOrders() {
+            try {
+                const response = await fetch('/api/lenta', {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('Ошибка загрузки заказов');
+                const orders = await response.json();
+                if (orders.length === 0) {
+                    ordersContainer.innerHTML = '<div style="color:white; text-align:center;">Нет активных заказов</div>';
+                    return;
+                }
+                ordersContainer.innerHTML = orders.map(({ label, price, id }) => `
+                    <div class="orders" data-card-id="${id}">
+                        <div class="list-headers-name-task">
+                            <span class="text-name-task">${escapeHtml(label)}</span>
+                            <span class="price-task">${price}₽</span>
+                        </div>
+                        <div class="data-task-create">
+                            <span>Создано: ${new Date().toLocaleDateString()}</span>
+                        </div>
+                        <div class="box-other-inf">
+                            <div class="other-inf-task">
+                                <div class="inf-status"><div class="circle-status"></div> Опубликован</div>
+                            </div>
+                            <div class="other-inf-Btn-task">
+                                <button class="Btns-task-remake">Открыть</button>
+                                <button class="Btns-task-remake">Редактировать</button>
+                                <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+                attachDeleteEvents();
+            } catch (err) {
+                console.error(err);
+                ordersContainer.innerHTML = '<div style="color:#ff8888;">Ошибка загрузки</div>';
+            }
+        }
 
-
-
-
-        const textBtn = document.querySelector('#header-list-home');
-        if (textBtn) { // Исправлено: было textBtnProf
-            textBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.href = '/';
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str.replace(/[&<>]/g, function (m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
             });
         }
-        const LogoBtn = document.querySelector('h4')
-        LogoBtn.addEventListener('click', () => {
-            location.assign("/");
 
-        })
-        const formNewtask = document.querySelector('.form-newtask');
-
-        formNewtask.addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            const TableName = document.querySelector('#TableName').value;
-            const discription = document.querySelector('#discription').value;
-            const price = document.querySelector('#price').value;
-
-            // Правильный сбор выбранного тега (radio)
-            const selectedTag = document.querySelector('input[name="tegs"]:checked');
-            const tagValue = selectedTag ? selectedTag.value : '';
-
-            const taskData = {
-                title: TableName,
-                discription: discription,
-                price: parseInt(price) || 0,
-                tags: tagValue  // или tags: [tagValue] если сервер ждет массив
-            };
-
-            fetch('/api/addCard', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(taskData)
-            })
-                .then(response => {
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(text)
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Успех:', data);
-                    formNewtask.reset(); // очищаем форму
-                    closeModal(); // закрываем модальное окно после успешного добавления
-                })
-                .catch(error => {
-                    console.error('Ошибка:', error);
-                    alert('Ошибка при добавлении карточки: ' + error.message);
+        // Удаление
+        async function deleteCard(cardId, cardElement) {
+            if (!confirm('Удалить карточку?')) return;
+            try {
+                const resp = await fetch('/api/removeCard', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: Number(cardId) })
                 });
-        });
-        
-        // Загрузка данных профиля при открытии страницы
-        fetch('/api/profile', {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json'
+                if (!resp.ok) throw new Error('Ошибка сервера');
+                const data = await resp.json();
+                if (cardElement) cardElement.remove();
+                console.log('Удалено', data);
+            } catch (err) {
+               location.reload();
             }
-        })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Ошибка загрузки профиля');
-                }
-                return response.json();
-            })
-            .then(data => {
-                // Заполняем поля
-                const name = document.querySelector('#Name');
-                const gmail = document.querySelector('#gmail');
-                const Date = document.querySelector('#Date');
-                if (name) name.textContent=data.name || '';
-                if (gmail) gmail.textContent=data.email || '';
-                if (Date) Date.textContent=data.dateCreateprofileStruct || ''; 
-                
-                  
-                // Здесь можно добавить заполнение тегов, заказов и т.д.
-                console.log('Профиль загружен:', data);
-            })
-            .catch(err => {
-                console.error('Ошибка:', err);
+        }
+
+        function attachDeleteEvents() {
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.removeEventListener('click', handleDelete);
+                btn.addEventListener('click', handleDelete);
             });
+        }
+        function handleDelete(e) {
+            e.stopPropagation();
+            const btn = e.currentTarget;
+            const cardId = btn.getAttribute('data-card-id');
+            const card = btn.closest('.orders');
+            deleteCard(cardId, card);
+        }
 
+        // ---------- СОЗДАНИЕ КАРТОЧКИ ----------
+        const form = document.getElementById('createTaskForm');
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const title = document.getElementById('TableName').value.trim();
+            const description = document.getElementById('discription').value.trim();
+            const price = parseInt(document.getElementById('price').value) || 0;
+            const selectedTag = document.querySelector('input[name="tegs"]:checked');
+            const tag = selectedTag ? selectedTag.value : '';
 
+            if (!title) {
+                alert('Введите название');
+                return;
+            }
+
+            try {
+                const resp = await fetch('/api/addCard', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, discription: description, price, tags: tag })
+                });
+                if (!resp.ok) throw new Error('Ошибка при добавлении');
+                const data = await resp.json();
+                console.log('Успех', data);
+                form.reset();
+                closeModal();
+                loadOrders(); // перезагружаем список
+            } catch (err) {
+                alert('Ошибка: ' + err.message);
+            }
+        });
+
+        // ---------- ПРОФИЛЬ ----------
+        async function loadProfile() {
+            try {
+                const resp = await fetch('/api/profile');
+                if (!resp.ok) throw new Error('Ошибка профиля');
+                const data = await resp.json();
+                document.getElementById('Name').innerText = data.name || 'Пользователь';
+                document.getElementById('gmail').innerText = data.email || 'email@example.com';
+                document.getElementById('Date').innerText = data.dateCreateprofileStruct || '01.01.2024';
+            } catch (err) {
+                console.error(err);
+                document.getElementById('Name').innerText = 'Гость';
+            }
+        }
+
+        // ---------- НАВИГАЦИЯ ----------
+        const homeBtn = document.getElementById('header-list-home');
+        if (homeBtn) homeBtn.addEventListener('click', () => window.location.href = '/');
+        const logoBtn = document.querySelector('h4');
+        if (logoBtn) logoBtn.addEventListener('click', () => window.location.href = '/');
+
+        // ---------- ЗАПУСК ----------
+        loadProfile();
+        loadOrders();
     </script>
 </body>
 

@@ -266,18 +266,18 @@ type comment struct {
 }
 
 type Vakans struct {
-	Id          int    `json:"id"`
-	Label       string `json:"label"`
-	Discription string `json:"discription"`
-	Avtor       string `json:"avtor"`
-	Price       int    `json:"price"`
-	Tag         string `json:"tag"`
-	InFavorite  bool   `json:"infavorite"`
+	Id             int    `json:"id"`
+	Label          string `json:"label"`
+	Discription    string `json:"discription"`
+	Avtor          string `json:"avtor"`
+	Price          int    `json:"price"`
+	Tag            string `json:"tag"`
+	InFavorite     bool   `json:"infavorite"`
+	DateCreateCard string `json:"dateCreateCard"`
 }
 
 type profileStruct struct {
 	Id                      int       `json:"id"`
-	Password                string    `json:"password"`
 	Name                    string    `json:"name"`
 	Email                   string    `json:"email"`
 	Rating                  int       `json:"rating"`
@@ -294,8 +294,8 @@ func GetInfProfile(email string) (profileStruct, error) {
 
 	var userId int
 	err := DB.QueryRow(`
-		SELECT id, password, name, rating, tgUs, balance, created_at, countSdelanihZakazov
-		FROM users WHERE email = $1`, email).Scan(&userId, &prof.Password, &prof.Name, &prof.Rating,
+		SELECT id, name, rating, tgUs, balance, created_at, countSdelanihZakazov
+		FROM users WHERE email = $1`, email).Scan(&userId, &prof.Name, &prof.Rating,
 		&prof.TgUs, &prof.Recvizits, &prof.DateCreateprofileStruct, &prof.CountSdelanihZakazov)
 	if err != nil {
 		if err == sql.ErrNoRows {
@@ -303,12 +303,12 @@ func GetInfProfile(email string) (profileStruct, error) {
 		}
 		return profileStruct{}, err
 	}
+	prof.DateCreateprofileStruct = prof.DateCreateprofileStruct[:10]
+
 	prof.Email = email
 	prof.Id = userId
 
-	rowsVakans, err := DB.Query(`
-		SELECT title, discription, price, tag
-		FROM vakans WHERE user_id = $1`, userId)
+	rowsVakans, err := DB.Query(`SELECT id, title, discription, price, tag, dateCreateVakans FROM vakans WHERE user_id = $1`, userId)
 	if err != nil {
 		return profileStruct{}, err
 	}
@@ -317,10 +317,11 @@ func GetInfProfile(email string) (profileStruct, error) {
 	var vakansList []Vakans
 	for rowsVakans.Next() {
 		var v Vakans
-		err := rowsVakans.Scan(&v.Label, &v.Discription, &v.Price, &v.Tag)
+		err := rowsVakans.Scan(&v.Id, &v.Label, &v.Discription, &v.Price, &v.Tag, &v.DateCreateCard)
 		if err != nil {
 			return profileStruct{}, err
 		}
+		v.DateCreateCard = v.DateCreateCard[:10]
 		v.Avtor = prof.Name
 		vakansList = append(vakansList, v)
 	}
@@ -386,6 +387,16 @@ func AddVakans(email, title, discription, tag string, price int) (error, string,
 		VALUES ($1, $2, $3, $4, $5, $6)`,
 		userID, avtor, title, discription, price, tag)
 	return err, avtor, userID
+}
+
+func RemoveVakans(email string, id int) error {
+	var user_id int
+	DB.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&user_id)
+	_, err := DB.Exec("DELETE FROM vakans WHERE id = $1 AND user_id = $2", id, user_id)
+	if err != nil {
+		return errors.New("Не удалось удалить карточку из БД")
+	}
+	return nil
 }
 
 func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, error) {

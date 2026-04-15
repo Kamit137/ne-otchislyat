@@ -124,3 +124,26 @@ func Exit(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/registration", http.StatusFound)
 }
+
+func RemoveCard(w http.ResponseWriter, r *http.Request) {
+	email, ok := r.Context().Value("email").(string)
+	if !ok {
+		http.Redirect(w, r, "/registration", http.StatusFound)
+		return
+	}
+	var CardId struct {
+		Id int `json:"id"`
+	}
+	err := json.NewDecoder(r.Body).Decode(&CardId)
+	if err != nil {
+		log.Fatal("нет id карточки")
+		http.Error(w, "Не получилось взять email", http.StatusFound)
+		return
+	}
+	err = sql.RemoveVakans(email, CardId.Id)
+	if err != nil {
+		http.Error(w, "Не удалось удалить карточку", http.StatusBadRequest)
+
+	}
+	w.WriteHeader(http.StatusOK)
+}

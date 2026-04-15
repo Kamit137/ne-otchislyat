@@ -28,14 +28,9 @@
                         <path fill="currentColor"
                             d="M367-527q-47-47-47-113t47-113q47-47 113-47t113 47q47 47 47 113t-47 113q-47 47-113 47t-113-47ZM160-160v-112q0-34 17.5-62.5T224-378q62-31 126-46.5T480-440q66 0 130 15.5T736-378q29 15 46.5 43.5T800-272v112H160Zm80-80h480v-32q0-11-5.5-20T700-306q-54-27-109-40.5T480-360q-56 0-111 13.5T260-306q-9 5-14.5 14t-5.5 20v32Zm296.5-343.5Q560-607 560-640t-23.5-56.5Q513-720 480-720t-56.5 23.5Q400-673 400-640t23.5 56.5Q447-560 480-560t56.5-23.5ZM480-640Zm0 400Z" />
                     </svg>
-                   
+
                     <span>Профиль</span>
-                    <hr class="head-br">
-                    <svg class="favorite-heart" data-id="${id}" xmlns="http://www.w3.org/2000/svg" height="40px"
-                        viewBox="0 -960 960 960" width="40px" fill="#c3c7d3">
-                        <path
-                            d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z" />
-                    </svg>
+
                 </div>
 
 
@@ -187,7 +182,7 @@
     <script>
         async function sendFavoriteRequest(cardId, isAdding) {
             try {
-                const response = await fetch('/api/favorites', {
+                const response = await fetch('http://localhost:8080/api/favorites', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -270,71 +265,86 @@
                 clickCount = 1;
                 textBlock.innerHTML = "";
             }
-             const selectedTagInput = document.querySelector('input[name="tegs"]:checked');
-  const selectedTag = selectedTagInput ? selectedTagInput.value : "";
+            const selectedTags = [];
+            taskItems.forEach((item) => {
+                const checkbox = item.querySelector('input[type="checkbox"]');
+                const label = item.querySelector('label');
+                if (checkbox && checkbox.checked) {
+                    selectedTags.push(label.textContent.trim());
+                }
+            });
+            const taskData = {
+                page: clickCount,
+                tagFilters: selectedTags,
+                itemType: "zakazs",
+                priceUpDownFalse: ""
+            };
 
-  console.log("🏷 Выбранный тег:", selectedTag); // Для отладки
-
-  const taskData = {
-    page: clickCount,
-    tag: selectedTag,
-    priceUpDownFalse: ""
-  };
-
-  fetch('/api/printfavorite', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(taskData)
-  })
-  .then(response => {
-      if (!response.ok) throw new Error('Network error: ' + response.status);
-      return response.json();
-  })
-  .then(json => {
-      console.log("📦 Получено вакансий:", json.length); // Для отладки
-      if (json.length === 0 && clickCount === 1) {
-        textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено. Попробуй сбросить фильтр или добавить вакансии в БД.</p>';
-      } else {
-        textBlock.innerHTML += json.map(({ label, discription, avtor, price, id }) => `
-          <div class="box-order" data-card-id="${id}">
+            fetch('http://localhost:8080/api/lenta', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(taskData)
+            })
+                .then(response => response.json())
+                .then(json => {
+                    if (json.length === 0 && clickCount === 1) {
+                        textBlock.innerHTML = '<p>Ничего не найдено</p>';
+                    } else {
+                        textBlock.innerHTML += json.map(({
+                            title,
+                            discription,
+                            avtor,
+                            price,
+                            id
+                        }) => `
+            <div class="box-order" data-card-id="${escapeHtml(id)}">
               <div class="text">
                 <div class="head-cards">
-                  <h4 class="text-color1">${label}</h4>
-                   <button class="favorite-btn" data-card-id="${id}">
+                  <h4 class="text-color1">${escapeHtml(title)}</h4>
+                  <button class="favorite-btn" data-card-id="${escapeHtml(id)}">
                     <svg class="favorite-heart" xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 -960 960 960" width="40px">
                       <path class="heart-path" d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Z"/>
                     </svg>
                   </button>
                 </div>
-                <p class="discription">${discription}</p>
+                <p class="discription">${escapeHtml(discription)}</p>
                 <div class="block-inf">
                   <div class="p-icons">
                     <div class="lxl-text">
                       <div class="name-block-br">
-                        <p>${avtor}<hr class="name-line"></p>
+                        <p>${escapeHtml(avtor)}<hr class="name-line"></p>
                       </div>
                     </div>
                     <p class="lxl-text">4.9 <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#fffa86"><path d="m305-704 112-145q12-16 28.5-23.5T480-880q18 0 34.5 7.5T543-849l112 145 170 57q26 8 41 29.5t15 47.5q0 12-3.5 24T866-523L756-367l4 164q1 35-23 59t-56 24q-2 0-22-3l-179-50-179 50q-5 2-11 2.5t-11 .5q-32 0-56-24t-23-59l4-165L95-523q-8-11-11.5-23T80-570q0-25 14.5-46.5T135-647l170-57Z"/></svg></p>
                     <p class="lxl-text">435 <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#c3c7d3"><path d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Z"/></svg></p>
                   </div>
                   <button class="p-name">
-                    <h5>${price} ₽</h5>
+                    <h5>${escapeHtml(price)} ₽</h5>
                   </button>
                 </div>
               </div>
             </div>
             `).join('');
 
-            // После добавления новых карточек - инициализируем обработчики для их сердечек
-            initFavoriteButtons();
-          }
-        })
-        .catch(err => console.error('Ошибка:', err));
-    }
-        
+                        // После добавления новых карточек - инициализируем обработчики для их сердечек
+                        initFavoriteButtons();
+                    }
+                })
+                .catch(err => console.error('Ошибка:', err));
+        }
 
         // Функция для экранирования HTML
-      
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
 
         // Загрузка при открытии страницы
         sendRequest(true);
@@ -371,8 +381,7 @@
                 window.location.href = '/profile';
             });
         }
-        
-    
+
 
         // Инициализируем сердечки
         initFavoriteButtons();
