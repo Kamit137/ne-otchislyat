@@ -28,13 +28,12 @@
                 </svg>
                 <span>На главную</span>
             </div>
-            <div class="header-list">
-                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
-                    fill="#3071E7">
-                    <path
-                        d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z" />
-                </svg>
-                <span>Выход</span>
+            <div id="header-list-logout" class="header-list">
+    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#3071E7">
+        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
+    </svg>
+    <span>Выход</span>
+</div>
             </div>
         </div>
     </div>
@@ -459,7 +458,32 @@
         if (homeBtn) homeBtn.addEventListener('click', () => window.location.href = '/');
         const logoBtn = document.querySelector('h4');
         if (logoBtn) logoBtn.addEventListener('click', () => window.location.href = '/');
-
+// ---------- ВЫХОД ----------
+const logoutBtn = document.getElementById('header-list-logout');
+if (logoutBtn) {
+    logoutBtn.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        try {
+            const response = await fetch('/api/exit', {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+            
+            if (response.ok || response.redirected) {
+                // Перенаправляем на страницу входа
+                window.location.href = '/registration';
+            } else {
+                // Если сервер не вернул редирект, делаем сами
+                window.location.href = '/registration';
+            }
+        } catch (error) {
+            console.error('Ошибка при выходе:', error);
+            // Всё равно перенаправляем
+            window.location.href = '/registration';
+        }
+    });
+}
         // ---------- ЗАПУСК ----------
         loadProfile();
         loadOrders();
