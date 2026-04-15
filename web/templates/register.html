@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/static/register.css">
+    <link rel="stylesheet" href="/src/static/register (1).css">
     <link
         href="https://fonts.googleapis.com/css2?family=Playwrite+NZ+Basic:wght@100..400&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
         rel="stylesheet">
@@ -132,7 +132,7 @@
                 password: password.value
             };
 
-            fetch('/reg', {
+            fetch('http://localhost:8080/reg', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -185,7 +185,7 @@
                 password: password.value
             };
 
-            fetch('/login', {
+            fetch('http://localhost:8080/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -223,14 +223,72 @@
         });
         const textBtn = document.querySelector('.header-list')
         textBtn.addEventListener('click', () => {
-            location.assign("/");
+            location.assign("/lenta");
 
         })
         const LogoBtn = document.querySelector('.container-logo')
         LogoBtn.addEventListener('click', () => {
-            location.assign("/");
+            location.assign("/lenta");
 
         })
+        // Для мобильной версии - таб-переключатель
+        function initMobileTabs() {
+            const isMobile = window.innerWidth <= 700;
+            const menuBlock = document.querySelector('.menu-block');
+            const loginContainer = document.querySelector('.login-container');
+            const registerContainer = document.querySelector('.register-container');
+
+            // Удаляем старые табы, если есть
+            const oldTabs = document.querySelector('.auth-tabs');
+            if (oldTabs) oldTabs.remove();
+
+            if (isMobile) {
+                // Создаем таб-переключатель
+                const tabsHtml = `
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Вход</button>
+                <button class="auth-tab" data-tab="register">Регистрация</button>
+            </div>
+        `;
+
+                // Вставляем табы в начало menu-block
+                menuBlock.insertAdjacentHTML('afterbegin', tabsHtml);
+
+                // Добавляем активные классы контейнерам
+                loginContainer.classList.add('active');
+                registerContainer.classList.remove('active');
+
+                // Обработчики табов
+                const tabs = document.querySelectorAll('.auth-tab');
+                tabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const target = tab.dataset.tab;
+
+                        // Обновляем активный таб
+                        tabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+
+                        // Показываем нужную форму
+                        if (target === 'login') {
+                            loginContainer.classList.add('active');
+                            registerContainer.classList.remove('active');
+                        } else {
+                            loginContainer.classList.remove('active');
+                            registerContainer.classList.add('active');
+                        }
+                    });
+                });
+            }
+        }
+
+        // Вызываем при загрузке и при изменении размера окна
+        window.addEventListener('load', initMobileTabs);
+        window.addEventListener('resize', () => {
+            // Удаляем табы и пересоздаем
+            const oldTabs = document.querySelector('.auth-tabs');
+            if (oldTabs) oldTabs.remove();
+            initMobileTabs();
+        });
 
     </script>
 </body>

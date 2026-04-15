@@ -119,7 +119,7 @@ body {
     overflow: hidden;
 }
 
-/* === ОРИГИНАЛЬНЫЕ СТИЛИ АНИМАЦИИ (ДЛЯ ДЕСКТОПА - ГОРИЗОНТАЛЬНАЯ) === */
+/* === ОРИГИНАЛЬНЫЕ СТИЛИ АНИМАЦИИ (ДЛЯ ДЕСКТОПА) === */
 .animation-login-hidden {
     overflow: hidden;
 }
@@ -342,7 +342,6 @@ body {
 
 .container-animation-left.left-panel-active {
     transform: translateX(0);
-
 }
 
 .text-animation-login {
@@ -408,351 +407,217 @@ body {
         font-size: 18px;
     }
 }
-/* === АДАПТИВ ДЛЯ ТЕЛЕФОНОВ (ВЕРТИКАЛЬНАЯ АНИМАЦИЯ) === */
+
+/* === АДАПТИВ ДЛЯ ТЕЛЕФОНОВ - КРУТОЙ ТАБ-ПЕРЕКЛЮЧАТЕЛЬ === */
 @media (max-width: 700px) {
     .background {
-        padding: 10px;
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        padding: 15px;
+        min-height: auto;
     }
 
     .menu-block {
-        display: block;
+        display: flex;
+        flex-direction: column;
         width: 100%;
-        max-width: 360px;
+        max-width: 400px;
         height: auto;
-        min-height: 580px;
-        border-radius: 30px;
-        position: relative;
+        min-height: 550px;
+        border-radius: 40px;
+        background: #2A2D3E;
         overflow: hidden;
+    }
+
+    /* Скрываем старые анимационные панели */
+    .front-container-animation-left,
+    .front-container-animation-right,
+    .container-animation-left,
+    .container-animation-right,
+    .text-animation-login,
+    .text-animation-register {
+        display: none;
+    }
+
+    /* Делаем контейнеры форм видимыми всегда */
+    .animation-login-hidden,
+    .animation-register-hidden {
+        position: relative;
+        width: 100%;
+        height: auto;
+        overflow: visible;
+    }
+
+    .login-container,
+    .register-container {
+        position: relative;
+        width: 100%;
+        height: auto;
+        transform: none !important;
+        border-radius: 0;
+        transition: none;
+    }
+
+    /* Стили для таб-переключателя */
+    .auth-tabs {
+        display: flex;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50px;
+        margin: 20px;
+        padding: 4px;
+        gap: 4px;
+    }
+
+    .auth-tab {
+        flex: 1;
+        text-align: center;
+        padding: 12px 20px;
+        border-radius: 50px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        color: var(--text-main);
+        background: transparent;
+        border: none;
+    }
+
+    .auth-tab.active {
+        background: var(--accent-blue);
+        color: white;
+        box-shadow: 0 2px 8px rgba(48, 113, 231, 0.3);
     }
 
     /* Контейнеры форм */
-    .animation-login-hidden,
-    .animation-register-hidden {
-        position: absolute;
-        left: 0;
-        width: 100%;
-        height: 50%;
-        overflow: hidden;
-    }
-
-    .animation-login-hidden {
-        top: 0;
-    }
-
-    .animation-register-hidden {
-        bottom: 0;
-    }
-
-    /* Логин форма */
-    .login-container {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        transform: translateY(0);
-        border-radius: 0;
-        transition: transform 0.6s ease-in-out;
-        z-index: 4;
-        background-color: #2A2D3E;
-    }
-
-    .login-container.login-hidden {
-        transform: translateY(-100%);
-    }
-
-    /* Регистрация форма */
+    .login-container,
     .register-container {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        transform: translateY(100%);
-        border-radius: 0;
-        transition: transform 0.6s ease-in-out;
-        z-index: 1;
-        background-color: #2A2D3E;
+        padding: 20px;
+        display: none;
     }
 
-    .register-container.register-hidden {
-        transform: translateY(0);
-    }
-
-    /* Левая панель (сверху) */
-    .front-container-animation-left {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 50%;
-        overflow: hidden;
-    }
-
-    .container-animation-left {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+    .login-container.active,
+    .register-container.active {
         display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.6s ease-in-out;
-        border-radius: 0;
-        transform: translateY(100%);
-        z-index: 1;
-        background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
     }
 
-    .container-animation-left.left-panel-active {
-        transform: translateY(0);
-    }
-
-    /* Правая панель (снизу) */
-    .front-container-animation-right {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 50%;
-        overflow: hidden;
-    }
-
-    .container-animation-right {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.6s ease-in-out;
-        border-radius: 0;
-        transform: translateY(0);
-        z-index: 10;
-        background: linear-gradient(135deg, #161E35 0%, #3071E7 100%);
-    }
-
-    .container-animation-right.right-panel-active {
-        transform: translateY(-100%);
-    }
-
-    /* Текст на панелях */
-    .text-animation-login {
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.6s ease-in-out;
-        width: 100%;
-        transform: translateY(0);
-    }
-
-    .text-animation-login.text-a-l {
-        transform: translateY(-100%);
-    }
-
-    .text-animation-register {
-        position: absolute;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        transition: transform 0.6s ease-in-out;
-        width: 100%;
-        transform: translateY(100%);
-    }
-
-    .text-animation-register.text-a-r {
-        transform: translateY(0);
-    }
-
-    /* Стили форм внутри контейнеров */
     .form-login,
     .form-register {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
         margin-top: 0;
-        padding: 20px;
+        width: 100%;
+        padding: 0;
+    }
+
+    .form-login__data,
+    .form-register__data {
+        width: 100%;
+        max-width: 100%;
+        height: 52px;
+    }
+
+    .btn-login,
+    .btn-register {
+        width: 100%;
+        max-width: 100%;
+        margin-top: 30px;
+        height: 52px;
     }
 
     .form-text {
-        font-size: 24px;
-        margin-bottom: 25px;
+        font-size: 28px;
+        margin-bottom: 30px;
+    }
+}
+
+/* === ОЧЕНЬ МАЛЕНЬКИЕ ЭКРАНЫ === */
+@media (max-width: 480px) {
+    .section-conatiner__list {
+        flex-direction: column;
         text-align: center;
     }
 
-    .form-login__data,
-    .form-register__data {
-        width: 100%;
-        max-width: 280px;
-        height: 48px;
-        margin-bottom: 15px;
-        padding-left: 15px;
-        padding-right: 15px;
-        font-size: 14px;
-        border-radius: 12px;
-    }
-
-    .btn-login,
-    .btn-register {
-        width: 200px;
-        height: 48px;
-        margin-top: 25px;
-        font-size: 16px;
-        border-radius: 40px;
-    }
-
-    /* Текст на панелях */
-    .text-prewie {
-        font-size: 20px;
-        margin-bottom: 20px;
-        padding: 0 15px;
-    }
-
-    .btn {
-        width: 160px;
-        height: 44px;
-        font-size: 15px;
-    }
-}
-
-/* === ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 400px) === */
-@media (max-width: 400px) {
-    .menu-block {
-        max-width: 320px;
-        min-height: 540px;
-        border-radius: 25px;
-    }
-
-    .form-text {
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-
-    .form-login__data,
-    .form-register__data {
-        max-width: 250px;
-        height: 44px;
-        font-size: 13px;
-    }
-
-    .btn-login,
-    .btn-register {
-        width: 170px;
-        height: 44px;
-        font-size: 15px;
-        margin-top: 20px;
-    }
-
-    .text-prewie {
-        font-size: 18px;
-        margin-bottom: 15px;
-    }
-
-    .btn {
-        width: 140px;
-        height: 40px;
-        font-size: 14px;
-    }
-}
-
-/* === ТЕЛЕФОНЫ В АЛЬБОМНОЙ ОРИЕНТАЦИИ === */
-@media (max-width: 800px) and (orientation: landscape) {
-    .background {
-        padding: 10px;
-        min-height: 100vh;
-    }
-
-    .menu-block {
-        max-width: 500px;
-        min-height: 320px;
-        height: auto;
-    }
-
-    .form-login,
-    .form-register {
-        padding: 15px;
-    }
-
-    .form-text {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-
-    .form-login__data,
-    .form-register__data {
-        height: 40px;
-        max-width: 240px;
-        margin-bottom: 10px;
-        font-size: 13px;
-    }
-
-    .btn-login,
-    .btn-register {
-        width: 160px;
-        height: 40px;
-        margin-top: 15px;
-        font-size: 14px;
-    }
-
-    .text-prewie {
-        font-size: 16px;
-        margin-bottom: 10px;
-    }
-
-    .btn {
-        width: 130px;
-        height: 36px;
-        font-size: 13px;
-    }
-}
-
-/* === ДОПОЛНИТЕЛЬНЫЕ ФИКСЫ ДЛЯ ХЕДЕРА НА ТЕЛЕФОНАХ === */
-@media (max-width: 600px) {
-    .section-conatiner__list {
-        flex-direction: column;
-        padding: 10px 15px;
-        gap: 10px;
-    }
-
     .container-logo {
+        margin-left: 0;
         justify-content: center;
-        width: 100%;
-    }
-
-    .container-logo h4 {
-        font-size: 20px;
     }
 
     .container-list {
         justify-content: center;
-        gap: 8px;
     }
 
     .header-list {
-        padding: 4px 8px;
+        margin-top: 0;
+        margin-right: 0;
     }
 
-    .header-list span {
-        font-size: 11px;
+    .menu-block {
+        max-width: 95%;
+        min-height: 520px;
     }
 
-    .header-list svg {
-        width: 20px;
-        height: 20px;
+    .form-login__data,
+    .form-register__data {
+        height: 48px;
+        font-size: 14px;
     }
+
+    .btn-login,
+    .btn-register {
+        height: 48px;
+        font-size: 16px;
+    }
+
+    .form-text {
+        font-size: 24px;
+    }
+
+    .auth-tabs {
+        margin: 15px;
+    }
+
+    .auth-tab {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+}
+
+/* === АЛЬБОМНАЯ ОРИЕНТАЦИЯ === */
+@media (max-width: 800px) and (orientation: landscape) {
+    .background {
+        padding: 10px;
+    }
+
+    .menu-block {
+        max-width: 90%;
+        min-height: 380px;
+    }
+
+    .form-login__data,
+    .form-register__data {
+        margin-bottom: 15px;
+        height: 42px;
+    }
+
+    .btn-login,
+    .btn-register {
+        margin-top: 20px;
+        height: 42px;
+    }
+
+    .form-text {
+        font-size: 22px;
+        margin-bottom: 20px;
+    }
+}
+
+/* === СКРОЛЛБАР === */
+::-webkit-scrollbar {
+    width: 6px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--border-color);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--accent-blue);
+    border-radius: 10px;
 }
