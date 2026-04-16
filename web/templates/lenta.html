@@ -415,6 +415,7 @@ formDeposit.addEventListener('submit', (event) => {
     headers: {
       'Content-Type': 'application/json'
     },
+    credentials: 'include', // ВАЖНО! Отправляет куки автоматически
     body: JSON.stringify(DepositData)
   })
     .then(response => {

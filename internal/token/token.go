@@ -2,8 +2,10 @@ package token
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -41,17 +43,31 @@ func ValidateToken(tokenString string) (*Claims, error) {
 
 func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		// Определяем, API ли это запрос
+		isAPI := strings.HasPrefix(r.URL.Path, "/api/") ||
+			r.Header.Get("Accept") == "application/json" ||
+			r.Header.Get("Content-Type") == "application/json"
+
 		cookie, err := r.Cookie("token")
 		if err != nil {
-			// Нет куки → редирект на регистрацию
+			if isAPI {
+				// Для API возвращаем JSON ошибку
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Unauthorized",
+					"message": "Authorization required",
+				})
+				return
+			}
+			// Для обычных страниц - редирект
 			http.Redirect(w, r, "/registration", http.StatusFound)
 			return
 		}
 
 		claims, err := ValidateToken(cookie.Value)
 		if err != nil {
-			// Токен есть, но он невалидный (просрочен, подделан и т.д.)
-			// Удаляем испорченную куку, чтобы не создавать мусор
+			// Удаляем испорченную куку
 			http.SetCookie(w, &http.Cookie{
 				Name:     "token",
 				Value:    "",
@@ -60,7 +76,16 @@ func AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
 				MaxAge:   -1,
 				HttpOnly: true,
 			})
-			// Редирект на регистрацию
+
+			if isAPI {
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusUnauthorized)
+				json.NewEncoder(w).Encode(map[string]string{
+					"error":   "Unauthorized",
+					"message": "Invalid or expired token",
+				})
+				return
+			}
 			http.Redirect(w, r, "/registration", http.StatusFound)
 			return
 		}
