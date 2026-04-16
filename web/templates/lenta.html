@@ -379,49 +379,57 @@
         overlayDep.classList.remove('active');
       }
     });
-   // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
+  // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
 const formDeposit = document.querySelector('.form-deposit');
-formDeposit.addEventListener('submit', (event) => {
-  event.preventDefault();
+if (formDeposit) {
+  formDeposit.addEventListener('submit', (event) => {
+    event.preventDefault();
 
-  const depositSumInput = document.querySelector('#sum');
-  const depositValue = depositSumInput.value.trim();
-  
-  if (depositValue === '') {
-    alert('Введите сумму пополнения');
-    return;
-  }
+    const depositSumInput = document.querySelector('#sum');
+    const depositValue = depositSumInput.value.trim();
+    
+    if (depositValue === '') {
+      alert('Введите сумму пополнения');
+      return;
+    }
 
-  const amount = parseFloat(depositValue);
-  
-  if (isNaN(amount) || amount <= 0) {
-    alert('Введите корректную сумму (больше 0)');
-    return;
-  }
+    const amount = parseFloat(depositValue);
+    
+    if (isNaN(amount) || amount <= 0) {
+      alert('Введите корректную сумму (больше 0)');
+      return;
+    }
 
-  if (amount < 1) {
-    alert('Минимальная сумма пополнения: 1 ₽');
-    return;
-  }
+    if (amount < 50) {
+      alert('Минимальная сумма пополнения: 50 ₽');
+      return;
+    }
 
-  const DepositData = {
-    amount: amount
-  };
+    const DepositData = {
+      amount: amount
+    };
 
-  console.log('📤 Отправка данных:', DepositData);
+    console.log('📤 Отправка данных:', DepositData);
 
-  fetch('/api/deposit', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    credentials: 'include', // ВАЖНО! Отправляет куки автоматически
-    body: JSON.stringify(DepositData)
-  })
+    fetch('/api/deposit', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include', 
+      body: JSON.stringify(DepositData)
+    })
     .then(response => {
+      console.log('📥 Статус ответа:', response.status);
+      
       if (!response.ok) {
+        // Пытаемся получить JSON ошибку
         return response.json().then(data => {
-          throw new Error(data.error || data.message || `Ошибка ${response.status}`);
+          console.log('❌ Ошибка от сервера:', data);
+          throw data;
+        }).catch(() => {
+          // Если не JSON, выбрасываем обычную ошибку
+          throw { error: `HTTP ${response.status}`, message: response.statusText };
         });
       }
       return response.json();
@@ -440,24 +448,40 @@ formDeposit.addEventListener('submit', (event) => {
       
       // Если есть ссылка на оплату - перенаправляем
       if (data.payment_url) {
-        // Для тестового режима показываем доп. информацию
         if (data.test_mode) {
           alert(`🧪 Тестовый счет создан!\nСумма: ${amount} TST\n\nИспользуйте тестовую карту:\n5555 5555 5555 5599\nСрок: любой будущий\nCVV: любой`);
         } else {
           alert(`Счет на ${amount} ₽ создан. Перенаправляем на страницу оплаты...`);
         }
         window.location.href = data.payment_url;
+      } else if (data.success === false) {
+        alert('Ошибка: ' + (data.message || data.error));
       } else {
         alert('Счет создан, но ссылка на оплату не получена');
       }
-      
     })
     .catch(error => {
       console.error('❌ Ошибка:', error);
-      alert('Ошибка при создании счета: ' + error.message);
+      
+      // Проверяем различные варианты ошибок
+      if (error.redirect) {
+        alert('Пожалуйста, авторизуйтесь');
+        window.location.href = error.redirect;
+      } else if (error.error === 'Unauthorized' || error.message === 'Unauthorized') {
+        alert('Необходимо авторизоваться');
+        window.location.href = '/registration';
+      } else if (error.error) {
+        alert('Ошибка: ' + error.error);
+      } else if (error.message) {
+        alert('Ошибка: ' + error.message);
+      } else {
+        alert('Ошибка при создании счета. Пожалуйста, попробуйте позже.');
+      }
     });
-});
-
+  });
+} else {
+  console.error('Форма депозита не найдена на странице');
+}
     // ========== ОСНОВНАЯ ЛОГИКА ЛЕНТЫ ==========
     let clickCount = 1;
     const textBlock = document.querySelector('.text-block');

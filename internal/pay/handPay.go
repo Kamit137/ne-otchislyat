@@ -18,11 +18,15 @@ func HandleDeposit(w http.ResponseWriter, r *http.Request) {
 
 	email, ok := r.Context().Value("email").(string)
 	if !ok || email == "" {
-		http.Redirect(w, r, "/registration", http.StatusFound)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		json.NewEncoder(w).Encode(map[string]interface{}{
+			"error":    "Unauthorized",
+			"message":  "Пожалуйста, авторизуйтесь",
+			"redirect": "/registration",
+		})
 		return
-
 	}
-
 	var req struct {
 		Amount float64 `json:"amount"`
 	}

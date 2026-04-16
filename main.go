@@ -39,7 +39,7 @@ func main() {
 	http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
 	http.HandleFunc("/api/removeCard", token.AuthMiddleware(profile.RemoveCard))
 
-	http.HandleFunc("/api/deposit", token.AuthMiddleware(pay.HandleDeposit))
+	http.HandleFunc("/api/deposit", token.AuthOptionalMiddleware(pay.HandleDeposit))
 	http.HandleFunc("/payment/result", pay.HandlePaymentNotification)
 	http.HandleFunc("/payment/fail", pay.HandlePaymentNotification)
 	http.HandleFunc("/payment/success", pay.HandlePaymentNotification)
