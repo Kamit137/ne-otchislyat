@@ -41,6 +41,9 @@ func main() {
 
 	http.HandleFunc("/api/deposit", token.AuthMiddleware(pay.HandleDeposit))
 	http.HandleFunc("/payment/result", pay.HandlePaymentNotification)
+	http.HandleFunc("/payment/fail", pay.HandlePaymentNotification)
+	http.HandleFunc("/payment/success", pay.HandlePaymentNotification)
+
 	http.HandleFunc("/api/balance", token.AuthMiddleware(pay.GetBalance))
 	http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))
 	http.HandleFunc("/api/order/complete", token.AuthMiddleware(pay.CompleteOrder))
@@ -55,5 +58,3 @@ func main() {
 
 	http.ListenAndServe(":8080", nil)
 }
-
-//

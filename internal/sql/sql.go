@@ -637,15 +637,6 @@ func GetUserBalance(email string) (balance, frozen int64, err error) {
 	return balance, frozen, nil
 }
 
-func DepositSql(rubles int64, email string) error {
-	_, err := DB.Exec("UPDATE users SET balance = balance + $1 WHERE email = $2", rubles, email)
-	if err != nil {
-		return err
-	}
-	log.Printf("User %s deposited %d kopecks", email, rubles)
-	return nil
-}
-
 func GetFavorite(email string) ([]Vakans, error) {
 	var user_id int
 	err := DB.QueryRow("SELECT id FROM users WHERE email=$1", email).Scan(&user_id)
@@ -698,6 +689,32 @@ func Like(email string, card_id int) error {
 		if err != nil {
 			return errors.New("ошибка удаления из избранного")
 		}
+	}
+	return nil
+}
+
+func DepositTransacs(email string, amount float64, orderID string) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var userID int
+	err = tx.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	if err != nil {
+		return err
+	}
+
+	_, err = tx.Exec(`INSERT INTO transactions (user_id, type, amount, status, payment_id)
+		VALUES ($1, 'deposit', $2, 'pending', $3)`, userID, int64(amount*100), orderID)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
 	}
 	return nil
 }
