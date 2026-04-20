@@ -45,8 +45,20 @@ func GiveLenta(w http.ResponseWriter, r *http.Request) {
 		json.NewEncoder(w).Encode(map[string]string{"error": "Failed to load vacancies"})
 		return
 	}
+	balance, frozenBalance, err := sql.GetUserBalance(email)
+	if err != nil {
+		balance, frozenBalance = 0, 0
+	}
+	var result struct {
+		Balance  int64        `json:"balance"`
+		FBalance int64        `json:"frozenBalance"`
+		Cards    []sql.Vakans `json:"cards"`
+	}
+	result.Cards = cards
+	result.Balance = balance
+	result.FBalance = frozenBalance
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(cards)
+	json.NewEncoder(w).Encode(result)
 }
 
 func DownloadOferta(w http.ResponseWriter, r *http.Request) {

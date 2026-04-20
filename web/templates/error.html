@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/error.css">
+    <title>Document</title>
+</head>
+
+<body>
+    <div class="back-color">
+        <div class="section-sf">
+            <div class="block-logo">
+                <div class="logo">ne-otchislyat.ru</div>
+            </div>
+
+            <div class="block-inf">
+                <div class="circle">
+                    <svg xmlns="http://www.w3.org/2000/svg" height="68px" viewBox="0 -960 960 960" width="68px">
+                        <path
+                            d="m256-200-56-56 224-224-224-224 56-56 224 224 224-224 56 56-224 224 224 224-56 56-224-224-224 224Z" />
+                    </svg>
+                </div>
+                <h1 class="text-main">
+                    Оплата не прошла
+
+                </h1>
+                <div class="text-bottom-main">
+                    <span class="tx-span">К сожалению, ваш платеж не удалось обработать.</span> Пожалуйста, попробуйте
+                    еще раз.
+                </div>
+
+                <button class="back-site" id="header-list-home">
+                    <span class="text-btn">Вернуться на главную</span>
+
+                </button>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        const BtnReg = document.querySelector('#header-list-home');
+        if (BtnReg) {
+            BtnReg.addEventListener('click', (e) => {
+                e.preventDefault();
+                location.assign("/");
+            });
+        }
+    </script>
+</body>
+
+</html>

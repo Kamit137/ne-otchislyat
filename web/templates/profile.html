@@ -287,206 +287,213 @@
             </div>
         </div>
     </div>
+ <script>
+   // ---------- DOM элементы ----------
+const ordersContainer = document.getElementById('ordersContainer');
+const modal = document.querySelector('.make-cards');
+const overlay = document.getElementById('modalOverlay');
+const showBtn = document.getElementById('filter-open');
+const closeModalBtn = document.querySelector('.btnX');
+const mainHeader = document.querySelector('.section-conatiner__list');
+const profileBlock = document.querySelector('.container-user__profile');
+const ordersBlock = document.querySelector('.container-user__orders');
 
-    <script>
-        // ---------- DOM элементы ----------
-        const ordersContainer = document.getElementById('ordersContainer');
-        const modal = document.querySelector('.make-cards');
-        const overlay = document.getElementById('modalOverlay');
-        const showBtn = document.getElementById('filter-open');
-        const closeModalBtn = document.querySelector('.btnX');
-        const mainHeader = document.querySelector('.section-conatiner__list');
-        const profileBlock = document.querySelector('.container-user__profile');
-        const ordersBlock = document.querySelector('.container-user__orders');
+// Функции модалки
+function openModal() {
+    modal.classList.remove('invisible');
+    overlay.classList.add('active');
+    if (mainHeader) mainHeader.classList.add('blurred');
+    if (profileBlock) profileBlock.classList.add('blurred');
+    if (ordersBlock) ordersBlock.classList.add('blurred');
+    document.body.style.overflow = 'hidden';
+}
 
-        // Функции модалки
-        function openModal() {
-            modal.classList.remove('invisible');
-            overlay.classList.add('active');
-            if (mainHeader) mainHeader.classList.add('blurred');
-            if (profileBlock) profileBlock.classList.add('blurred');
-            if (ordersBlock) ordersBlock.classList.add('blurred');
-            document.body.style.overflow = 'hidden';
+function closeModal() {
+    modal.classList.add('invisible');
+    overlay.classList.remove('active');
+    if (mainHeader) mainHeader.classList.remove('blurred');
+    if (profileBlock) profileBlock.classList.remove('blurred');
+    if (ordersBlock) ordersBlock.classList.remove('blurred');
+    document.body.style.overflow = '';
+}
+
+showBtn.addEventListener('click', openModal);
+closeModalBtn.addEventListener('click', closeModal);
+overlay.addEventListener('click', closeModal);
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('invisible')) closeModal();
+});
+
+// ---------- ЗАГРУЗКА ПРОФИЛЯ И ЗАКАЗОВ (ОДНИМ ЗАПРОСОМ) ----------
+async function loadProfile() {
+    try {
+        const resp = await fetch('/api/profile');
+        if (!resp.ok) throw new Error('Ошибка профиля');
+        const data = await resp.json();
+        
+        // Заполняем профиль
+        document.getElementById('Name').innerText = data.name || 'Пользователь';
+        document.getElementById('gmail').innerText = data.email || 'email@example.com';
+        document.getElementById('Date').innerText = data.DateCreateprofileStruct || '01.01.2024';
+        
+        // Заполняем телеграмм
+        const tgSpans = document.querySelectorAll('.text-gmail-profile');
+        if (tgSpans.length > 0 && data.tgUs) {
+            tgSpans[0].innerText = `Телеграмм: ${data.tgUs}`;
         }
-        function closeModal() {
-            modal.classList.add('invisible');
-            overlay.classList.remove('active');
-            if (mainHeader) mainHeader.classList.remove('blurred');
-            if (profileBlock) profileBlock.classList.remove('blurred');
-            if (ordersBlock) ordersBlock.classList.remove('blurred');
-            document.body.style.overflow = '';
+        
+        // Заполняем рейтинг
+        if (tgSpans.length > 1) {
+            tgSpans[1].innerText = `Рейтинг: ${data.rating || 0}`;
         }
-        showBtn.addEventListener('click', openModal);
-        closeModalBtn.addEventListener('click', closeModal);
-        overlay.addEventListener('click', closeModal);
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && !modal.classList.contains('invisible')) closeModal();
+        
+        // Заполняем количество заказов
+        if (tgSpans.length > 2) {
+            tgSpans[2].innerText = `Выполнено заказов: ${data.countSdelanihZakazov || 0}`;
+        }
+        
+        // ✅ Рендерим заказы из data.Vakans
+        renderOrders(data.vakans || []);
+        
+    } catch (err) {
+        console.error('Ошибка загрузки профиля:', err);
+        document.getElementById('Name').innerText = 'Гость';
+        renderOrders([]);
+    }
+}
+
+// ---------- РЕНДЕР ЗАКАЗОВ ----------
+function renderOrders(orders) {
+    // Очищаем контейнер от статического HTML
+    ordersContainer.innerHTML = '';
+    
+    if (!orders || orders.length === 0) {
+        ordersContainer.innerHTML = '<div style="color:white; text-align:center; padding:40px;">Нет активных заказов</div>';
+        return;
+    }
+    
+    ordersContainer.innerHTML = orders.map(({ label, price, id, dateCreateCard }) => `
+        <div class="orders" data-card-id="${id}">
+            <div class="list-headers-name-task">
+                <span class="text-name-task">${escapeHtml(label)}</span>
+                <span class="price-task">${price}₽</span>
+            </div>
+            <div class="data-task-create">
+                <span>Создано: ${dateCreateCard || new Date().toLocaleDateString()}</span>
+            </div>
+            <div class="box-other-inf">
+                <div class="other-inf-task">
+                    <div class="inf-status"><div class="circle-status"></div> Опубликован</div>
+                </div>
+                <div class="other-inf-Btn-task">
+                    <button class="Btns-task-remake">Открыть</button>
+                    <button class="Btns-task-remake">Редактировать</button>
+                    <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    
+    attachDeleteEvents();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+        if (m === '&') return '&amp;';
+        if (m === '<') return '&lt;';
+        if (m === '>') return '&gt;';
+        return m;
+    });
+}
+
+// ---------- УДАЛЕНИЕ КАРТОЧКИ ----------
+async function deleteCard(cardId, cardElement) {
+    if (!confirm('Удалить карточку?')) return;
+    try {
+        const resp = await fetch('/api/removeCard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id: Number(cardId) })
         });
+        if (!resp.ok) throw new Error('Ошибка сервера');
+        if (cardElement) cardElement.remove();
+    } catch (err) {
+        console.error('Ошибка удаления:', err);
+        loadProfile(); // Перезагружаем профиль при ошибке
+    }
+}
 
-        // ---------- ЗАГРУЗКА ЗАКАЗОВ ----------
-        async function loadOrders() {
-            try {
-                const response = await fetch('/api/lenta', {
-                    method: 'GET',
-                    headers: { 'Content-Type': 'application/json' }
-                });
-                if (!response.ok) throw new Error('Ошибка загрузки заказов');
-                const orders = await response.json();
-                if (orders.length === 0) {
-                    ordersContainer.innerHTML = '<div style="color:white; text-align:center;">Нет активных заказов</div>';
-                    return;
-                }
-                ordersContainer.innerHTML = orders.map(({ label, price, id }) => `
-                    <div class="orders" data-card-id="${id}">
-                        <div class="list-headers-name-task">
-                            <span class="text-name-task">${escapeHtml(label)}</span>
-                            <span class="price-task">${price}₽</span>
-                        </div>
-                        <div class="data-task-create">
-                            <span>Создано: ${new Date().toLocaleDateString()}</span>
-                        </div>
-                        <div class="box-other-inf">
-                            <div class="other-inf-task">
-                                <div class="inf-status"><div class="circle-status"></div> Опубликован</div>
-                            </div>
-                            <div class="other-inf-Btn-task">
-                                <button class="Btns-task-remake">Открыть</button>
-                                <button class="Btns-task-remake">Редактировать</button>
-                                <button class="Btns-task-remake delete-btn" data-card-id="${id}">Удалить</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                attachDeleteEvents();
-            } catch (err) {
-                console.error(err);
-                ordersContainer.innerHTML = '<div style="color:#ff8888;">Ошибка загрузки</div>';
-            }
-        }
+function attachDeleteEvents() {
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.removeEventListener('click', handleDelete);
+        btn.addEventListener('click', handleDelete);
+    });
+}
 
-        function escapeHtml(str) {
-            if (!str) return '';
-            return str.replace(/[&<>]/g, function (m) {
-                if (m === '&') return '&amp;';
-                if (m === '<') return '&lt;';
-                if (m === '>') return '&gt;';
-                return m;
-            });
-        }
+function handleDelete(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const cardId = btn.getAttribute('data-card-id');
+    const card = btn.closest('.orders');
+    deleteCard(cardId, card);
+}
 
-        // Удаление
-        async function deleteCard(cardId, cardElement) {
-            if (!confirm('Удалить карточку?')) return;
-            try {
-                const resp = await fetch('/api/removeCard', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ id: Number(cardId) })
-                });
-                if (!resp.ok) throw new Error('Ошибка сервера');
-                const data = await resp.json();
-                if (cardElement) cardElement.remove();
-                console.log('Удалено', data);
-            } catch (err) {
-               location.reload();
-            }
-        }
+// ---------- СОЗДАНИЕ КАРТОЧКИ ----------
+const form = document.getElementById('createTaskForm');
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('TableName').value.trim();
+    const description = document.getElementById('discription').value.trim();
+    const price = parseInt(document.getElementById('price').value) || 0;
+    const selectedTag = document.querySelector('input[name="tegs"]:checked');
+    const tag = selectedTag ? selectedTag.value : '';
 
-        function attachDeleteEvents() {
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.removeEventListener('click', handleDelete);
-                btn.addEventListener('click', handleDelete);
-            });
-        }
-        function handleDelete(e) {
-            e.stopPropagation();
-            const btn = e.currentTarget;
-            const cardId = btn.getAttribute('data-card-id');
-            const card = btn.closest('.orders');
-            deleteCard(cardId, card);
-        }
+    if (!title) {
+        alert('Введите название');
+        return;
+    }
 
-        // ---------- СОЗДАНИЕ КАРТОЧКИ ----------
-        const form = document.getElementById('createTaskForm');
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const title = document.getElementById('TableName').value.trim();
-            const description = document.getElementById('discription').value.trim();
-            const price = parseInt(document.getElementById('price').value) || 0;
-            const selectedTag = document.querySelector('input[name="tegs"]:checked');
-            const tag = selectedTag ? selectedTag.value : '';
-
-            if (!title) {
-                alert('Введите название');
-                return;
-            }
-
-            try {
-                const resp = await fetch('/api/addCard', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, discription: description, price, tags: tag })
-                });
-                if (!resp.ok) throw new Error('Ошибка при добавлении');
-                const data = await resp.json();
-                console.log('Успех', data);
-                form.reset();
-                closeModal();
-                loadOrders(); // перезагружаем список
-            } catch (err) {
-                alert('Ошибка: ' + err.message);
-            }
+    try {
+        const resp = await fetch('/api/addCard', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, discription: description, price, tags: tag })
         });
+        if (!resp.ok) throw new Error('Ошибка при добавлении');
+        
+        form.reset();
+        closeModal();
+        loadProfile(); // ✅ Перезагружаем профиль (обновит и заказы)
+    } catch (err) {
+        alert('Ошибка: ' + err.message);
+    }
+});
 
-        // ---------- ПРОФИЛЬ ----------
-        async function loadProfile() {
-            try {
-                const resp = await fetch('/api/profile');
-                if (!resp.ok) throw new Error('Ошибка профиля');
-                const data = await resp.json();
-                document.getElementById('Name').innerText = data.name || 'Пользователь';
-                document.getElementById('gmail').innerText = data.email || 'email@example.com';
-                document.getElementById('Date').innerText = data.dateCreateprofileStruct || '01.01.2024';
-            } catch (err) {
-                console.error(err);
-                document.getElementById('Name').innerText = 'Гость';
-            }
-        }
+// ---------- НАВИГАЦИЯ ----------
+const homeBtn = document.getElementById('header-list-home');
+if (homeBtn) homeBtn.addEventListener('click', () => window.location.href = '/');
 
-        // ---------- НАВИГАЦИЯ ----------
-        const homeBtn = document.getElementById('header-list-home');
-        if (homeBtn) homeBtn.addEventListener('click', () => window.location.href = '/');
-        const logoBtn = document.querySelector('h4');
-        if (logoBtn) logoBtn.addEventListener('click', () => window.location.href = '/');
+const logoBtn = document.querySelector('h4');
+if (logoBtn) logoBtn.addEventListener('click', () => window.location.href = '/');
+
 // ---------- ВЫХОД ----------
 const logoutBtn = document.getElementById('header-list-logout');
 if (logoutBtn) {
     logoutBtn.addEventListener('click', async (e) => {
         e.preventDefault();
-        
         try {
-            const response = await fetch('/api/exit', {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            
-            if (response.ok || response.redirected) {
-                // Перенаправляем на страницу входа
-                window.location.href = '/registration';
-            } else {
-                // Если сервер не вернул редирект, делаем сами
-                window.location.href = '/registration';
-            }
+            await fetch('/api/exit', { method: 'GET' });
         } catch (error) {
             console.error('Ошибка при выходе:', error);
-            // Всё равно перенаправляем
+        } finally {
             window.location.href = '/registration';
         }
     });
 }
-        // ---------- ЗАПУСК ----------
-        loadProfile();
-        loadOrders();
+
+// ---------- ЗАПУСК ----------
+loadProfile(); // ✅ Только один вызов — он загружает и профиль, и заказы
     </script>
 </body>
 

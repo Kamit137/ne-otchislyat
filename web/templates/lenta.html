@@ -24,12 +24,39 @@
               d="M80-200v-80h400v80H80Zm0-200v-80h200v80H80Zm0-200v-80h200v80H80Zm744 400L670-354q-24 17-52.5 25.5T560-320q-83 0-141.5-58.5T360-520q0-83 58.5-141.5T560-720q83 0 141.5 58.5T760-520q0 29-8.5 57.5T726-410l154 154-56 56ZM560-400q50 0 85-35t35-85q0-50-35-85t-85-35q-50 0-85 35t-35 85q0 50 35 85t85 35Z" />
           </svg>
         </button>
+        <div class="money">
+
+          <div class="block-money">
+            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#a31132">
+              <path
+                d="M480-120q-151 0-255.5-46.5T120-280v-400q0-66 105.5-113T480-840q149 0 254.5 47T840-680v400q0 67-104.5 113.5T480-120Zm0-479q89 0 179-25.5T760-679q-11-29-100.5-55T480-760q-91 0-178.5 25.5T200-679q14 30 101.5 55T480-599Zm0 199q42 0 81-4t74.5-11.5q35.5-7.5 67-18.5t57.5-25v-120q-26 14-57.5 25t-67 18.5Q600-528 561-524t-81 4q-42 0-82-4t-75.5-11.5Q287-543 256-554t-56-25v120q25 14 56 25t66.5 18.5Q358-408 398-404t82 4Zm0 200q46 0 93.5-7t87.5-18.5q40-11.5 67-26t32-29.5v-98q-26 14-57.5 25t-67 18.5Q600-328 561-324t-81 4q-42 0-82-4t-75.5-11.5Q287-343 256-354t-56-25v99q5 15 31.5 29t66.5 25.5q40 11.5 88 18.5t94 7Z" />
+            </svg>
+            <span class="balance">1500.00₽</span>
+
+          </div>
+          <div class="block-money-frozen">
+            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#a31132">
+              <path
+                d="M440-80v-73l-64 54-52-61 116-98v-152l-132 76-27 149-79-14 15-83-64 37-40-69 64-37-79-29 27-75 143 51 132-76-132-76-143 52-27-76 79-28-64-37 40-69 64 37-15-83 79-14 27 149 132 76v-152l-116-98 52-61 64 54v-74h80v74l64-54 52 61-116 98v152l131-76 27-149 79 14-15 83 64-37 40 69-64 37 79 28-27 76-143-52-131 76 131 76 143-51 27 75-79 29 64 37-40 69-64-37 15 83-79 14-27-149-131-76v152l116 98-52 61-64-54v73h-80Z" />
+            </svg>
+            <span class="frozen">0000.00₽</span>
+
+          </div>
+
+
+        </div>
       </div>
       <div class="container-list">
 
         <div id="header-list-deposit" class="header-list">
+          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#a31132">
+            <path
+              d="M200-200v-560 560Zm0 80q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h560q33 0 56.5 23.5T840-760v100h-80v-100H200v560h560v-100h80v100q0 33-23.5 56.5T760-120H200Zm320-160q-33 0-56.5-23.5T440-360v-240q0-33 23.5-56.5T520-680h280q33 0 56.5 23.5T880-600v240q0 33-23.5 56.5T800-280H520Zm280-80v-240H520v240h280Zm-117.5-77.5Q700-455 700-480t-17.5-42.5Q665-540 640-540t-42.5 17.5Q580-505 580-480t17.5 42.5Q615-420 640-420t42.5-17.5Z" />
+          </svg>
 
-          <button class="btn-deposit">Пополнить</button>
+
+          <span>Пополнить</span>
+
 
         </div>
         <div id="header-list-prof" class="header-list">
@@ -49,12 +76,12 @@
           <span>Заказы</span>
 
         </div>
-        <div id="header-list-fav" class="header-list">
+        <div id="header-list-reg" class="header-list">
 
           <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M12.7692 6.70483C9.53846 2.01902 4 3.90245 4 8.68256C4 13.4627 13.2308 20 13.2308 20C13.2308 20 22 13.2003 22 8.68256C22 4.16479 16.9231 2.01903 13.6923 6.70483L13.2308 7.0791L12.7692 6.70483Z"
-               stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
           <span>Избранное</span>
 
@@ -206,11 +233,67 @@
               <div class="block-inf">
                 <div class="p-icons">
                   <div class="lxl-text">
-                    <div class="name-block-br">
+                    <button class="name-block-br">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="m560-240-56-58 142-142H160v-80h486L504-662l56-58 240 240-240 240Z" />
+                      </svg>
                       <p>Алексей
-                        <hr class="name-line">
+
                       </p>
-                    </div>
+                    </button>
+
+                  </div>
+                  <p class="lxl-text">4.9
+                    <svg aria-hidden="true" height="27" viewBox="0 0 16 16" version="1.1" width="27" fill="#fffa20">
+                      <path
+                        d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z">
+                      </path>
+                    </svg>
+                  </p>
+                  <p class="lxl-text">435
+                    <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px"
+                      fill="#c3c7d3">
+                      <path
+                        d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Zm-57-480 57 400h422l57-400H212Zm226 320 198-198-57-56-141 141-57-57-57 57 114 113ZM320-680h320v-80H320v80Zm160 280Z" />
+                    </svg>
+                  </p>
+                </div>
+
+                <button class="p-name">
+                  <h5>850 ₽
+                  </h5>
+
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+          <div class="box-order">
+            <div class="text">
+              <div class="head-cards">
+                <h4 class="text-color1">Лаба за 1 день
+                </h4>
+                <svg xmlns="http://www.w3.org/2000/svg" height="40px" viewBox="0 -960 960 960" width="40px"
+                  fill="#c3c7d3">
+                  <path
+                    d="m480-120-58-52q-101-91-167-157T150-447.5Q111-500 95.5-544T80-634q0-94 63-157t157-63q52 0 99 22t81 62q34-40 81-62t99-22q94 0 157 63t63 157q0 46-15.5 90T810-447.5Q771-395 705-329T538-172l-58 52Zm0-108q96-86 158-147.5t98-107q36-45.5 50-81t14-70.5q0-60-40-100t-100-40q-47 0-87 26.5T518-680h-76q-15-41-55-67.5T300-774q-60 0-100 40t-40 100q0 35 14 70.5t50 81q36 45.5 98 107T480-228Zm0-273Z" />
+                </svg>
+
+              </div>
+              <p class="discription">Стильные наручные часы с классическим циферблатом. Водозащита 3 АТМ, кварцевый
+                механизм, кожаный ремешок. Идеально подходят для повседневного образа и деловых встреч
+              <div class="block-inf">
+                <div class="p-icons">
+                  <div class="lxl-text">
+                    <button class="name-block-br">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px">
+                        <path d="m560-240-56-58 142-142H160v-80h486L504-662l56-58 240 240-240 240Z" />
+                      </svg>
+                      <p>Алексей
+
+                      </p>
+                    </button>
 
                   </div>
                   <p class="lxl-text">4.9
@@ -365,7 +448,7 @@
       }
     });
     //МОДАЛЬНОЕ ОКНО ПОПОЛЕНия 
-    const DepositBtn = document.querySelector('.btn-deposit');
+    const DepositBtn = document.querySelector('#header-list-deposit');
     const overlayDep = document.querySelector('.modal-overlay-dep');
     const closeBtnDeposit = document.querySelector('.close-deposit');
 
@@ -379,109 +462,110 @@
         overlayDep.classList.remove('active');
       }
     });
-  // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
-const formDeposit = document.querySelector('.form-deposit');
-if (formDeposit) {
-  formDeposit.addEventListener('submit', (event) => {
-    event.preventDefault();
+    // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
+    const formDeposit = document.querySelector('.form-deposit');
+    if (formDeposit) {
+      formDeposit.addEventListener('submit', (event) => {
+        event.preventDefault();
 
-    const depositSumInput = document.querySelector('#sum');
-    const depositValue = depositSumInput.value.trim();
-    
-    if (depositValue === '') {
-      alert('Введите сумму пополнения');
-      return;
-    }
+        const depositSumInput = document.querySelector('#sum');
+        const depositValue = depositSumInput.value.trim();
 
-    const amount = parseFloat(depositValue);
-    
-    if (isNaN(amount) || amount <= 0) {
-      alert('Введите корректную сумму (больше 0)');
-      return;
-    }
-
-    if (amount < 50) {
-      alert('Минимальная сумма пополнения: 50 ₽');
-      return;
-    }
-
-    const DepositData = {
-      amount: amount
-    };
-
-    console.log('📤 Отправка данных:', DepositData);
-
-    fetch('/api/deposit', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      credentials: 'include', 
-      body: JSON.stringify(DepositData)
-    })
-    .then(response => {
-      console.log('📥 Статус ответа:', response.status);
-      
-      if (!response.ok) {
-        // Пытаемся получить JSON ошибку
-        return response.json().then(data => {
-          console.log('❌ Ошибка от сервера:', data);
-          throw data;
-        }).catch(() => {
-          // Если не JSON, выбрасываем обычную ошибку
-          throw { error: `HTTP ${response.status}`, message: response.statusText };
-        });
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log('✅ Успех:', data);
-      
-      // Закрываем модальное окно
-      const overlayDep = document.querySelector('.modal-overlay-dep');
-      if (overlayDep) {
-        overlayDep.classList.remove('active');
-      }
-      
-      // Очищаем поле ввода
-      depositSumInput.value = '';
-      
-      // Если есть ссылка на оплату - перенаправляем
-      if (data.payment_url) {
-        if (data.test_mode) {
-          alert(`🧪 Тестовый счет создан!\nСумма: ${amount} TST\n\nИспользуйте тестовую карту:\n5555 5555 5555 5599\nСрок: любой будущий\nCVV: любой`);
-        } else {
-          alert(`Счет на ${amount} ₽ создан. Перенаправляем на страницу оплаты...`);
+        if (depositValue === '') {
+          alert('Введите сумму пополнения');
+          return;
         }
-        window.location.href = data.payment_url;
-      } else if (data.success === false) {
-        alert('Ошибка: ' + (data.message || data.error));
-      } else {
-        alert('Счет создан, но ссылка на оплату не получена');
-      }
-    })
-    .catch(error => {
-      console.error('❌ Ошибка:', error);
-      
-      // Проверяем различные варианты ошибок
-      if (error.redirect) {
-        alert('Пожалуйста, авторизуйтесь');
-        window.location.href = error.redirect;
-      } else if (error.error === 'Unauthorized' || error.message === 'Unauthorized') {
-        alert('Необходимо авторизоваться');
-        window.location.href = '/registration';
-      } else if (error.error) {
-        alert('Ошибка: ' + error.error);
-      } else if (error.message) {
-        alert('Ошибка: ' + error.message);
-      } else {
-        alert('Ошибка при создании счета. Пожалуйста, попробуйте позже.');
-      }
-    });
-  });
-} else {
-  console.error('Форма депозита не найдена на странице');
-}
+
+        const amount = parseFloat(depositValue);
+
+        if (isNaN(amount) || amount <= 0) {
+          alert('Введите корректную сумму (больше 0)');
+          return;
+        }
+
+        if (amount < 50) {
+          alert('Минимальная сумма пополнения: 50 ₽');
+          return;
+        }
+
+        const DepositData = {
+          amount: amount
+        };
+
+        console.log('📤 Отправка данных:', DepositData);
+
+        fetch('/api/deposit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          credentials: 'include',
+          body: JSON.stringify(DepositData)
+        })
+          .then(response => {
+            console.log('📥 Статус ответа:', response.status);
+
+            if (!response.ok) {
+              // Пытаемся получить JSON ошибку
+              return response.json().then(data => {
+                console.log('❌ Ошибка от сервера:', data);
+                throw data;
+              }).catch(() => {
+                // Если не JSON, выбрасываем обычную ошибку
+                throw { error: `HTTP ${response.status}`, message: response.statusText };
+              });
+            }
+            return response.json();
+          })
+          .then(data => {
+            console.log('✅ Успех:', data);
+
+            // Закрываем модальное окно
+            const overlayDep = document.querySelector('.modal-overlay-dep');
+            if (overlayDep) {
+              overlayDep.classList.remove('active');
+            }
+
+            // Очищаем поле ввода
+            depositSumInput.value = '';
+
+            // Если есть ссылка на оплату - перенаправляем
+            if (data.payment_url) {
+              if (data.test_mode) {
+                alert(`🧪 Тестовый счет создан!\nСумма: ${amount} TST\n\nИспользуйте тестовую карту:\n5555 5555 5555 5599\nСрок: любой будущий\nCVV: любой`);
+              } else {
+                alert(`Счет на ${amount} ₽ создан. Перенаправляем на страницу оплаты...`);
+              }
+              window.location.href = data.payment_url;
+            } else if (data.success === false) {
+              alert('Ошибка: ' + (data.message || data.error));
+            } else {
+              alert('Счет создан, но ссылка на оплату не получена');
+            }
+          })
+          .catch(error => {
+            console.error('❌ Ошибка:', error);
+
+            // Проверяем различные варианты ошибок
+            if (error.redirect) {
+              alert('Пожалуйста, авторизуйтесь');
+              window.location.href = error.redirect;
+            } else if (error.error === 'Unauthorized' || error.message === 'Unauthorized') {
+              alert('Необходимо авторизоваться');
+              window.location.href = '/registration';
+            } else if (error.error) {
+              alert('Ошибка: ' + error.error);
+            } else if (error.message) {
+              alert('Ошибка: ' + error.message);
+            } else {
+              alert('Ошибка при создании счета. Пожалуйста, попробуйте позже.');
+            }
+          });
+      });
+    } else {
+      console.error('Форма депозита не найдена на странице');
+    }
+
     // ========== ОСНОВНАЯ ЛОГИКА ЛЕНТЫ ==========
     let clickCount = 1;
     const textBlock = document.querySelector('.text-block');
@@ -516,12 +600,14 @@ if (formDeposit) {
           if (!response.ok) throw new Error('Network error: ' + response.status);
           return response.json();
         })
-        .then(json => {
-          console.log("📦 Получено вакансий:", json.length); // Для отладки
-          if (json.length === 0 && clickCount === 1) {
-            textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено. Попробуй сбросить фильтр или добавить вакансии в БД.</p>';
-          } else {
-            textBlock.innerHTML += json.map(({ label, discription, avtor, price, id, infavorite }) => `
+        .then(data => {
+    const { balance, frozenBalance, cards } = data; // ✅ правильно
+    console.log("📦 Получено вакансий:", cards.length);
+    
+    if (cards.length === 0 && clickCount === 1) {
+        textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено.</p>';
+    } else {
+        textBlock.innerHTML += cards.map(({ label, discription, avtor, price, id, infavorite }) => `
           <div class="box-order" data-card-id="${id}">
               <div class="text">
                 <div class="head-cards">
@@ -554,6 +640,14 @@ if (formDeposit) {
             // После добавления новых карточек - инициализируем обработчики для их сердечек
             initFavoriteButtons();
           }
+          const balanceElement = document.querySelector('.balance');
+    if (balanceElement) {
+        balanceElement.textContent = `${balance.toFixed(2)}₽`;
+    }
+    const frozenElement = document.querySelector('.frozen');
+    if (frozenElement) {
+        frozenElement.textContent = `${frozenBalance.toFixed(2)}₽`;
+    }
         })
         .catch(err => console.error('Ошибка:', err));
     }

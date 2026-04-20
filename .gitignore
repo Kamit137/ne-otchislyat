@@ -30,3 +30,22 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+# Логи (у вас есть app.log и output.log)
+*.log
+app.log
+output.log
+
+# Бинарник (у вас есть ne-otchislyat файл)
+ne-otchislyat
+
+# Файлы БД если будут локальные
+*.db
+*.sqlite
+
+# Конфиги с секретами
+.env
+config.local.json
+
+# Временные файлы
+*.tmp
+*.temp

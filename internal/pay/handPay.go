@@ -282,7 +282,7 @@ func CancelOrder(w http.ResponseWriter, r *http.Request) {
 
 func PaymentSuccessPage(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.ParseFiles("web/templates/paySuccess.html")
+	tmpl, err := template.ParseFiles("web/templates/successfull.html")
 	if err != nil {
 		log.Println("Template error:", err)
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)
@@ -295,7 +295,7 @@ func PaymentSuccessPage(w http.ResponseWriter, r *http.Request) {
 
 func PaymentFailPage(w http.ResponseWriter, r *http.Request) {
 
-	tmpl, err := template.ParseFiles("web/templates/payFail.html")
+	tmpl, err := template.ParseFiles("web/templates/error.html")
 	if err != nil {
 		log.Println("Template error:", err)
 		http.Error(w, "Ошибка шаблона", http.StatusInternalServerError)

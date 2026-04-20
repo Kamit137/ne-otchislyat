@@ -1,0 +1,290 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+:root {
+    --bg-dark: #080C25;
+    --panel-bg: #161E35;
+    --accent-blue: #3071E7;
+    --text-main: #A6B2EC;
+    --border-color: #293659;
+}
+
+html {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    min-height: 100vh;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 20px;
+    background-color: #090A11;
+    font-family: 'Roboto', sans-serif;
+}
+
+.back-color {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #090A11;
+    min-height: calc(100vh - 40px);
+    width: 100%;
+    padding: 20px;
+}
+
+.section-sf {
+    flex-direction: column;
+    display: flex;
+    padding: 32px;
+    width: 480px;
+    max-width: 90%;
+    height: auto;
+    min-height: 550px;
+    border-radius: 10px;
+    background: linear-gradient(225deg, rgb(22, 24, 39) 41%, rgb(16, 20, 33) 56%);
+    border: 1px solid #262939;
+    align-items: center;
+}
+
+.block-logo {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+.logo {
+    font-size: 20px;
+    color: white;
+}
+
+.block-inf {
+    width: 100%;
+    max-width: 400px;
+    height: auto;
+    flex-direction: column;
+    margin: 25px 0;
+    padding: 25px;
+    align-items: center;
+    display: flex;
+}
+
+.circle {
+    width: 150px;
+    height: 150px;
+    max-width: 150px;
+    max-height: 150px;
+    background: linear-gradient(135deg, rgb(163, 17, 50), rgba(88, 8, 27, 0.89));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fa3c45;
+    box-shadow: 1px 4px 68px 45px #5c1020;
+}
+
+.circle svg {
+    fill: white;
+    width: 80px;
+    height: 80px;
+}
+
+.text-main {
+    color: white;
+    margin-top: 25px;
+    font-size: clamp(20px, 5vw, 25px);
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.tx-span {
+    margin-bottom: 10px;
+}
+
+.text-bottom-main {
+    width: 100%;
+    max-width: 450px;
+    flex-direction: column;
+    display: flex;
+    align-items: center;
+    color: grey;
+    margin-bottom: 30px;
+    text-align: center;
+    padding: 0 15px;
+}
+
+.main-inf {
+    background: radial-gradient(circle, #22263a 0%, #1B1E2E 100%);
+    width: 100%;
+    max-width: 450px;
+    min-height: 180px;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    border: solid 1px #202333;
+    margin-bottom: 20px;
+}
+
+.text-inf-main {
+    padding-left: 20px;
+    padding-top: 20px;
+    color: gray;
+    word-wrap: break-word;
+}
+
+.back-site {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 420px;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, rgb(244, 44, 69), rgb(163, 17, 50));
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.2s, opacity 0.2s;
+}
+
+.back-site:hover {
+    transform: scale(1.02);
+    opacity: 0.95;
+}
+
+.back-site:active {
+    transform: scale(0.98);
+}
+
+.back-site svg {
+    display: flex;
+    align-items: center;
+    fill: white;
+    margin-left: 5px;
+}
+
+.text-btn {
+    padding: 5px;
+    display: flex;
+    align-items: center;
+}
+
+/* Медиа-запросы для очень маленьких экранов */
+@media (max-width: 520px) {
+    body {
+        padding: 10px;
+    }
+
+    .back-color {
+        padding: 10px;
+        min-height: calc(100vh - 20px);
+    }
+
+    .section-sf {
+        padding: 20px;
+        max-width: 95%;
+    }
+
+    .block-inf {
+        margin: 15px 0;
+        padding: 15px;
+    }
+
+    .circle {
+        width: 120px;
+        height: 120px;
+    }
+
+    .circle svg {
+        width: 60px;
+        height: 60px;
+    }
+
+    .text-main {
+        font-size: 20px;
+    }
+
+    .text-bottom-main {
+        margin-bottom: 20px;
+    }
+
+    .main-inf {
+        min-height: 150px;
+    }
+
+    .text-inf-main {
+        padding-left: 15px;
+        padding-top: 15px;
+        font-size: 14px;
+    }
+
+    .back-site {
+        padding: 12px;
+        font-size: 16px;
+    }
+}
+
+/* Для экранов выше 2000px (не растягиваем, оставляем по центру) */
+@media (min-width: 2000px) {
+    .back-color {
+        align-items: center;
+    }
+
+    .section-sf {
+        transform: scale(1);
+    }
+}
+
+/* Для ландшафтной ориентации на телефонах */
+@media (max-height: 600px) and (orientation: landscape) {
+    body {
+        padding: 10px;
+    }
+
+    .section-sf {
+        min-height: auto;
+        padding: 20px;
+    }
+
+    .block-inf {
+        margin: 10px 0;
+        padding: 10px;
+    }
+
+    .circle {
+        width: 80px;
+        height: 80px;
+    }
+
+    .circle svg {
+        width: 40px;
+        height: 40px;
+    }
+
+    .text-main {
+        margin-top: 15px;
+        margin-bottom: 10px;
+    }
+
+    .text-bottom-main {
+        margin-bottom: 15px;
+    }
+}
+
+/* Для устройств с высоким разрешением */
+@media (-webkit-min-device-pixel-ratio: 2),
+(min-resolution: 192dpi) {
+    .section-sf {
+        border-width: 0.5px;
+    }
+
+    .main-inf {
+        border-width: 0.5px;
+    }
+}
