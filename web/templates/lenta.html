@@ -642,11 +642,11 @@
           }
           const balanceElement = document.querySelector('.balance');
     if (balanceElement) {
-        balanceElement.textContent = `${balance.toFixed(2)}₽`;
+        balanceElement.textContent = `${balance.toFixed(2)/100}₽`;
     }
     const frozenElement = document.querySelector('.frozen');
     if (frozenElement) {
-        frozenElement.textContent = `${frozenBalance.toFixed(2)}₽`;
+        frozenElement.textContent = `${frozenBalance.toFixed(2)/100}₽`;
     }
         })
         .catch(err => console.error('Ошибка:', err));
