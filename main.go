@@ -41,8 +41,8 @@ func main() {
 
 	http.HandleFunc("/api/deposit", token.AuthOptionalMiddleware(pay.HandleDeposit))
 	http.HandleFunc("/payment/result", pay.HandlePaymentNotification)
-	http.HandleFunc("/payment/fail", pay.HandlePaymentNotification)
-	http.HandleFunc("/payment/success", pay.HandlePaymentNotification)
+	http.HandleFunc("/payment/fail", pay.PaymentFailPage)
+	http.HandleFunc("/payment/success", pay.PaymentSuccessPage)
 
 	http.HandleFunc("/api/balance", token.AuthMiddleware(pay.GetBalance))
 	http.HandleFunc("/api/order/create", token.AuthMiddleware(pay.CreateOrder))
