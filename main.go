@@ -18,11 +18,11 @@ func main() {
 		log.Fatal("Ошибка инициализации БД:", err)
 	}
 
-	pay.InitPay(
-		"472301",                           // eshopID
-		"ec9033ec7cca47a1a4086a9e5d77c023", // secretKey (из настроек магазина)
-		// bearerToken (из ЛК)
-	)
+	// pay.InitPay(
+	// 	"472301",                           // eshopID
+	// 	"ec9033ec7cca47a1a4086a9e5d77c023", // secretKey (из настроек магазина)
+	// 	// bearerToken (из ЛК)
+	// )
 
 	http.HandleFunc("/registration", reglog.IndexPage)
 	http.HandleFunc("/reg", reglog.Reg)
@@ -39,8 +39,8 @@ func main() {
 	http.HandleFunc("/api/addCard", token.AuthMiddleware(profile.AddCard))
 	http.HandleFunc("/api/removeCard", token.AuthMiddleware(profile.RemoveCard))
 
-	http.HandleFunc("/api/deposit", token.AuthOptionalMiddleware(pay.HandleDeposit))
-	http.HandleFunc("/payment/result", pay.HandlePaymentNotification)
+	http.HandleFunc("/api/deposit", token.AuthOptionalMiddleware(pay.VoidHandleDeposit))
+	http.HandleFunc("/payment/result", pay.VoidHandlePaymentNotification)
 	http.HandleFunc("/payment/fail", pay.PaymentFailPage)
 	http.HandleFunc("/payment/success", pay.PaymentSuccessPage)
 

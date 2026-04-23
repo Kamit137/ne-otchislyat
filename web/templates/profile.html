@@ -57,7 +57,7 @@
                     <input class="colorbox" id="TableName" name="title" type="text" maxlength="50" required>
                 </div>
                 <div class="create-block">
-                    <label class="name-inf" for="discription">Описание товара:</label>
+                    <label class="name-inf" for="discriptiРейтинг:on">Описание товара:</label>
                     <textarea class="block-textarea" id="discription"
                         placeholder="Расскажите подробно о товаре"></textarea>
                 </div>
@@ -119,14 +119,16 @@
                     <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M21 5L2 12.5L9 13.5M21 5L18.5 20L9 13.5M21 5L9 13.5M9 13.5V19L12.2488 15.7229" />
                     </svg>
-                    <span class="text-gmail-profile">Телеграмм: @Biba</span>
+                    <span   class="text-gmail-profile">Телеграмм:</span>
+                    <span  id="tg" class="text-gmail-profile"></span>
                 </div>
                 <div class="gmail-profile">
                     <svg aria-hidden="true" height="24" viewBox="0 0 16 16" version="1.1" width="24" fill="#fffa20">
                         <path
                             d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.751.751 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z" />
                     </svg>
-                    <span class="text-gmail-profile">Рейтинг: 4.9</span>
+                    <span  class="text-gmail-profile">Рейтинг:</span>
+                    <span id="rating" class="text-gmail-profile"></span>
                 </div>
                 <div class="gmail-profile">
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"
@@ -134,7 +136,8 @@
                         <path
                             d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Zm-57-480 57 400h422l57-400H212Zm226 320 198-198-57-56-141 141-57-57-57 57 114 113ZM320-680h320v-80H320v80Zm160 280Z" />
                     </svg>
-                    <span class="text-gmail-profile">Выполнено заказов: 435</span>
+                     <span  class="text-gmail-profile">Выполнено заказов:</span>
+                    <span id="vakans" class="text-gmail-profile">Выполнено заказов: 435</span>
                 </div>
             </div>
             <div class="profile-btn">
@@ -332,25 +335,21 @@ async function loadProfile() {
         const data = await resp.json();
         
         // Заполняем профиль
-        document.getElementById('Name').innerText = data.name || 'Пользователь';
+        document.getElementById('Name').innerText =data.name || 'Пользователь';
         document.getElementById('gmail').innerText = data.email || 'email@example.com';
         document.getElementById('Date').innerText = data.DateCreateprofileStruct || '01.01.2024';
         
+        document.getElementById('tg').innerText = '';
+        
+        document.getElementById('rating').innerText = data.rating || '01.01.2024';
+        document.getElementById('vakans').innerText = data.countSdelanihZakazov || '01.01.2024';
+        
+        
         // Заполняем телеграмм
-        const tgSpans = document.querySelectorAll('.text-gmail-profile');
-        if (tgSpans.length > 0 && data.tgUs) {
-            tgSpans[0].innerText = `Телеграмм: ${data.tgUs}`;
-        }
+        
         
         // Заполняем рейтинг
-        if (tgSpans.length > 1) {
-            tgSpans[1].innerText = `Рейтинг: ${data.rating || 0}`;
-        }
-        
-        // Заполняем количество заказов
-        if (tgSpans.length > 2) {
-            tgSpans[2].innerText = `Выполнено заказов: ${data.countSdelanihZakazov || 0}`;
-        }
+       
         
         // ✅ Рендерим заказы из data.Vakans
         renderOrders(data.vakans || []);

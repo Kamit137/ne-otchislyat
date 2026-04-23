@@ -91,14 +91,7 @@
           <span>Избранное</span>
 
         </div>
-        <div id="header-list-" class="header-list">
-          <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#79b5b9">
-            <path
-              d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z" />
-          </svg>
-          <span>Корзина</span>
-
-        </div>
+        
 
 
       </div>
@@ -201,13 +194,11 @@
                         d="m305-704 112-145q12-16 28.5-23.5T480-880q18 0 34.5 7.5T543-849l112 145 170 57q26 8 41 29.5t15 47.5q0 12-3.5 24T866-523L756-367l4 164q1 35-23 59t-56 24q-2 0-22-3l-179-50-179 50q-5 2-11 2.5t-11 .5q-32 0-56-24t-23-59l4-165L95-523q-8-11-11.5-23T80-570q0-25 14.5-46.5T135-647l170-57Zm49 69-194 64 124 179-4 191 200-55 200 56-4-192 124-177-194-66-126-165-126 165Zm126 135Z" />
                     </svg>
                   </p>
-                  <p class="lxl-text">435
-                    <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px"
-                      fill="#c3c7d3">
-                      <path
-                        d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Zm-57-480 57 400h422l57-400H212Zm226 320 198-198-57-56-141 141-57-57-57 57 114 113ZM320-680h320v-80H320v80Zm160 280Z" />
-                    </svg>
-                  </p>
+                  <p class="lxl-text">${countSdelanihZakazov || 0}
+    <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#c3c7d3">
+        <path d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Z"/>
+    </svg>
+</p>
                 </div>
 
                 <button class="p-name">
@@ -468,109 +459,95 @@
       }
     });
     // КНОПКА ОТПРАВКИ СУММЫ ПОПОЛНЕНИЯ 
-    const formDeposit = document.querySelector('.form-deposit');
-    if (formDeposit) {
-      formDeposit.addEventListener('submit', (event) => {
+const formDeposit = document.querySelector('.form-deposit');
+if (formDeposit) {
+    formDeposit.addEventListener('submit', (event) => {
         event.preventDefault();
 
         const depositSumInput = document.querySelector('#sum');
         const depositValue = depositSumInput.value.trim();
 
         if (depositValue === '') {
-          alert('Введите сумму пополнения');
-          return;
+            alert('Введите сумму пополнения');
+            return;
         }
 
         const amount = parseFloat(depositValue);
 
         if (isNaN(amount) || amount <= 0) {
-          alert('Введите корректную сумму (больше 0)');
-          return;
+            alert('Введите корректную сумму (больше 0)');
+            return;
         }
 
-        if (amount < 50) {
-          alert('Минимальная сумма пополнения: 50 ₽');
-          return;
+        if (amount < 1) {
+            alert('Минимальная сумма пополнения: 1 ₽');
+            return;
         }
 
-        const DepositData = {
-          amount: amount
-        };
+        const DepositData = { amount: amount };
 
         console.log('📤 Отправка данных:', DepositData);
 
         fetch('/api/deposit', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          credentials: 'include',
-          body: JSON.stringify(DepositData)
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(DepositData)
         })
-          .then(response => {
-            console.log('📥 Статус ответа:', response.status);
-
+        .then(response => {
             if (!response.ok) {
-              // Пытаемся получить JSON ошибку
-              return response.json().then(data => {
-                console.log('❌ Ошибка от сервера:', data);
-                throw data;
-              }).catch(() => {
-                // Если не JSON, выбрасываем обычную ошибку
-                throw { error: `HTTP ${response.status}`, message: response.statusText };
-              });
+                return response.json().then(data => { throw data; });
             }
             return response.json();
-          })
-          .then(data => {
+        })
+        .then(data => {
             console.log('✅ Успех:', data);
-
+            
             // Закрываем модальное окно
             const overlayDep = document.querySelector('.modal-overlay-dep');
             if (overlayDep) {
-              overlayDep.classList.remove('active');
+                overlayDep.classList.remove('active');
             }
-
+            
             // Очищаем поле ввода
             depositSumInput.value = '';
-
-            // Если есть ссылка на оплату - перенаправляем
-            if (data.payment_url) {
-              if (data.test_mode) {
-                alert(`🧪 Тестовый счет создан!\nСумма: ${amount} TST\n\nИспользуйте тестовую карту:\n5555 5555 5555 5599\nСрок: любой будущий\nCVV: любой`);
-              } else {
-                alert(`Счет на ${amount} ₽ создан. Перенаправляем на страницу оплаты...`);
-              }
-              window.location.href = data.payment_url;
-            } else if (data.success === false) {
-              alert('Ошибка: ' + (data.message || data.error));
-            } else {
-              alert('Счет создан, но ссылка на оплату не получена');
-            }
-          })
-          .catch(error => {
+            
+            // Показываем сообщение и обновляем баланс
+            alert(data.message || 'Баланс пополнен!');
+            
+            // Обновляем отображение баланса
+            updateBalance();
+        })
+        .catch(error => {
             console.error('❌ Ошибка:', error);
-
-            // Проверяем различные варианты ошибок
             if (error.redirect) {
-              alert('Пожалуйста, авторизуйтесь');
-              window.location.href = error.redirect;
-            } else if (error.error === 'Unauthorized' || error.message === 'Unauthorized') {
-              alert('Необходимо авторизоваться');
-              window.location.href = '/registration';
-            } else if (error.error) {
-              alert('Ошибка: ' + error.error);
-            } else if (error.message) {
-              alert('Ошибка: ' + error.message);
+                window.location.href = error.redirect;
             } else {
-              alert('Ошибка при создании счета. Пожалуйста, попробуйте позже.');
+                alert('Ошибка: ' + (error.message || error.error || 'Неизвестная ошибка'));
             }
-          });
-      });
-    } else {
-      console.error('Форма депозита не найдена на странице');
-    }
+        });
+    });
+}
 
+// Функция обновления баланса
+function updateBalance() {
+    fetch('/api/balance', {
+        method: 'GET',
+        credentials: 'include'
+    })
+    .then(response => response.json())
+    .then(data => {
+        const balanceElement = document.querySelector('.bal-amount--main');
+        const frozenElement = document.querySelector('.bal-amount--frozen');
+        if (balanceElement) {
+            balanceElement.textContent = `${data.balance.toFixed(2)} ₽`;
+        }
+        if (frozenElement) {
+            frozenElement.textContent = `${data.frozen.toFixed(2)} ₽`;
+        }
+    })
+    .catch(err => console.error('Ошибка обновления баланса:', err));
+}
     // ========== ОСНОВНАЯ ЛОГИКА ЛЕНТЫ ==========
     let clickCount = 1;
     const textBlock = document.querySelector('.text-block');
@@ -611,7 +588,7 @@
           if (json.length === 0 && clickCount === 1) {
             textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено. Попробуй сбросить фильтр или добавить вакансии в БД.</p>';
           } else {
-            textBlock.innerHTML += cards.map(({ label, discription, avtor, price, id, infavorite }) => `
+            textBlock.innerHTML += cards.map(({ label, discription, avtor, price, id, infavorite,countSdelanihZakazov,rating }) => `
           <div class="box-order" data-card-id="${id}">
               <div class="text">
                 <div class="head-cards">
@@ -627,11 +604,11 @@
                   <div class="p-icons">
                     <div class="lxl-text">
                       <div class="name-block-br">
-                        <p>${avtor}<hr class="name-line"></p>
+                        <p>${avtor}</p>
                       </div>
                     </div>
-                    <p class="lxl-text">4.9 <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#fffa86"><path d="m305-704 112-145q12-16 28.5-23.5T480-880q18 0 34.5 7.5T543-849l112 145 170 57q26 8 41 29.5t15 47.5q0 12-3.5 24T866-523L756-367l4 164q1 35-23 59t-56 24q-2 0-22-3l-179-50-179 50q-5 2-11 2.5t-11 .5q-32 0-56-24t-23-59l4-165L95-523q-8-11-11.5-23T80-570q0-25 14.5-46.5T135-647l170-57Z"/></svg></p>
-                    <p class="lxl-text">435 <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#c3c7d3"><path d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Z"/></svg></p>
+                    <p class="lxl-text">${rating} <svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#fffa86"><path d="m305-704 112-145q12-16 28.5-23.5T480-880q18 0 34.5 7.5T543-849l112 145 170 57q26 8 41 29.5t15 47.5q0 12-3.5 24T866-523L756-367l4 164q1 35-23 59t-56 24q-2 0-22-3l-179-50-179 50q-5 2-11 2.5t-11 .5q-32 0-56-24t-23-59l4-165L95-523q-8-11-11.5-23T80-570q0-25 14.5-46.5T135-647l170-57Z"/></svg></p>
+                    <p class="lxl-text">${countSdelanihZakazov}<svg xmlns="http://www.w3.org/2000/svg" height="27px" viewBox="0 -960 960 960" width="27px" fill="#c3c7d3"><path d="M269-120q-30 0-52-20t-27-49l-70-491h120v-80q0-33 23.5-56.5T320-840h320q33 0 56.5 23.5T720-760v80h120l-70 491q-5 29-27.5 49T690-120H269Z"/></svg></p>
                   </div>
                   <button class="p-name">
                     <h5>${price} ₽</h5>

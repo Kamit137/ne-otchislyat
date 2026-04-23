@@ -3,6 +3,7 @@ package sql
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"log"
 	"ne-otchislyat/internal/codemail"
 	"time"
@@ -39,7 +40,7 @@ func InitDB() error {
 		verified BOOLEAN DEFAULT FALSE,
 		verification_code VARCHAR(6),
 		time_live_code TIMESTAMP,
-		rating INT DEFAULT 0,
+		rating FLOAT DEFAULT 0.0,
 		tgUs VARCHAR(255) DEFAULT '',
 		balance BIGINT NOT NULL DEFAULT 0 CHECK (balance >= 0),
 		recvizits BIGINT NOT NULL DEFAULT 0,
@@ -266,21 +267,24 @@ type comment struct {
 }
 
 type Vakans struct {
-	Id             int    `json:"id"`
-	Label          string `json:"label"`
-	Discription    string `json:"discription"`
-	Avtor          string `json:"avtor"`
-	Price          int    `json:"price"`
-	Tag            string `json:"tag"`
-	InFavorite     bool   `json:"infavorite"`
-	DateCreateCard string `json:"dateCreateCard"`
+	Id                   int     `json:"id"`
+	Label                string  `json:"label"`
+	Discription          string  `json:"discription"`
+	Avtor                string  `json:"avtor"`
+	AvtorId              int     `json:"avtor_id"`
+	Price                int     `json:"price"`
+	Tag                  string  `json:"tag"`
+	Rating               float64 `json:"rating"`
+	InFavorite           bool    `json:"infavorite"`
+	DateCreateCard       string  `json:"dateCreateCard"`
+	CountSdelanihZakazov int     `json:"countSdelanihZakazov"`
 }
 
 type profileStruct struct {
 	Id                      int       `json:"id"`
 	Name                    string    `json:"name"`
 	Email                   string    `json:"email"`
-	Rating                  int       `json:"rating"`
+	Rating                  float64   `json:"rating"`
 	TgUs                    string    `json:"tgUs"`
 	Recvizits               int64     `json:"recvizits"`
 	DateCreateprofileStruct string    `json:"dateCreateprofileStruct"`
@@ -420,20 +424,23 @@ func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, 
 	if tag != "" {
 		switch priceUpDownFalse {
 		case "Up":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price ASC LIMIT 60 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`
+                SELECT id, user_id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 
+                ORDER BY price ASC LIMIT 60 OFFSET $2`, tag, offset)
 		case "Down":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price DESC LIMIT 60 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price ASC LIMIT 60 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY price DESC LIMIT 60 OFFSET $2`, tag, offset)
 		default:
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY id ASC LIMIT 60 OFFSET $2`, tag, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans WHERE tag = $1 ORDER BY id ASC LIMIT 60 OFFSET $2`, tag, offset)
 		}
 	} else {
 		switch priceUpDownFalse {
 		case "Up":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price ASC LIMIT 60 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans ORDER BY price ASC LIMIT 60 OFFSET $1`, offset)
 		case "Down":
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY price DESC LIMIT 60 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans ORDER BY price DESC LIMIT 60 OFFSET $1`, offset)
 		default:
-			rows, err = DB.Query(`SELECT id, avtor, title, discription, price, tag FROM vakans ORDER BY id ASC LIMIT 60 OFFSET $1`, offset)
+			rows, err = DB.Query(`SELECT id, user_id, avtor, title, discription, price, tag FROM vakans ORDER BY id ASC LIMIT 60 OFFSET $1`, offset)
 		}
 	}
 	if err != nil {
@@ -445,11 +452,15 @@ func GetVakans(email string, page int, tag, priceUpDownFalse string) ([]Vakans, 
 	for rows.Next() {
 		var v Vakans
 		v.InFavorite = false
-		err := rows.Scan(&v.Id, &v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
+		err := rows.Scan(&v.Id, &v.AvtorId, &v.Avtor, &v.Label, &v.Discription, &v.Price, &v.Tag)
 		if err != nil {
 			return nil, err
 		}
 		err = DB.QueryRow("SELECT EXISTS(SELECT 1 FROM favorites WHERE user_id = $1 AND vakans_id = $2)", user_id, v.Id).Scan(&v.InFavorite)
+		if err != nil {
+			return nil, err
+		}
+		err = DB.QueryRow("SELECT countSdelanihZakazov, rating FROM users WHERE id=$1", v.AvtorId).Scan(&v.CountSdelanihZakazov, &v.Rating)
 
 		if err != nil {
 			return nil, err
@@ -717,4 +728,37 @@ func DepositTransacs(email string, amount float64, orderID string) error {
 		return err
 	}
 	return nil
+}
+
+// VoidDeposit - тестовое пополнение без реальной оплаты
+func VoidDeposit(email string, amount float64) error {
+	tx, err := DB.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	var userID int
+	err = tx.QueryRow("SELECT id FROM users WHERE email = $1", email).Scan(&userID)
+	if err != nil {
+		return err
+	}
+
+	amountKopecks := int64(amount * 100)
+
+	// Обновляем баланс
+	_, err = tx.Exec(`UPDATE users SET balance = balance + $1 WHERE id = $2`, amountKopecks, userID)
+	if err != nil {
+		return err
+	}
+
+	// Создаем запись о транзакции со статусом success
+	orderID := fmt.Sprintf("test_dep_%d", time.Now().UnixNano())
+	_, err = tx.Exec(`INSERT INTO transactions (user_id, type, amount, status, payment_id)
+		VALUES ($1, 'deposit', $2, 'success', $3)`, userID, amountKopecks, orderID)
+	if err != nil {
+		return err
+	}
+
+	return tx.Commit()
 }
