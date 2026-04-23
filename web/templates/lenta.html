@@ -26,26 +26,31 @@
         </button>
         <div class="money">
 
-          <div class="block-money">
-            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#a31132">
+          <div class="bal-cell">
+            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px" fill="#A6B2EC">
               <path
                 d="M480-120q-151 0-255.5-46.5T120-280v-400q0-66 105.5-113T480-840q149 0 254.5 47T840-680v400q0 67-104.5 113.5T480-120Zm0-479q89 0 179-25.5T760-679q-11-29-100.5-55T480-760q-91 0-178.5 25.5T200-679q14 30 101.5 55T480-599Zm0 199q42 0 81-4t74.5-11.5q35.5-7.5 67-18.5t57.5-25v-120q-26 14-57.5 25t-67 18.5Q600-528 561-524t-81 4q-42 0-82-4t-75.5-11.5Q287-543 256-554t-56-25v120q25 14 56 25t66.5 18.5Q358-408 398-404t82 4Zm0 200q46 0 93.5-7t87.5-18.5q40-11.5 67-26t32-29.5v-98q-26 14-57.5 25t-67 18.5Q600-328 561-324t-81 4q-42 0-82-4t-75.5-11.5Q287-343 256-354t-56-25v99q5 15 31.5 29t66.5 25.5q40 11.5 88 18.5t94 7Z" />
             </svg>
-            <span class="balance">1500.00₽</span>
-
+            <span class="balance bal-amount bal-amount--main">500.00 ₽</span>
           </div>
-          <div class="block-money-frozen">
-            <svg xmlns="http://www.w3.org/2000/svg" height="18px" viewBox="0 -960 960 960" width="18px" fill="#a31132">
+
+          <div class="bal-cell">
+            <svg xmlns="http://www.w3.org/2000/svg" height="16px" viewBox="0 -960 960 960" width="16px"
+              fill="rgb(138,201,201)">
               <path
                 d="M440-80v-73l-64 54-52-61 116-98v-152l-132 76-27 149-79-14 15-83-64 37-40-69 64-37-79-29 27-75 143 51 132-76-132-76-143 52-27-76 79-28-64-37 40-69 64 37-15-83 79-14 27 149 132 76v-152l-116-98 52-61 64 54v-74h80v74l64-54 52 61-116 98v152l131-76 27-149 79 14-15 83 64-37 40 69-64 37 79 28-27 76-143-52-131 76 131 76 143-51 27 75-79 29 64 37-40 69-64-37 15 83-79 14-27-149-131-76v152l116 98-52 61-64-54v73h-80Z" />
             </svg>
-            <span class="frozen">0000.00₽</span>
-
+            <span class="frozen bal-amount bal-amount--frozen">6000000.00 ₽</span>
           </div>
 
 
         </div>
+
+
+
+
       </div>
+
       <div class="container-list">
 
         <div id="header-list-deposit" class="header-list">
@@ -76,7 +81,7 @@
           <span>Заказы</span>
 
         </div>
-        <div id="header-list-reg" class="header-list">
+        <div id="header-list-fav" class="header-list">
 
           <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -86,7 +91,7 @@
           <span>Избранное</span>
 
         </div>
-        <div id="header-list-fav" class="header-list">
+        <div id="header-list-" class="header-list">
           <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#79b5b9">
             <path
               d="M240-80q-33 0-56.5-23.5T160-160v-480q0-33 23.5-56.5T240-720h80q0-66 47-113t113-47q66 0 113 47t47 113h80q33 0 56.5 23.5T800-640v480q0 33-23.5 56.5T720-80H240Zm0-80h480v-480h-80v80q0 17-11.5 28.5T600-520q-17 0-28.5-11.5T560-560v-80H400v80q0 17-11.5 28.5T360-520q-17 0-28.5-11.5T320-560v-80h-80v480Zm160-560h160q0-33-23.5-56.5T480-800q-33 0-56.5 23.5T400-720ZM240-160v-480 480Z" />
@@ -600,14 +605,13 @@
           if (!response.ok) throw new Error('Network error: ' + response.status);
           return response.json();
         })
-        .then(data => {
-    const { balance, frozenBalance, cards } = data; // ✅ правильно
-    console.log("📦 Получено вакансий:", cards.length);
-    
-    if (cards.length === 0 && clickCount === 1) {
-        textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено.</p>';
-    } else {
-        textBlock.innerHTML += cards.map(({ label, discription, avtor, price, id, infavorite }) => `
+        .then(json => {
+          const { balance, frozenBalance, cards } = json;
+          console.log("📦 Получено вакансий:", json.length); // Для отладки
+          if (json.length === 0 && clickCount === 1) {
+            textBlock.innerHTML = '<p style="text-align:center; color:#888;">Ничего не найдено. Попробуй сбросить фильтр или добавить вакансии в БД.</p>';
+          } else {
+            textBlock.innerHTML += cards.map(({ label, discription, avtor, price, id, infavorite }) => `
           <div class="box-order" data-card-id="${id}">
               <div class="text">
                 <div class="head-cards">
@@ -640,14 +644,14 @@
             // После добавления новых карточек - инициализируем обработчики для их сердечек
             initFavoriteButtons();
           }
-          const balanceElement = document.querySelector('.balance');
-    if (balanceElement) {
-        balanceElement.textContent = `${balance.toFixed(2)/100}₽`;
-    }
-    const frozenElement = document.querySelector('.frozen');
-    if (frozenElement) {
-        frozenElement.textContent = `${frozenBalance.toFixed(2)/100}₽`;
-    }
+          const balanceElement = document.querySelector('.balance'); // замените на ваш селектор
+          if (balanceElement) {
+            balanceElement.textContent = `${balance} ₽`;
+          }
+          const frozenElement = document.querySelector('.frozen');
+          if (frozenElement) {
+            frozenElement.textContent = `${frozenBalance} ₽`;
+          }
         })
         .catch(err => console.error('Ошибка:', err));
     }

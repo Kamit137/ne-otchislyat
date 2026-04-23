@@ -131,22 +131,7 @@ footer {
     align-items: center;
 }
 
-.money {
 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 4px 4px;
-    background: linear-gradient(180deg, rgb(107 111 131) 16%, rgb(126 128 140) 83%);
-    background: linear-gradient(180deg, rgb(59, 63, 85) 16%, rgb(47, 50, 67) 83%);
-    border-radius: 15px;
-    cursor: pointer;
-    transition: all 0.2s;
-
-
-    border-bottom: 1px solid rgb(138, 201, 201);
-    border-top: 1px solid #e2e2e2;
-}
 
 .block-money-frozen,
 .block-money {
@@ -1022,4 +1007,84 @@ button {
 button:focus,
 input:focus {
     outline: none;
+}
+
+.money {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: #1e2130;
+    border-radius: 8px;
+    padding: 0 2px;
+    border: 1px solid #293659;
+}
+
+.bal-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    position: relative;
+}
+
+.bal-cell+.bal-cell::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 1px;
+    background: #293659;
+}
+
+.bal-amount {
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.bal-amount--main {
+    color: #c8d0f0;
+}
+
+.bal-amount--frozen {
+    color: rgb(138, 201, 201);
+}
+
+.bal-topup {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin: 3px;
+    padding: 5px 12px;
+    border-radius: 6px;
+    background: #3071E7;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: background 0.2s;
+}
+
+.bal-topup:hover {
+    background: #4583f5;
+}
+
+@media (max-width: 600px) {
+    .bal-cell {
+        padding: 5px 8px;
+        gap: 4px;
+    }
+
+    .bal-amount {
+        font-size: 12px;
+    }
+
+    .bal-topup {
+        padding: 5px 8px;
+        font-size: 11px;
+    }
 }
