@@ -9,6 +9,7 @@ import (
 	"ne-otchislyat/internal/hendlers/verify"
 	"ne-otchislyat/internal/pay"
 	"ne-otchislyat/internal/sql"
+
 	"ne-otchislyat/internal/token"
 	"net/http"
 )
@@ -17,12 +18,6 @@ func main() {
 	if err := sql.InitDB(); err != nil {
 		log.Fatal("Ошибка инициализации БД:", err)
 	}
-
-	// pay.InitPay(
-	// 	"472301",                           // eshopID
-	// 	"ec9033ec7cca47a1a4086a9e5d77c023", // secretKey (из настроек магазина)
-	// 	// bearerToken (из ЛК)
-	// )
 
 	http.HandleFunc("/registration", reglog.IndexPage)
 	http.HandleFunc("/reg", reglog.Reg)
